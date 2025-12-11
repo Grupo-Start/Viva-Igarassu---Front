@@ -1,9 +1,9 @@
 import "./Button.css";
 
-export function Button() {
+export function Button({text}) {
   return (
     <button className="btn">
-      Entrar
+      {text}
     </button>
   );
 }

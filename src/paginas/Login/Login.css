@@ -88,3 +88,27 @@ box-sizing: border-box;
    height: 550px;
    
 }
+.underline-login {
+    text-decoration: underline;
+    cursor: pointer;
+    margin:  25px 0;
+}
+.img-cadeado {
+    position: absolute;
+    right: 70px;
+    top: 52%;
+   transform: translateY(-50%);
+   z-index: 10;
+   width: 23px ;
+
+}
+
+.img-usuário {
+    position: absolute;
+     right: 70px;
+    top: 44%;
+   transform: translateY(-50%);
+   z-index: 10;
+  width: 25px;
+
+}

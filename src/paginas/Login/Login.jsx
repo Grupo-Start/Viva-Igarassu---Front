@@ -1,26 +1,33 @@
 import { Button } from "../../components/button/Button"
 import "./Login.css"
 import Img from "../../assets/WhatsApp Image 2025-12-07 at 10.19.02 (1).jpeg"
+import  imgcadeado  from "../../assets/imgcadeado.png"
+import imgusuário from "../../assets/imgusuário.png"
 
 export function Login() {
     return (
         <div className="container-login">
+            
             <div className="container-imagem">
                 <img className="img-login" src={Img} alt="" />
             </div>
+            
             <div className="form-login">
 
                 <h1 className="login-h1">Login</h1>
                 <p className="subtitle-p">Entre na sua conta</p>
-
+                
+                
                 <input type="email" placeholder="E-mail" required />
+                <img className="img-cadeado" src={imgcadeado} alt="imgcadeado" />
+               
                 <input type="password" placeholder="Senha" required />
+                <img className="img-usuário" src={imgusuário} alt="imgusuário" />
 
+                <Button text="Entrar" />
 
-                <Button />
-
-                <p><strong>Esqueceu sua senha ?</strong></p>
-                <p>Não tem conta ? <strong>Cadastre-se</strong></p>
+                <p className="underline-login"><strong><a>Esqueceu sua senha ?</a></strong></p>
+                <p>Não tem conta ? <strong className="underline-login"><a>Cadastre-se</a></strong></p>
 
             </div>
 
