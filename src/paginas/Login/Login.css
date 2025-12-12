@@ -95,11 +95,14 @@ box-sizing: border-box;
 }
 .img-cadeado {
     position: absolute;
-    right: 70px;
+    right: 55px;
     top: 52%;
    transform: translateY(-50%);
    z-index: 10;
-   width: 23px ;
+   width: 60px;
+   font-size: 21px; /*aqui precisa usar o font size para aumentar o tamanho do icone, porque a imagem que foi usada foi da biblioteca*/
+
+
 
 }
 
@@ -109,6 +112,6 @@ box-sizing: border-box;
     top: 44%;
    transform: translateY(-50%);
    z-index: 10;
-  width: 25px;
+  width: 30px;
 
 }

@@ -1,8 +1,8 @@
 import { Button } from "../../components/button/Button"
 import "./Login.css"
 import Img from "../../assets/WhatsApp Image 2025-12-07 at 10.19.02 (1).jpeg"
-import  imgcadeado  from "../../assets/imgcadeado.png"
-import imgusuário from "../../assets/imgusuário.png"
+import { FaUser } from "react-icons/fa";
+import { IoIosLock } from "react-icons/io";
 
 export function Login() {
     return (
@@ -19,10 +19,11 @@ export function Login() {
                 
                 
                 <input type="email" placeholder="E-mail" required />
-                <img className="img-cadeado" src={imgcadeado} alt="imgcadeado" />
-               
+                <FaUser className="img-usuário"/> 
+
                 <input type="password" placeholder="Senha" required />
-                <img className="img-usuário" src={imgusuário} alt="imgusuário" />
+                 <IoIosLock className="img-cadeado" />
+
 
                 <Button text="Entrar" />
 
