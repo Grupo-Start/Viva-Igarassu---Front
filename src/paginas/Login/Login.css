@@ -39,9 +39,10 @@ box-sizing: border-box;
 }
 
 .form-login h1 {
-    font-size: 50px;
+    font-size: 70px;
     margin-bottom: -5px;
     text-align: center;
+    font-weight: 70;
 
 }
 .subtitle-p {
@@ -96,7 +97,7 @@ box-sizing: border-box;
 .img-cadeado {
     position: absolute;
     right: 55px;
-    top: 52%;
+    top: 53%;
    transform: translateY(-50%);
    z-index: 10;
    width: 60px;
@@ -109,7 +110,7 @@ box-sizing: border-box;
 .img-usuário {
     position: absolute;
      right: 70px;
-    top: 44%;
+    top: 46%;
    transform: translateY(-50%);
    z-index: 10;
   width: 30px;

@@ -28,7 +28,7 @@ export function Login() {
                 <Button text="Entrar" />
 
                 <p className="underline-login"><strong><a>Esqueceu sua senha ?</a></strong></p>
-                <p>Não tem conta ? <strong className="underline-login"><a>Cadastre-se</a></strong></p>
+                <p>Não tem conta ? <strong className="underline-login"><a href="register.jsx">Cadastre-se</a></strong></p>
 
             </div>
 
