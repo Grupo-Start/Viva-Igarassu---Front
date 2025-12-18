@@ -15,5 +15,9 @@ export const paginas = createBrowserRouter([
     {
         path: '/register',
         element: <Register />
+    },
+    { 
+        path : '/RegisterPerson',
+        element: <RegisterPerson />
     }
 ])
