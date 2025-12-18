@@ -9,17 +9,18 @@ export function Register() {
        
             <div className="container-register">
                 
-                <div className="left">
+                <div className="container-imagem">
                     <img className="img-register" src={Img} alt="img-register" />
                 </div>
                 
                 <div className="right">
                     <h1>Cadastre-se</h1>
                     <p>Selecione uma opção abaixo</p>
-                    
+                
+                <div className="button-register">  
                     <Button text="Pessoa física" />
                     <Button text="Empresa" />
-
+                </div>  
                 </div>
 
             </div>
