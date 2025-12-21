@@ -81,43 +81,24 @@ export function Login() {
     };
 
     return (
+        
         <div className="container-login">
+            
             <div className="container-imagem">
                 <img className="img-login" src={Img} alt="Viva Igarassu" />
-            </div>
+            </div> 
 
             <div className="form-login">
                 <h1 className="login-h1">Login</h1>
                 <p className="subtitle-p">Entre na sua conta</p>
 
-                {error && <p className="error-message">{error}</p>}
+                <input type="email" placeholder="E-mail" required />
+                <FaUser className="img-usuário" />
 
-                <form onSubmit={handleSubmit}>
-                    <input 
-                        type="email" 
-                        placeholder="E-mail" 
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        disabled={loading}
-                        required 
-                    />
-                    <FaUser className="img-usuário" />
+                <input type="password" placeholder="Senha" required />
+                <IoIosLock className="img-cadeado" />
 
-                    <input 
-                        type="password" 
-                        placeholder="Senha" 
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        disabled={loading}
-                        required 
-                    />
-                    <IoIosLock className="img-cadeado" />
-
-                    <Button 
-                        text={loading ? "Entrando..." : "Entrar"} 
-                        disabled={loading}
-                    />
-                </form>
+                <Button text="Entrar" />
 
                 <p className="underline-login"><strong><a>Esqueceu sua senha ?</a></strong></p>
                 <p>Não tem conta ? <strong className="underline-login"><a href="/register">Cadastre-se</a></strong></p>
