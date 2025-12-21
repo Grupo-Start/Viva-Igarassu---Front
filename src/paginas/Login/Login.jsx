@@ -16,13 +16,16 @@ export function Login() {
             <div className="form-login">
                 <h1 className="login-h1">Login</h1>
                 <p className="subtitle-p">Entre na sua conta</p>
-
+            
+            <div className="input-group">
                 <input type="email" placeholder="E-mail" required />
                 <FaUser className="img-usuário" />
+            </div>
 
+            <div className="input-groupcadeado">   
                 <input type="password" placeholder="Senha" required />
                 <IoIosLock className="img-cadeado" />
-
+            </div>  
                 <Button text="Entrar" />
 
                 <p className="underline-login"><strong><a>Esqueceu sua senha ?</a></strong></p>
