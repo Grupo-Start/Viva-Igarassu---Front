@@ -39,14 +39,15 @@ box-sizing: border-box;
 }
 
 .form-login h1 {
-    font-size: 70px;
+    font-size: 75px;
     margin-bottom: -5px;
     text-align: center;
-    font-weight: 70;
+    font-weight: 100px;
 
 }
 .subtitle-p {
-    margin: 20px;
+    margin: 25px;
+    font-weight: 600;
 }
 
 .form-login p{
@@ -96,8 +97,8 @@ box-sizing: border-box;
 }
 .img-cadeado {
     position: absolute;
-    right: 55px;
-    top: 53%;
+    right: 54px;
+    top: 54%;
    transform: translateY(-50%);
    z-index: 10;
    width: 60px;
@@ -110,7 +111,7 @@ box-sizing: border-box;
 .img-usuário {
     position: absolute;
      right: 70px;
-    top: 46%;
+    top: 47%;
    transform: translateY(-50%);
    z-index: 10;
   width: 30px;
