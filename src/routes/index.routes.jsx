@@ -3,6 +3,7 @@ import { Home } from "../paginas/home/home";
 import { Login } from "../paginas/Login/Login";
 import { Register } from "../paginas/register/register";
 import { RegisterPerson } from "../paginas/RegisterPerson/RegisterPerson";
+import { AdminDashboard } from "../paginas/AdminDashboard/AdminDashboard";
 
 export const paginas = createBrowserRouter([
     {
@@ -20,5 +21,9 @@ export const paginas = createBrowserRouter([
     { 
         path : '/RegisterPerson',
         element: <RegisterPerson />
+    },
+    {
+        path: '/Admin-Dashboard',
+        element: <AdminDashboard />
     }
 ])
