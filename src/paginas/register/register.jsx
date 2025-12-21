@@ -10,7 +10,7 @@ export function Register() {
             <div className="container-register">
                 
                 <div className="container-imagem">
-                    <img className="img-register" src={Img} alt="img-register" />
+                    <img className="img-register" src={Img} alt="Viva Igarassu" />
                 </div>
                 
                 <div className="right">
