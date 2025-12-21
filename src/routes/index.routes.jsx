@@ -3,7 +3,7 @@ import { Home } from "../paginas/home/home";
 import { Login } from "../paginas/Login/Login";
 import { Register } from "../paginas/register/register";
 import { RegisterPerson } from "../paginas/RegisterPerson/RegisterPerson";
-import { DashboardCo } from "../paginas/dashboardCo/dashboardCo";
+import { AdminDashboard } from "../paginas/AdminDashboard/AdminDashboard";
 
 export const paginas = createBrowserRouter([
     {
@@ -23,7 +23,7 @@ export const paginas = createBrowserRouter([
         element: <RegisterPerson />
     },
     {
-        path : '/dashboardCo',
-        element : <DashboardCo />
+        path: '/Admin-Dashboard',
+        element: <AdminDashboard />
     }
 ])
