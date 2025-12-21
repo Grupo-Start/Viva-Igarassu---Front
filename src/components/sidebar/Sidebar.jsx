@@ -2,6 +2,8 @@
 import { useState } from "react";
 import "./sidebar.css";
 
+
+
 export function Sidebar() {
   const [open, setOpen] = useState(true);
 
@@ -16,19 +18,16 @@ export function Sidebar() {
         </div>
 
         <ul className="menu">
-          <li>{open && "Dashboard"}</li>
-          <li>{open && "Meus dados"}</li>
-          <li>{open && "Redefinir senha"}</li>
-          <li>{open && "Recompensas"}</li>
-          <li>{open && "Eventos"}</li>
-          <li>{open && "Sair"}</li>
+          <li>{open && " Dashboard"}</li>
+          <li>{open && " Meus dados"}</li>
+          <li>{open && " Redefinir senha"}</li>
+          <li>{open && " Recompensas"}</li>
+          <li>{open && " Eventos"}</li>
+          <li>{open && " Sair"}</li>
         </ul>
       </aside>
 
-      <main className="content">
-        <h1>Livraria Igarassu</h1>
-        <p>Sidebar funcionando com CSS + JSX</p>
-      </main>
+      
     </div>
   );
 }
