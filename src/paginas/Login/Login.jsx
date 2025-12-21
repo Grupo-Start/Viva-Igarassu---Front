@@ -7,23 +7,19 @@ import { IoIosLock } from "react-icons/io";
 export function Login() {
     return (
         <div className="container-login">
-            
             <div className="container-imagem">
-                <img className="img-login" src={Img} alt="" />
+                <img className="img-login" src={Img} alt="Viva Igarassu" />
             </div>
-            
-            <div className="form-login">
 
+            <div className="form-login">
                 <h1 className="login-h1">Login</h1>
                 <p className="subtitle-p">Entre na sua conta</p>
-                
-                
+
                 <input type="email" placeholder="E-mail" required />
-                <FaUser className="img-usuário"/> 
+                <FaUser className="img-usuário" />
 
                 <input type="password" placeholder="Senha" required />
-                 <IoIosLock className="img-cadeado" />
-
+                <IoIosLock className="img-cadeado" />
 
                 <Button text="Entrar" />
 
@@ -32,9 +28,7 @@ export function Login() {
 
             </div>
 
-
-
-        </div>
+        </div >
     )
 }
 
