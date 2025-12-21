@@ -95,6 +95,23 @@ box-sizing: border-box;
     cursor: pointer;
     margin:  25px 0;
 }
+
+.error-message {
+    color: #ef4444;
+    background-color: #fee;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    text-align: center;
+    width: 100%;
+    font-size: 14px;
+}
+
+.form-login input:disabled {
+    background-color: #f3f4f6;
+    cursor: not-allowed;
+}
+
 .img-cadeado {
     position: absolute;
     right: 54px;
