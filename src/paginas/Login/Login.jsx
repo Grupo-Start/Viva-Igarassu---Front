@@ -6,10 +6,12 @@ import { IoIosLock } from "react-icons/io";
 
 export function Login() {
     return (
+        
         <div className="container-login">
+            
             <div className="container-imagem">
                 <img className="img-login" src={Img} alt="Viva Igarassu" />
-            </div>
+            </div> 
 
             <div className="form-login">
                 <h1 className="login-h1">Login</h1>
