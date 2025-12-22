@@ -1,3 +1,5 @@
+import axios from 'axios';
+
 const API_BASE_URL = 'http://localhost:3001';
 
 // ROTA DE LOGIN DO BACKEND
@@ -5,6 +7,33 @@ const LOGIN_ENDPOINT = '/usuarios/login';
 
 // ROTA DO DASHBOARD
 const DASHBOARD_ENDPOINT = '/dashboard/admin';
+
+// Configurar instância do axios
+const api = axios.create({
+  baseURL: API_BASE_URL,
+});
+
+// Interceptor para adicionar token automaticamente
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+// Interceptor para tratar erros de autenticação
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
 
 async function fetchAPI(endpoint, options = {}) {
   const url = `${API_BASE_URL}${endpoint}`;
@@ -185,15 +214,92 @@ export const dashboardService = {
       return 0;
     }
   },
+
+  // Buscar dados de visitas por período (7 ou 30 dias)
+  getVisitsData: async (dias = 30) => {
+    try {
+      console.log(`Buscando visitas para ${dias} dias...`);
+      const response = await api.get(`/dashboard/visitas-por-periodo?dias=${dias}`);
+      console.log('Response completo:', response);
+      const data = response.data;
+      
+      console.log(`Dados de visitas (${dias} dias):`, data);
+      console.log('Tipo de data:', typeof data);
+      console.log('É array?', Array.isArray(data));
+      
+      // Se o backend retornar array de visitas
+      if (Array.isArray(data)) {
+        console.log('Retornando array com', data.length, 'itens');
+        return data;
+      }
+      
+      // Se retornar objeto com chave visitas
+      if (data.visitas && Array.isArray(data.visitas)) {
+        console.log('Retornando data.visitas com', data.visitas.length, 'itens');
+        return data.visitas;
+      }
+      
+      console.warn('Estrutura de dados inesperada, retornando array vazio');
+      // Retorna array vazio se não houver dados
+      return [];
+    } catch (error) {
+      console.error('Erro ao buscar dados de visitas:', error);
+      console.error('Detalhes do erro:', error.response?.data);
+      console.error('Status do erro:', error.response?.status);
+      return [];
+    }
+  },
+
+  // Buscar lista de usuários
+  getUsers: async () => {
+    try {
+      const response = await api.get('/usuarios');
+      return response.data;
+    } catch (error) {
+      console.error('Erro ao buscar usuários:', error);
+      throw error;
+    }
+  },
+
+  // Atualizar status do usuário (bloquear/desbloquear)
+  updateUserStatus: async (userId, status) => {
+    try {
+      const response = await api.patch(`/usuarios/${userId}/status`, { status });
+      console.log('Status atualizado:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Erro ao atualizar status:', error);
+      throw error;
+    }
+  },
+
+  getEmpresas: async () => {
+    try {
+      const response = await api.get('/empresa');
+      return response.data;
+    } catch (error) {
+      console.error('Erro ao buscar empresas:', error);
+      throw error;
+    }
+  },
+
+  updateEmpresaStatus: async (empresaId, status) => {
+    try {
+      const response = await api.patch(`/empresa/${empresaId}/status`, { status });
+      console.log('Status da empresa atualizado:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Erro ao atualizar status da empresa:', error);
+      throw error;
+    }
+  },
 };
 
 export const authService = {
   login: async (credentials) => {
-    // NÃO limpar token aqui - deixar o componente fazer isso se necessário
     
     const url = `${API_BASE_URL}${LOGIN_ENDPOINT}`;
     
-    // Tenta múltiplos formatos de campo (email/password, email/senha, etc)
     const loginDataFormats = [
       { email: credentials.email, password: credentials.password },
       { email: credentials.email, senha: credentials.password },
