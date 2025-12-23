@@ -1,0 +1,433 @@
+import { useState, useEffect } from "react";
+import "./PagePontosTuristicos.css";
+import { DashboardHeader } from "../../../components/dashboardHeader/DashboardHeader";
+import { SidebarAdmin } from "../../../components/sidebarAdmin/SidebarAdmin";
+import { MdLocationOn } from "react-icons/md";
+import { dashboardService } from "../../../services/api";
+
+export function PagePontosTuristicos() {
+  const [pontos, setPontos] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingId, setEditingId] = useState(null);
+  
+  // Estados do formulário
+  const [formData, setFormData] = useState({
+    nome: '',
+    endereco: '',
+    categoria: '',
+    descricao: '',
+    horario_funcionamento: ''
+  });
+
+  useEffect(() => {
+    loadPontosTuristicos();
+  }, []);
+
+  const loadPontosTuristicos = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const data = await dashboardService.getPontosTuristicos();
+      console.log('Pontos turísticos carregados:', data);
+      console.log('Primeiro ponto completo:', JSON.stringify(data[0], null, 2));
+      console.log('Campos disponíveis:', Object.keys(data[0] || {}));
+      
+      // Adaptar estrutura do backend para o formato esperado
+      const formattedPontos = Array.isArray(data) ? data.map(ponto => {
+        const nome = ponto.nome || ponto.nome_ponto || ponto.name || 'N/A';
+        const localizacao = ponto.localizacao || ponto.local || 'N/A';
+        const categoria = ponto.tipo || ponto.categoria || ponto.tipo_ponto || 'outros';
+        const descricao = ponto.descricao || ponto.desc || ponto.description || 'N/A';
+        const horarioFuncionamento = ponto.horario_funcionamento || ponto.horario || ponto.funcionamento || '';
+        
+        // Montar endereço completo a partir dos campos retornados pelo backend
+        let enderecoCompleto = '';
+        if (ponto.enderecos && typeof ponto.enderecos === 'object') {
+          // Backend retorna como objeto 'enderecos' (plural)
+          const { logradouro, numero, bairro, cidade, estado, cep } = ponto.enderecos;
+          enderecoCompleto = [logradouro, numero, bairro, cidade, estado, cep].filter(Boolean).join(', ');
+        } else if (ponto.rua || ponto.numero || ponto.bairro) {
+          // Se os campos vierem direto do JOIN
+          enderecoCompleto = [ponto.rua, ponto.numero, ponto.bairro, ponto.cidade, ponto.estado, ponto.cep].filter(Boolean).join(', ');
+        } else if (ponto.endereco && typeof ponto.endereco === 'object') {
+          // Se endereco vier como objeto (singular)
+          const { rua, numero, bairro, cidade, estado, cep } = ponto.endereco;
+          enderecoCompleto = [rua, numero, bairro, cidade, estado, cep].filter(Boolean).join(', ');
+        } else if (typeof ponto.endereco === 'string' && !ponto.endereco.includes('-')) {
+          // Se vier como string e não for UUID
+          enderecoCompleto = ponto.endereco;
+        } else {
+          // Não há dados de endereço
+          enderecoCompleto = '';
+        }
+        
+        console.log('Ponto:', ponto.id_ponto, 'Nome:', nome, 'Endereço:', enderecoCompleto);
+        
+        return {
+          id: ponto.id_ponto || ponto.id,
+          nome: nome,
+          localizacao: localizacao,
+          endereco: enderecoCompleto,
+          categoria: categoria || 'outros', // Garante valor default só no front
+          descricao: descricao,
+          horario_funcionamento: horarioFuncionamento,
+          status: ponto.status || (ponto.ativo === false ? 'inativo' : 'ativo')
+        };
+      }) : [];
+      
+      setPontos(formattedPontos);
+    } catch (err) {
+      console.error('Erro ao carregar pontos turísticos:', err);
+      
+      if (err.message?.includes('Network Error') || err.code === 'ERR_NETWORK') {
+        setError('Não foi possível conectar ao backend.');
+      } else if (err.response?.status === 404) {
+        setError('Endpoint /pontos-turisticos não encontrado no backend.');
+      } else {
+        setError(`Erro ao carregar pontos turísticos: ${err.response?.data?.message || err.message}`);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const normalizeString = (str) => {
+    return str?.toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .trim();
+  };
+
+  const filteredPontos = pontos.filter(ponto => {
+    return true;
+  });
+
+  const categorias = ['igreja', 'praia', 'museu', 'praça', 'outros'];
+
+  const countByCategoria = (categoria) => {
+    if (categoria === 'todos') return pontos.length;
+    return pontos.filter(p => normalizeString(p.categoria) === normalizeString(categoria)).length;
+  };
+
+  const capitalize = (str) => {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  };
+
+  const handleFormChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmitPonto = async (e) => {
+    e.preventDefault();
+    try {
+      // Montar objeto só com campos válidos para o backend
+      const dadosBackend = {
+        nome: formData.nome,
+        descricao: formData.descricao,
+        horario_funcionamento: formData.horario_funcionamento
+      };
+      // Se o ponto original tiver id_endereco, envie, senão não envie endereco
+      if (isEditing) {
+        const pontoOriginal = pontos.find(p => p.id === editingId);
+        if (pontoOriginal && pontoOriginal.id_endereco) {
+          dadosBackend.id_endereco = pontoOriginal.id_endereco;
+        }
+      }
+      if (isEditing) {
+        await dashboardService.updatePontoTuristico(editingId, dadosBackend);
+        alert('Ponto turístico atualizado com sucesso!');
+      } else {
+        await dashboardService.createPontoTuristico(dadosBackend);
+        alert('Ponto turístico adicionado com sucesso!');
+      }
+      setShowModal(false);
+      setIsEditing(false);
+      setEditingId(null);
+      setFormData({
+        nome: '',
+        endereco: '',
+        categoria: '',
+        descricao: '',
+        horario_funcionamento: ''
+      });
+      loadPontosTuristicos();
+    } catch (err) {
+      console.error('Erro ao salvar ponto:', err);
+      alert(`Erro ao ${isEditing ? 'atualizar' : 'adicionar'} ponto turístico. Tente novamente.`);
+    }
+  };
+
+  const handleEditPonto = (ponto) => {
+    console.log('Editando ponto:', ponto);
+    console.log('Endereço do ponto:', ponto.endereco);
+    
+    setFormData({
+      nome: ponto.nome,
+      endereco: ponto.endereco || '',
+      categoria: ponto.categoria,
+      descricao: ponto.descricao,
+      horario_funcionamento: ponto.horario_funcionamento || ''
+    });
+    setEditingId(ponto.id);
+    setIsEditing(true);
+    setShowModal(true);
+  };
+
+  const handleAddPonto = () => {
+    setFormData({
+      nome: '',
+      endereco: '',
+      categoria: '',
+      descricao: '',
+      horario_funcionamento: ''
+    });
+    setIsEditing(false);
+    setEditingId(null);
+    setShowModal(true);
+  };
+
+  const handleToggleStatus = async (pontoId, statusAtual) => {
+    try {
+      const novoStatus = statusAtual === 'ativo' ? 'inativo' : 'ativo';
+      await dashboardService.updatePontoTuristicoStatus(pontoId, novoStatus);
+      loadPontosTuristicos();
+    } catch (err) {
+      console.error('Erro ao alterar status:', err);
+      alert('Erro ao alterar status do ponto turístico.');
+    }
+  };
+
+  const handleGerarQRCode = async (pontoId, pontoNome) => {
+    try {
+      const blob = await dashboardService.downloadPDF(pontoId);
+      
+      // Criar URL para download
+      const url = window.URL.createObjectURL(new Blob([blob]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `qrcode-${pontoNome.replace(/\s+/g, '-').toLowerCase()}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      
+      console.log('QR Code PDF baixado com sucesso');
+    } catch (err) {
+      console.error('Erro ao gerar QR Code:', err);
+      
+      let errorMsg = 'Erro ao gerar QR Code. ';
+      if (err.response?.status === 404) {
+        errorMsg += 'Ponto turístico não encontrado.';
+      } else if (err.response?.status === 401) {
+        errorMsg += 'Sessão expirada. Faça login novamente.';
+      } else if (err.message?.includes('Network Error')) {
+        errorMsg += 'Não foi possível conectar ao backend.';
+      } else {
+        errorMsg += err.message || 'Tente novamente.';
+      }
+      
+      alert(errorMsg);
+    }
+  };
+
+  // Função para alternar status só no frontend
+  const handleToggleStatusFrontend = (pontoId) => {
+    setPontos(prevPontos => prevPontos.map(p =>
+      p.id === pontoId
+        ? { ...p, status: p.status === 'ativo' ? 'inativo' : 'ativo' }
+        : p
+    ));
+  };
+
+  if (loading) {
+    return (
+      <div>
+        <DashboardHeader/>
+        <div style={{ display: 'flex', overflow: 'hidden' }}>
+          <SidebarAdmin/>
+          <div className="admin-dashboard">
+            <h1>Pontos Turísticos</h1>
+            <p className="loading">Carregando pontos turísticos...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div>
+        <DashboardHeader/>
+        <div style={{ display: 'flex', overflow: 'hidden' }}>
+          <SidebarAdmin/>
+          <div className="admin-dashboard">
+            <h1>Pontos Turísticos</h1>
+            <p className="error">{error}</p>
+            <button onClick={loadPontosTuristicos}>Tentar novamente</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <DashboardHeader/>
+      <div style={{ display: 'flex', overflow: 'hidden' }}>
+        <SidebarAdmin/>
+        <div className="admin-dashboard">
+          <h1>Pontos Turísticos</h1>
+          <div className="dashboard-content">
+            <div className="pontos-header-top">
+              <div className="pontos-stats">
+                <MdLocationOn size={24} color="#5FD6C3" />
+                <span>Total de pontos turísticos: {pontos.length}</span>
+              </div>
+              <button className="btn-add-ponto" onClick={handleAddPonto}>
+                + Adicionar Ponto Turístico
+              </button>
+            </div>
+
+            <div className="pontos-table-container">
+              <table className="pontos-table">
+                <thead>
+                  <tr>
+                    <th>Nome</th>
+                    <th>Descrição</th>
+                    <th>Status</th>
+                    <th>QR Code</th>
+                    <th>Ações</th>
+                    <th>Ativar/Desativar</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredPontos.map((ponto) => (
+                    <tr key={ponto.id}>
+                      <td>{ponto.nome}</td>
+                      <td>{ponto.descricao}</td>
+                      <td>
+                        <span className={`badge ${ponto.status === 'ativo' ? 'badge-ativo' : 'badge-inativo'}`}>
+                          {ponto.status}
+                        </span>
+                      </td>
+                      <td>
+                        <button 
+                          className="btn-qrcode"
+                          onClick={() => handleGerarQRCode(ponto.id, ponto.nome)}
+                        >
+                          Baixar PDF
+                        </button>
+                      </td>
+                      <td>
+                        <button 
+                          className="btn-edit"
+                          onClick={() => handleEditPonto(ponto)}
+                        >
+                          Editar
+                        </button>
+                      </td>
+                      <td>
+                        <button 
+                          className={`btn-toggle ${ponto.status === 'ativo' ? 'btn-desativar' : 'btn-ativar'}`}
+                          onClick={() => handleToggleStatusFrontend(ponto.id)}
+                        >
+                          {ponto.status === 'ativo' ? 'Desativar' : 'Ativar'}
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {showModal && (
+        <div className="modal-overlay" onClick={() => setShowModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>{isEditing ? 'Editar' : 'Adicionar'} Ponto Turístico</h2>
+              <button className="btn-close" onClick={() => setShowModal(false)}>✕</button>
+            </div>
+            <form className="modal-form" onSubmit={handleSubmitPonto}>
+              <div className="form-group">
+                <label>Nome do Ponto Turístico</label>
+                <input 
+                  type="text" 
+                  name="nome"
+                  value={formData.nome}
+                  onChange={handleFormChange}
+                  placeholder="Ex: Igreja de São Cosme e Damião" 
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label>Endereço Completo</label>
+                <input 
+                  type="text" 
+                  name="endereco"
+                  value={formData.endereco}
+                  onChange={handleFormChange}
+                  placeholder="Ex: Rua Principal, 123" 
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label>Horário de Funcionamento</label>
+                <input 
+                  type="text" 
+                  name="horario_funcionamento"
+                  value={formData.horario_funcionamento}
+                  onChange={handleFormChange}
+                  placeholder="Ex: Seg a Sex: 8h às 18h" 
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label>Categoria</label>
+                <select 
+                  name="categoria"
+                  value={formData.categoria}
+                  onChange={handleFormChange}
+                  required
+                >
+                  <option value="">Selecione uma categoria</option>
+                  <option value="igreja">Igreja</option>
+                  <option value="praia">Praia</option>
+                  <option value="museu">Museu</option>
+                  <option value="praça">Praça</option>
+                  <option value="outros">Outros</option>
+                </select>
+              </div>
+              <div className="form-group">
+                <label>Descrição</label>
+                <textarea 
+                  name="descricao"
+                  value={formData.descricao}
+                  onChange={handleFormChange}
+                  rows="3" 
+                  placeholder="Descreva o ponto turístico..."
+                  required
+                ></textarea>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn-cancel" onClick={() => setShowModal(false)}>
+                  Cancelar
+                </button>
+                <button type="submit" className="btn-save">
+                  Salvar
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

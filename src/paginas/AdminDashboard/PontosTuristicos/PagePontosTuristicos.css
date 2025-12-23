@@ -1,0 +1,541 @@
+/* Pontos Turísticos Page Styles */
+
+.pontos-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.pontos-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.pontos-stats {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #0A3D62;
+}
+
+.btn-add-ponto {
+  background-color: #5FD6C3;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 14px;
+  transition: background-color 0.3s;
+}
+
+.btn-add-ponto:hover {
+  background-color: #4ac4b1;
+}
+
+.filter-section {
+  margin-bottom: 24px;
+}
+
+.filter-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.filter-btn {
+  padding: 8px 16px;
+  border: 1px solid #d1d5db;
+  background-color: white;
+  color: #374151;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.filter-btn:hover {
+  background-color: #f3f4f6;
+  border-color: #0A3D62;
+}
+
+.filter-btn.active {
+  background-color: #0A3D62;
+  color: white;
+  border-color: #0A3D62;
+}
+
+.pontos-table-container {
+  background-color: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow-x: auto;
+}
+
+.pontos-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.pontos-table thead {
+  background-color: #f9fafb;
+}
+
+.pontos-table th {
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 600;
+  color: #374151;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.pontos-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #e5e7eb;
+  color: #111827;
+}
+
+.pontos-table tbody tr:hover {
+  background-color: #f9fafb;
+}
+
+.badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.badge-ativo {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.badge-inativo {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.btn-edit {
+  padding: 6px 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s;
+  background-color: #dbeafe;
+  color: #1e40af;
+  margin-right: 8px;
+  min-width: 90px;
+}
+
+.btn-edit:hover {
+  background-color: #bfdbfe;
+}
+
+.btn-toggle {
+  padding: 6px 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s;
+  min-width: 90px;
+}
+
+.btn-desativar {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.btn-desativar:hover {
+  background-color: #fecaca;
+}
+
+.btn-ativar {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.btn-ativar:hover {
+  background-color: #a7f3d0;
+}
+
+.btn-qrcode {
+  padding: 6px 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s;
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.btn-qrcode:hover {
+  background-color: #a7f3d0;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: #6b7280;
+  font-size: 16px;
+}
+
+@media (max-width: 768px) {
+  .pontos-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .pontos-table-container {
+    overflow-x: auto;
+  }
+
+  .pontos-table {
+    min-width: 800px;
+  }
+}
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: white;
+  border-radius: 12px;
+  padding: 24px;
+  max-width: 500px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 20px;
+  color: #0A3D62;
+}
+
+.btn-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #6b7280;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-close:hover {
+  color: #374151;
+}
+
+.modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  font-weight: 500;
+  color: #374151;
+  font-size: 14px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #5FD6C3;
+}
+
+.modal-footer {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+.btn-cancel {
+  padding: 10px 20px;
+  border: 1px solid #d1d5db;
+  background-color: white;
+  color: #374151;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.btn-cancel:hover {
+  background-color: #f3f4f6;
+}
+
+.btn-save {
+  padding: 10px 20px;
+  border: none;
+  background-color: #5FD6C3;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.btn-save:hover {
+  background-color: #4ac4b1;
+}
+
+.filter-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.filter-btn {
+  padding: 8px 16px;
+  border: 1px solid #d1d5db;
+  background-color: white;
+  color: #374151;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.filter-btn:hover {
+  background-color: #f3f4f6;
+  border-color: #0A3D62;
+}
+
+.filter-btn.active {
+  background-color: #0A3D62;
+  color: white;
+  border-color: #0A3D62;
+}
+
+.empresas-table-container {
+  background-color: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow-x: auto;
+}
+
+.empresas-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.empresas-table thead {
+  background-color: #f9fafb;
+}
+
+.empresas-table th {
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 600;
+  color: #374151;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.empresas-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #e5e7eb;
+  color: #111827;
+}
+
+.empresas-table tbody tr:hover {
+  background-color: #f9fafb;
+}
+
+.badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.badge-ativo {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.badge-inativo {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.btn-toggle-status {
+  padding: 6px 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.btn-deactivate {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.btn-deactivate:hover {
+  background-color: #fecaca;
+}
+
+.btn-activate {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.btn-activate:hover {
+  background-color: #a7f3d0;
+}
+
+@media (max-width: 768px) {
+  .empresas-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .empresas-table-container {
+    overflow-x: auto;
+  }
+
+  .empresas-table {
+    min-width: 800px;
+  }
+}
+
+.badge-ativo {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.badge-inativo {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.badge-bloqueado {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.saldo-moedas {
+  font-weight: 600;
+  color: #5FD6C3;
+}
+
+.btn-toggle-status {
+  padding: 6px 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.btn-block {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.btn-block:hover {
+  background-color: #fecaca;
+}
+
+.btn-unblock {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.btn-unblock:hover {
+  background-color: #a7f3d0;
+}
+
+@media (max-width: 768px) {
+  .users-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .users-table-container {
+    overflow-x: auto;
+  }
+
+  .users-table {
+    min-width: 600px;
+  }
+}

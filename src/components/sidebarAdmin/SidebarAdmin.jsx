@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import "./SidebarAdmin.css";
@@ -22,24 +21,49 @@ export function SidebarAdmin() {
         <ul className="menu">
           <li 
             className={location.pathname === '/Admin-Dashboard' ? 'menu-active' : ''} 
-            onClick={() => navigate('/Admin-Dashboard')}
+            onClick={() => {
+              navigate('/Admin-Dashboard');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
           >
             {open && "Dashboard"}
           </li>
           <li 
             className={location.pathname === '/Admin-Dashboard/Users' ? 'menu-active' : ''} 
-            onClick={() => navigate('/Admin-Dashboard/Users')}
+            onClick={() => {
+              navigate('/Admin-Dashboard/Users');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
           >
             {open && "Usuários"}
           </li>
           <li 
             className={location.pathname === '/Admin-Dashboard/Empresas' ? 'menu-active' : ''} 
-            onClick={() => navigate('/Admin-Dashboard/Empresas')}
+            onClick={() => {
+              navigate('/Admin-Dashboard/Empresas');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
           >
             {open && "Empresas"}
           </li>
-          <li>{open && "Pontos Turísticos"}</li>
-          <li>{open && "Eventos"}</li>
+          <li 
+            className={location.pathname === '/Admin-Dashboard/PontosTuristicos' ? 'menu-active' : ''} 
+            onClick={() => {
+              navigate('/Admin-Dashboard/PontosTuristicos');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+          >
+            {open && "Pontos Turísticos"}
+          </li>
+          <li 
+            className={location.pathname === '/Admin-Dashboard/Eventos' ? 'menu-active' : ''} 
+            onClick={() => {
+              navigate('/Admin-Dashboard/Eventos');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+          >
+            {open && "Eventos"}
+          </li>
           <li>{open && "Recompensas"}</li>
           <li>{open && "Configurações"}</li>
         </ul>

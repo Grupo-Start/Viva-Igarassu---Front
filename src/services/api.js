@@ -16,8 +16,13 @@ const api = axios.create({
 // Interceptor para adicionar token automaticamente
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
+  console.log('Interceptor - Token existe?', !!token);
+  console.log('Interceptor - URL da requisição:', config.url);
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
+    console.log('Interceptor - Header Authorization adicionado');
+  } else {
+    console.log('Interceptor - Token não encontrado no localStorage');
   }
   return config;
 });
@@ -292,6 +297,100 @@ export const dashboardService = {
       console.error('Erro ao atualizar status da empresa:', error);
       throw error;
     }
+  },
+
+  getPontosTuristicos: async () => {
+    try {
+      const response = await api.get('/pontos-turisticos');
+      return response.data;
+    } catch (error) {
+      console.error('Erro ao buscar pontos turísticos:', error);
+      throw error;
+    }
+  },
+
+  createPontoTuristico: async (dados) => {
+    try {
+      const response = await api.post('/pontos-turisticos', dados);
+      console.log('Ponto turístico criado:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Erro ao criar ponto turístico:', error);
+      throw error;
+    }
+  },
+
+  updatePontoTuristico: async (pontoId, dados) => {
+    try {
+      const response = await api.put(`/pontos-turisticos/${pontoId}`, dados);
+      console.log('Ponto turístico atualizado:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Erro ao atualizar ponto turístico:', error);
+      throw error;
+    }
+  },
+
+  updatePontoTuristicoStatus: async (pontoId, status) => {
+    try {
+      const response = await api.patch(`/pontos-turisticos/${pontoId}/status`, { status });
+      console.log('Status do ponto turístico atualizado:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Erro ao atualizar status do ponto turístico:', error);
+      throw error;
+    }
+  },
+
+  downloadPDF: async (pontoId) => {
+    try {
+      const token = localStorage.getItem('token');
+      console.log('=== Download PDF ===');
+      console.log('Ponto ID:', pontoId);
+      console.log('Tipo do ID:', typeof pontoId);
+      console.log('URL:', `${API_BASE_URL}/qrcodes/pontos-turisticos/${pontoId}/download-pdf`);
+      
+      const response = await axios.get(
+        `${API_BASE_URL}/qrcodes/pontos-turisticos/${pontoId}/download-pdf`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          },
+          responseType: 'blob'
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Erro ao baixar PDF:', error);
+      console.error('Response data:', error.response?.data);
+      console.error('Status:', error.response?.status);
+      throw error;
+    }
+  },
+
+  downloadQRCode: async (pontoId) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(
+        `${API_BASE_URL}/qrcodes/pontos-turisticos/${pontoId}/download-qrcode`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          },
+          responseType: 'blob'
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Erro ao baixar QR Code:', error);
+      throw error;
+    }
+  },
+
+  // --- Eventos ---
+  getEventos: async () => {
+    const response = await api.get('/eventos');
+    return response.data;
   },
 };
 
