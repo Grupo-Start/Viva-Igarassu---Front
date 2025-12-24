@@ -1,0 +1,149 @@
+.admin-dashboard {
+  padding: 24px;
+  background-color: #f5f7fa;
+  min-height: 100vh;
+  flex: 1;
+  overflow-x: hidden;
+  width: 100%;
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+ 
+.admin-dashboard h1 {
+  font-size: 31px;
+  font-weight: 700;
+  color: #0A3D62;
+  margin-bottom: 24px;
+}
+
+.admin-dashboard .loading {
+  color: #6b7280;
+  text-align: center;
+  padding: 20px;
+}
+
+.admin-dashboard .error {
+  color: #ef4444;
+  padding: 16px;
+  background-color: #fee;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.admin-dashboard button {
+  background-color: #0A3D62;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  transition: background-color 0.3s;
+}
+
+.admin-dashboard button:hover {
+  background-color: #0A3D62;
+}
+
+.chart-section {
+  margin-top: 24px;
+  background-color: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow-x: auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.chart-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.chart-header h2 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #0A3D62;
+  margin: 0;
+}
+
+.total-visits {
+  font-size: 14px;
+  color: #5FD6C3;
+  font-weight: 600;
+}
+
+.period-filter {
+  display: flex;
+  gap: 8px;
+}
+
+.stat-cards-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.dashboard-content {
+  display: grid;
+  gap: 20px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+  .admin-dashboard {
+    padding: 12px;
+    margin-left: 0;
+  }
+
+  .admin-dashboard h1 {
+    font-size: 20px;
+    margin-bottom: 16px;
+  }
+
+  .stat-cards-container {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .chart-section {
+    padding: 16px;
+  }
+  
+  .chart-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .chart-header h2 {
+    font-size: 18px;
+  }
+  
+  .period-filter {
+    width: 100%;
+  }
+  
+  .period-filter button {
+    flex: 1;
+  }
+  
+  .total-visits {
+    font-size: 12px;
+  }
+}

@@ -29,22 +29,16 @@ export function Login() {
             localStorage.removeItem('token');
             localStorage.removeItem('user');
 
-            console.log('Tentando fazer login com:', { email });
             const response = await authService.login({ email, password });
-            console.log('Login bem-sucedido! Resposta completa:', response);
-            console.log('Token recebido?', !!response.token);
-            console.log('User recebido?', !!response.user);
 
             if (response.token) {
                 localStorage.setItem('token', response.token);
-                console.log('✓ Token salvo no localStorage');
             } else {
                 console.error('✗ Token não foi retornado pelo backend!');
             }
 
             if (response.user) {
                 localStorage.setItem('user', JSON.stringify(response.user));
-                console.log('✓ User salvo no localStorage');
             }
 
             await new Promise(resolve => setTimeout(resolve, 100));
@@ -54,22 +48,14 @@ export function Login() {
             const role = response.user?.role?.toLowerCase();
             const isAdmin = response.user?.isAdmin || response.user?.is_admin;
 
-            console.log('=== VERIFICAÇÃO ADMIN ===');
-            console.log('Email digitado:', emailDigitado);
-            console.log('Email do response:', emailResponse);
-            console.log('Tipo:', tipo);
-            console.log('Role:', role);
-            console.log('isAdmin:', isAdmin);
+            
 
-            if (emailDigitado === 'admin@test' ||
-                emailResponse === 'admin@test' ||
-                tipo === 'admin' ||
-                role === 'admin' ||
-                isAdmin === true) {
-                console.log('✓✓✓ ADMIN CONFIRMADO! Redirecionando...');
+            const adminEmails = ['admin@test', 'admin@test.com'];
+            const isEmailAdmin = adminEmails.includes(emailDigitado) || adminEmails.includes(emailResponse);
+
+            if (isEmailAdmin || tipo === 'admin' || role === 'adm' || isAdmin === true) {
                 navigate('/Admin-Dashboard', { replace: true });
             } else {
-                console.log('✗ Usuário comum, redirecionando para Home...');
                 navigate('/', { replace: true });
             }
         } catch (err) {
@@ -94,17 +80,37 @@ export function Login() {
                 <h1 className="login-h1">Login</h1>
                 <p className="subtitle-p">Entre na sua conta</p>
 
-                <div className="form-login-container">
-                    <input className="login-input" type="email" placeholder="E-mail" required />
-                    <FaUser className="img-cadeado" />
-                </div>
+                {error && <p style={{color: 'red', marginBottom: '1rem'}}>{error}</p>}
 
-                <div className="form-login-container">
-                    <input className="login-input" type="password" placeholder="Senha" required />
-                    <IoIosLock className="img-cadeado" />
-                </div>
+                <form onSubmit={handleSubmit}>
+                    <div className="form-login-container">
+                        <input 
+                            className="login-input" 
+                            type="email" 
+                            placeholder="E-mail" 
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            disabled={loading}
+                            required 
+                        />
+                        <FaUser className="img-cadeado" />
+                    </div>
 
-                <Button text="Entrar" />
+                    <div className="form-login-container">
+                        <input 
+                            className="login-input" 
+                            type="password" 
+                            placeholder="Senha" 
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            disabled={loading}
+                            required 
+                        />
+                        <IoIosLock className="img-cadeado" />
+                    </div>
+
+                    <Button text={loading ? "Entrando..." : "Entrar"} type="submit" disabled={loading} />
+                </form>
 
                 <div className="form-login-request">
                     <p><strong className="underline-login">Esqueceu sua senha ?</strong></p>

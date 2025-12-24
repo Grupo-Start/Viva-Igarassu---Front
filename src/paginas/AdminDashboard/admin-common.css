@@ -1,0 +1,87 @@
+.filter-btn {
+  padding: 8px 16px;
+  border: 1px solid #d1d5db;
+  background: #fff;
+  color: #374151;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.filter-btn:hover {
+  background: #f3f4f6;
+  border-color: #0A3D62;
+}
+
+.filter-btn.active {
+  background: #0A3D62;
+  color: #fff;
+  border-color: #0A3D62;
+}
+
+.badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.badge-admin {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.badge-comum {
+  background: #e0e7ff;
+  color: #4338ca;
+}
+
+.badge-ativo {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.badge-inativo {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.badge-bloqueado {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: #fff;
+  border-radius: 10px;
+  padding: 18px;
+  max-width: 720px;
+  width: 100%;
+  box-shadow: 0 6px 30px rgba(2, 6, 23, 0.2);
+  box-sizing: border-box;
+}
+
+.modal .modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.modal .modal-body {
+  padding-top: 8px;
+}
