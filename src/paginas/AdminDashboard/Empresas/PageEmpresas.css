@@ -1,12 +1,15 @@
-/* Empresas Page Styles */
-
-.empresas-header {
+.empresas-header,
+.empresas-header-top {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
-  flex-wrap: wrap;
   gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.empresas-header {
+  margin-bottom: 24px;
 }
 
 .empresas-stats {
@@ -23,37 +26,14 @@
   gap: 8px;
   flex-wrap: wrap;
   justify-content: flex-end;
-  width: 100%;
-}
-
-.filter-btn {
-  padding: 8px 16px;
-  border: 1px solid #d1d5db;
-  background-color: white;
-  color: #374151;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-  transition: all 0.2s;
-}
-
-.filter-btn:hover {
-  background-color: #f3f4f6;
-  border-color: #0A3D62;
-}
-
-.filter-btn.active {
-  background-color: #0A3D62;
-  color: white;
-  border-color: #0A3D62;
+  margin-left: auto;
 }
 
 .empresas-table-container {
-  background-color: white;
+  background: #fff;
   border-radius: 12px;
   padding: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   overflow-x: auto;
 }
 
@@ -63,7 +43,7 @@
 }
 
 .empresas-table thead {
-  background-color: #f9fafb;
+  background: #f9fafb;
 }
 
 .empresas-table th {
@@ -81,65 +61,48 @@
 }
 
 .empresas-table tbody tr:hover {
-  background-color: #f9fafb;
-}
-
-.badge {
-  display: inline-block;
-  padding: 4px 12px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 500;
-  text-transform: uppercase;
+  background: #f9fafb;
 }
 
 .badge-ativo {
-  background-color: #d1fae5;
+  background: #d1fae5;
   color: #065f46;
 }
 
 .badge-inativo {
-  background-color: #fee2e2;
+  background: #fee2e2;
   color: #991b1b;
 }
 
-.btn-toggle-status {
-  padding: 6px 14px;
-  border: none;
+.action-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-acao {
+  padding: 8px 14px;
   border-radius: 6px;
+  border: none;
+  background: #dbeafe;
+  color: #1e40af;
   cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-  transition: all 0.2s;
 }
 
-.btn-deactivate {
-  background-color: #fee2e2;
+.btn-acao.excluir {
+  background: #fee2e2;
   color: #991b1b;
 }
 
-.btn-deactivate:hover {
-  background-color: #fecaca;
-}
-
-.btn-activate {
-  background-color: #d1fae5;
-  color: #065f46;
-}
-
-.btn-activate:hover {
-  background-color: #a7f3d0;
+.loading {
+  text-align: center;
+  padding: 24px;
+  color: #6b7280;
 }
 
 @media (max-width: 768px) {
   .empresas-header {
     flex-direction: column;
     align-items: flex-start;
-    gap: 16px;
-  }
-
-  .empresas-table-container {
-    overflow-x: auto;
   }
 
   .empresas-table {
@@ -147,66 +110,35 @@
   }
 }
 
-.badge-ativo {
-  background-color: #d1fae5;
-  color: #065f46;
+.modal h2 {
+  margin: 0 0 12px 0;
+  color: #0A3D62;
 }
 
-.badge-inativo {
-  background-color: #fee2e2;
-  color: #991b1b;
+.modal form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
-.badge-bloqueado {
-  background-color: #fee2e2;
-  color: #991b1b;
-}
-
-.saldo-moedas {
-  font-weight: 600;
-  color: #5FD6C3;
-}
-
-.btn-toggle-status {
-  padding: 6px 14px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 14px;
+.modal label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
   font-weight: 500;
-  transition: all 0.2s;
+  color: #374151;
 }
 
-.btn-block {
-  background-color: #fee2e2;
-  color: #991b1b;
+.modal input,
+.modal select,
+.modal textarea {
+  padding: 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
 }
 
-.btn-block:hover {
-  background-color: #fecaca;
+.modal input:focus {
+  outline: none;
+  border-color: #5FD6C3;
 }
 
-.btn-unblock {
-  background-color: #d1fae5;
-  color: #065f46;
-}
-
-.btn-unblock:hover {
-  background-color: #a7f3d0;
-}
-
-@media (max-width: 768px) {
-  .users-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 16px;
-  }
-
-  .users-table-container {
-    overflow-x: auto;
-  }
-
-  .users-table {
-    min-width: 600px;
-  }
-}

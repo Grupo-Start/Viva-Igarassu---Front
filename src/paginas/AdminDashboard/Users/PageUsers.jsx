@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import "../admin-common.css";
 import "./PageUsers.css";
 import { DashboardHeader } from "../../../components/dashboardHeader/DashboardHeader";
 import { SidebarAdmin } from "../../../components/sidebarAdmin/SidebarAdmin";
@@ -21,15 +22,11 @@ export function PageUsers() {
       setError(null);
       
       const data = await dashboardService.getUsers();
-      console.log('Usuários carregados:', data);
-      console.log('Primeiro usuário completo:', data[0]);
-      console.log('Campos disponíveis:', Object.keys(data[0] || {}));
       
       // Adaptar estrutura do backend para o formato esperado
       const formattedUsers = Array.isArray(data) ? data.map(user => {
         const nome = user.nome || user.name || user.username || user.nomeCompleto || user.nome_completo || 'N/A';
         const tipo = (user.tipo || user.role || user.type || 'comum').toLowerCase();
-        console.log('User:', user.id, 'Nome encontrado:', nome, 'Tipo:', tipo);
         return {
           id: user.id,
           nome: nome,
@@ -66,7 +63,7 @@ export function PageUsers() {
         user.id === userId ? { ...user, status: newStatus } : user
       ));
       
-      console.log(`Usuário ${userId} ${newStatus === 'ativo' ? 'desbloqueado' : 'bloqueado'}`);
+      
     } catch (err) {
       console.error('Erro ao atualizar status:', err);
       setError('Erro ao atualizar status do usuário');
@@ -164,8 +161,8 @@ export function PageUsers() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredUsers.map((user) => (
-                    <tr key={user.id}>
+                  {filteredUsers.map((user, idx) => (
+                    <tr key={user.id ?? user.email ?? idx}>
                       <td>{user.nome}</td>
                       <td>{user.email}</td>
                       <td>

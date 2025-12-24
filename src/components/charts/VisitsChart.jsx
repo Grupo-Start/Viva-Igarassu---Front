@@ -25,7 +25,6 @@ export function VisitsChart({ data = defaultData }) {
           <XAxis 
             dataKey="data" 
             tickFormatter={(value) => {
-              // Parse manual para evitar problema de timezone
               const [year, month, day] = value.split('-');
               return `${day}/${month}`;
             }}
@@ -33,7 +32,6 @@ export function VisitsChart({ data = defaultData }) {
           <YAxis />
           <Tooltip 
             labelFormatter={(value) => {
-              // Parse manual para evitar problema de timezone
               const [year, month, day] = value.split('-');
               return `${day}/${month}/${year}`;
             }}

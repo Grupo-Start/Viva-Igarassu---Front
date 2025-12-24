@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import "../admin-common.css";
 import "./PageEmpresas.css";
 import { DashboardHeader } from "../../../components/dashboardHeader/DashboardHeader";
 import { SidebarAdmin } from "../../../components/sidebarAdmin/SidebarAdmin";
@@ -21,21 +22,16 @@ export function PageEmpresas() {
       setError(null);
       
       const data = await dashboardService.getEmpresas();
-      console.log('Empresas carregadas:', data);
-      console.log('Primeira empresa completa:', JSON.stringify(data[0], null, 2));
-      console.log('Campos disponíveis:', Object.keys(data[0] || {}));
       
       const formattedEmpresas = Array.isArray(data) ? data.map(empresa => {
         const nome = empresa.nome_empresa || empresa.nome || empresa.name || 'N/A';
         const email = empresa.usuarios?.email || empresa.usuario?.email || empresa.empreendedor?.email || 'N/A';
         const tipoServico = empresa.tipo_servico || empresa.tipoServico || empresa.servico || empresa.categoria || 'N/A';
-        console.log('Empresa:', empresa.id_empresa, 'Nome:', nome, 'Email:', email, 'Tipo Serviço:', tipoServico);
         return {
           id: empresa.id_empresa || empresa.id,
           nome: nome,
           cnpj: empresa.cnpj || 'N/A',
           email: email,
-          telefone: empresa.telefone || empresa.phone || empresa.contato || 'N/A',
           tipoServico: tipoServico,
           status: empresa.status || (empresa.ativo === false ? 'inativo' : 'ativo')
         };
@@ -43,8 +39,6 @@ export function PageEmpresas() {
       
       setEmpresas(formattedEmpresas);
     } catch (err) {
-      console.error('Erro ao carregar empresas:', err);
-      
       if (err.message?.includes('Network Error') || err.code === 'ERR_NETWORK') {
         setError('Não foi possível conectar ao backend.');
       } else if (err.response?.status === 404) {
@@ -61,19 +55,14 @@ export function PageEmpresas() {
     try {
       const newStatus = currentStatus === 'ativo' ? 'inativo' : 'ativo';
       
-      console.log(`Tentando atualizar empresa ${empresaId} para status: ${newStatus}`);
       await dashboardService.updateEmpresaStatus(empresaId, newStatus);
       
       setEmpresas(empresas.map(empresa => 
         empresa.id === empresaId ? { ...empresa, status: newStatus } : empresa
       ));
       
-      console.log(`✓ Empresa ${empresaId} ${newStatus === 'ativo' ? 'ativada' : 'desativada'}`);
-    } catch (err) {
-      console.error('Erro ao atualizar status:', err);
-      console.error('Resposta do servidor:', err.response?.data);
-      console.error('Status HTTP:', err.response?.status);
       
+    } catch (err) {
       const errorMsg = err.response?.status === 404 
         ? 'Endpoint PATCH /empresa/:id/status não implementado no backend'
         : err.response?.data?.message || 'Erro ao atualizar status da empresa';
@@ -181,19 +170,18 @@ export function PageEmpresas() {
                     <th>Nome</th>
                     <th>CNPJ</th>
                     <th>Email</th>
-                    <th>Telefone</th>
                     <th>Tipo de Serviço</th>
                     <th>Status</th>
                     <th>Ações</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredEmpresas.map((empresa) => (
-                    <tr key={empresa.id}>
+                  {filteredEmpresas.map((empresa, idx) => (
+                    <tr key={empresa.id ?? empresa.cnpj ?? empresa.nome ?? idx}>
                       <td>{empresa.nome}</td>
                       <td>{empresa.cnpj}</td>
                       <td>{empresa.email}</td>
-                      <td>{empresa.telefone}</td>
+                      
                       <td>{empresa.tipoServico}</td>
                       <td>
                         <span className={`badge ${empresa.status === 'ativo' ? 'badge-ativo' : 'badge-inativo'}`}>

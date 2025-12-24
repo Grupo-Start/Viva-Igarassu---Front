@@ -1,5 +1,3 @@
-/* Users Page Styles */
-
 .users-header {
   display: flex;
   justify-content: space-between;
@@ -12,29 +10,6 @@
 .filter-buttons {
   display: flex;
   gap: 8px;
-}
-
-.filter-btn {
-  padding: 8px 16px;
-  border: 1px solid #d1d5db;
-  background-color: white;
-  color: #374151;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-  transition: all 0.2s;
-}
-
-.filter-btn:hover {
-  background-color: #f3f4f6;
-  border-color: #0A3D62;
-}
-
-.filter-btn.active {
-  background-color: #0A3D62;
-  color: white;
-  border-color: #0A3D62;
 }
 
 .users-stats {
@@ -94,40 +69,6 @@
 
 .users-table tbody tr:hover {
   background-color: #f9fafb;
-}
-
-.badge {
-  display: inline-block;
-  padding: 4px 12px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 500;
-  text-transform: uppercase;
-}
-
-.badge-admin {
-  background-color: #dbeafe;
-  color: #1e40af;
-}
-
-.badge-comum {
-  background-color: #e0e7ff;
-  color: #4338ca;
-}
-
-.badge-ativo {
-  background-color: #d1fae5;
-  color: #065f46;
-}
-
-.badge-inativo {
-  background-color: #fee2e2;
-  color: #991b1b;
-}
-
-.badge-bloqueado {
-  background-color: #fee2e2;
-  color: #991b1b;
 }
 
 .saldo-moedas {

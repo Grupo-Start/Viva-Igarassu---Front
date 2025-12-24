@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import StatCard from "../../../components/StatCard/StatCard";
+import "../admin-common.css";
 import "./AdminDashboard.css";
 import { dashboardService } from "../../../services/api";
 import { IoMdPeople } from "react-icons/io";
@@ -37,7 +38,7 @@ export function AdminDashboard() {
       const visits = await dashboardService.getVisitsData(visitsPeriod);
       setVisitsData(visits);
     } catch (err) {
-      console.error('Erro ao carregar visitas:', err);
+      console.warn('Erro ao carregar visitas:', err);
     }
   };
 
@@ -65,31 +66,12 @@ export function AdminDashboard() {
         availableRewards: recompensasCount,
       });
     } catch (err) {
-      console.error('Erro ao carregar dados do dashboard:', err);
-      setError(`Erro ao carregar os dados: ${err.message}`);
+      setError(`Erro ao carregar os dados: ${err.response?.data?.message || err.message}`);
     } finally {
       setLoading(false);
     }
   };
-
-  if (loading) {
-    return (
-      <div className="admin-dashboard">
-        <h1>Dashboard Administrativo</h1>
-        <p className="loading">Carregando dados...</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="admin-dashboard">
-        <h1>Dashboard Administrativo</h1>
-        <p className="error">{error}</p>
-        <button onClick={loadDashboardData}>Tentar novamente</button>
-      </div>
-    );
-  }
+  
 
   return (
     <div>
@@ -133,17 +115,17 @@ export function AdminDashboard() {
                             <span className="total-visits">Total: {getTotalVisits()} visitas</span>
                         </div>
                         <div className="period-filter">
-                            <button 
-                                className={visitsPeriod === 7 ? 'active' : ''}
-                                onClick={() => setVisitsPeriod(7)}
+                            <button
+                              className={`filter-btn ${visitsPeriod === 7 ? 'active' : ''}`}
+                              onClick={() => setVisitsPeriod(7)}
                             >
-                                7 dias
+                              7 dias
                             </button>
-                            <button 
-                                className={visitsPeriod === 30 ? 'active' : ''}
-                                onClick={() => setVisitsPeriod(30)}
+                            <button
+                              className={`filter-btn ${visitsPeriod === 30 ? 'active' : ''}`}
+                              onClick={() => setVisitsPeriod(30)}
                             >
-                                30 dias
+                              30 dias
                             </button>
                         </div>
                     </div>

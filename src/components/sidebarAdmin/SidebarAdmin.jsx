@@ -64,8 +64,15 @@ export function SidebarAdmin() {
           >
             {open && "Eventos"}
           </li>
-          <li>{open && "Recompensas"}</li>
-          <li>{open && "Configurações"}</li>
+          <li 
+            className={location.pathname === '/Admin-Dashboard/Recompensas' ? 'menu-active' : ''}
+            onClick={() => {
+              navigate('/Admin-Dashboard/Recompensas');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+          >
+            {open && "Recompensas"}
+          </li>
         </ul>
       </aside>
     </div>

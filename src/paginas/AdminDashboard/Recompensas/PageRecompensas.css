@@ -1,5 +1,4 @@
-.pontos-header-top,
-.pontos-header {
+.recompensas-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -8,11 +7,11 @@
   margin-bottom: 16px;
 }
 
-.pontos-header {
+.recompensas-header {
   margin-bottom: 24px;
 }
 
-.pontos-stats {
+.recompensas-stats {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -21,31 +20,20 @@
   color: #0A3D62;
 }
 
-.btn-add-ponto {
+.btn-add-recompensa {
   background: #5FD6C3;
   color: #fff;
   padding: 10px 20px;
   border-radius: 8px;
   border: none;
   cursor: pointer;
-  font-weight: 600;
 }
 
-.btn-add-ponto:hover {
+.btn-add-recompensa:hover {
   background: #4ac4b1;
 }
 
-.filter-section {
-  margin-bottom: 16px;
-}
-
-.filter-buttons {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.pontos-table-container {
+.recompensas-table-container {
   background: #fff;
   border-radius: 12px;
   padding: 20px;
@@ -53,16 +41,16 @@
   overflow-x: auto;
 }
 
-.pontos-table {
+.recompensas-table {
   width: 100%;
   border-collapse: collapse;
 }
 
-.pontos-table thead {
+.recompensas-table thead {
   background: #f9fafb;
 }
 
-.pontos-table th {
+.recompensas-table th {
   padding: 12px 16px;
   text-align: left;
   font-weight: 600;
@@ -70,55 +58,28 @@
   border-bottom: 2px solid #e5e7eb;
 }
 
-.pontos-table td {
+.recompensas-table td {
   padding: 12px 16px;
   border-bottom: 1px solid #e5e7eb;
   color: #111827;
 }
 
-.pontos-table tbody tr:hover {
+.recompensas-table tbody tr:hover {
   background: #f9fafb;
-}
-
-.badge-ativo {
-  background: #d1fae5;
-  color: #065f46;
-}
-
-.badge-inativo {
-  background: #fee2e2;
-  color: #991b1b;
 }
 
 .action-buttons {
   display: flex;
   gap: 8px;
-  flex-wrap: wrap;
 }
 
-.btn-edit {
-  padding: 6px 12px;
-  border-radius: 6px;
+.btn-acao {
+  padding: 10px 20px;
+  border-radius: 8px;
   border: none;
-  background: #dbeafe;
-  color: #1e40af;
+  background: #003459;
+  color: #fff;
   cursor: pointer;
-}
-
-.btn-edit:hover {
-  background: #bfdbfe;
-}
-
-.btn-qrcode {
-  padding: 6px 12px;
-  border-radius: 6px;
-  border: none;
-  background: #d1fae5;
-  color: #065f46;
-}
-
-.btn-qrcode:hover {
-  background: #a7f3d0;
 }
 
 .loading {
@@ -127,54 +88,20 @@
   color: #6b7280;
 }
 
+.error {
+  color: #d32f2f;
+  margin: 16px 0;
+}
+
 @media (max-width: 768px) {
-  .pontos-header {
+  .recompensas-header {
     flex-direction: column;
     align-items: flex-start;
   }
 
-  .pontos-table {
+  .recompensas-table {
     min-width: 800px;
   }
-}
-
-.modal-content {
-  background: #fff;
-  border-radius: 12px;
-  padding: 20px;
-  width: clamp(320px, 90%, 520px);
-  max-height: 90vh;
-  overflow: auto;
-}
-
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-}
-
-.modal-header h2 {
-  margin: 0;
-  color: #0A3D62;
-}
-
-.btn-close {
-  background: none;
-  border: none;
-  font-size: 20px;
-  cursor: pointer;
-  color: #6b7280;
-}
-
-.btn-close:hover {
-  color: #374151;
-}
-
-.modal-form {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
 }
 
 .form-group {
@@ -186,14 +113,17 @@
 .form-group label {
   font-weight: 500;
   color: #374151;
+  font-size: 14px;
 }
 
 .form-group input,
 .form-group select,
 .form-group textarea {
-  padding: 10px;
+  padding: 10px 12px;
   border: 1px solid #d1d5db;
   border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
 }
 
 .form-group input:focus,
@@ -205,23 +135,35 @@
 
 .modal-footer {
   display: flex;
-  gap: 8px;
+  gap: 12px;
   justify-content: flex-end;
+  margin-top: 8px;
 }
 
 .btn-cancel {
-  padding: 8px 14px;
+  padding: 10px 20px;
   border: 1px solid #d1d5db;
-  background: #fff;
+  background-color: white;
+  color: #374151;
   border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 14px;
 }
+
+.btn-cancel:hover { background-color: #f3f4f6; }
 
 .btn-save {
-  padding: 8px 14px;
+  padding: 10px 20px;
   border: none;
-  background: #5FD6C3;
-  color: #fff;
+  background-color: #5FD6C3;
+  color: white;
   border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 14px;
 }
 
-
+.btn-save:hover { 
+    background-color: #4ac4b1; 
+}

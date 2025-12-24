@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import "../admin-common.css";
 import "./PagePontosTuristicos.css";
 import { DashboardHeader } from "../../../components/dashboardHeader/DashboardHeader";
 import { SidebarAdmin } from "../../../components/sidebarAdmin/SidebarAdmin";
@@ -12,8 +13,6 @@ export function PagePontosTuristicos() {
   const [showModal, setShowModal] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editingId, setEditingId] = useState(null);
-  
-  // Estados do formulário
   const [formData, setFormData] = useState({
     nome: '',
     endereco: '',
@@ -30,59 +29,40 @@ export function PagePontosTuristicos() {
     try {
       setLoading(true);
       setError(null);
-      
       const data = await dashboardService.getPontosTuristicos();
-      console.log('Pontos turísticos carregados:', data);
-      console.log('Primeiro ponto completo:', JSON.stringify(data[0], null, 2));
-      console.log('Campos disponíveis:', Object.keys(data[0] || {}));
-      
-      // Adaptar estrutura do backend para o formato esperado
       const formattedPontos = Array.isArray(data) ? data.map(ponto => {
         const nome = ponto.nome || ponto.nome_ponto || ponto.name || 'N/A';
         const localizacao = ponto.localizacao || ponto.local || 'N/A';
         const categoria = ponto.tipo || ponto.categoria || ponto.tipo_ponto || 'outros';
         const descricao = ponto.descricao || ponto.desc || ponto.description || 'N/A';
         const horarioFuncionamento = ponto.horario_funcionamento || ponto.horario || ponto.funcionamento || '';
-        
-        // Montar endereço completo a partir dos campos retornados pelo backend
         let enderecoCompleto = '';
         if (ponto.enderecos && typeof ponto.enderecos === 'object') {
-          // Backend retorna como objeto 'enderecos' (plural)
           const { logradouro, numero, bairro, cidade, estado, cep } = ponto.enderecos;
           enderecoCompleto = [logradouro, numero, bairro, cidade, estado, cep].filter(Boolean).join(', ');
         } else if (ponto.rua || ponto.numero || ponto.bairro) {
-          // Se os campos vierem direto do JOIN
           enderecoCompleto = [ponto.rua, ponto.numero, ponto.bairro, ponto.cidade, ponto.estado, ponto.cep].filter(Boolean).join(', ');
         } else if (ponto.endereco && typeof ponto.endereco === 'object') {
-          // Se endereco vier como objeto (singular)
           const { rua, numero, bairro, cidade, estado, cep } = ponto.endereco;
           enderecoCompleto = [rua, numero, bairro, cidade, estado, cep].filter(Boolean).join(', ');
         } else if (typeof ponto.endereco === 'string' && !ponto.endereco.includes('-')) {
-          // Se vier como string e não for UUID
           enderecoCompleto = ponto.endereco;
         } else {
-          // Não há dados de endereço
           enderecoCompleto = '';
         }
-        
-        console.log('Ponto:', ponto.id_ponto, 'Nome:', nome, 'Endereço:', enderecoCompleto);
-        
         return {
           id: ponto.id_ponto || ponto.id,
           nome: nome,
           localizacao: localizacao,
           endereco: enderecoCompleto,
-          categoria: categoria || 'outros', // Garante valor default só no front
+          categoria: categoria || 'outros',
           descricao: descricao,
           horario_funcionamento: horarioFuncionamento,
           status: ponto.status || (ponto.ativo === false ? 'inativo' : 'ativo')
         };
       }) : [];
-      
       setPontos(formattedPontos);
     } catch (err) {
-      console.error('Erro ao carregar pontos turísticos:', err);
-      
       if (err.message?.includes('Network Error') || err.code === 'ERR_NETWORK') {
         setError('Não foi possível conectar ao backend.');
       } else if (err.response?.status === 404) {
@@ -125,13 +105,11 @@ export function PagePontosTuristicos() {
   const handleSubmitPonto = async (e) => {
     e.preventDefault();
     try {
-      // Montar objeto só com campos válidos para o backend
       const dadosBackend = {
         nome: formData.nome,
         descricao: formData.descricao,
         horario_funcionamento: formData.horario_funcionamento
       };
-      // Se o ponto original tiver id_endereco, envie, senão não envie endereco
       if (isEditing) {
         const pontoOriginal = pontos.find(p => p.id === editingId);
         if (pontoOriginal && pontoOriginal.id_endereco) {
@@ -157,15 +135,11 @@ export function PagePontosTuristicos() {
       });
       loadPontosTuristicos();
     } catch (err) {
-      console.error('Erro ao salvar ponto:', err);
       alert(`Erro ao ${isEditing ? 'atualizar' : 'adicionar'} ponto turístico. Tente novamente.`);
     }
   };
 
   const handleEditPonto = (ponto) => {
-    console.log('Editando ponto:', ponto);
-    console.log('Endereço do ponto:', ponto.endereco);
-    
     setFormData({
       nome: ponto.nome,
       endereco: ponto.endereco || '',
@@ -197,7 +171,6 @@ export function PagePontosTuristicos() {
       await dashboardService.updatePontoTuristicoStatus(pontoId, novoStatus);
       loadPontosTuristicos();
     } catch (err) {
-      console.error('Erro ao alterar status:', err);
       alert('Erro ao alterar status do ponto turístico.');
     }
   };
@@ -205,8 +178,6 @@ export function PagePontosTuristicos() {
   const handleGerarQRCode = async (pontoId, pontoNome) => {
     try {
       const blob = await dashboardService.downloadPDF(pontoId);
-      
-      // Criar URL para download
       const url = window.URL.createObjectURL(new Blob([blob]));
       const link = document.createElement('a');
       link.href = url;
@@ -215,11 +186,7 @@ export function PagePontosTuristicos() {
       link.click();
       link.remove();
       window.URL.revokeObjectURL(url);
-      
-      console.log('QR Code PDF baixado com sucesso');
     } catch (err) {
-      console.error('Erro ao gerar QR Code:', err);
-      
       let errorMsg = 'Erro ao gerar QR Code. ';
       if (err.response?.status === 404) {
         errorMsg += 'Ponto turístico não encontrado.';
@@ -230,12 +197,10 @@ export function PagePontosTuristicos() {
       } else {
         errorMsg += err.message || 'Tente novamente.';
       }
-      
       alert(errorMsg);
     }
   };
 
-  // Função para alternar status só no frontend
   const handleToggleStatusFrontend = (pontoId) => {
     setPontos(prevPontos => prevPontos.map(p =>
       p.id === pontoId
