@@ -42,18 +42,14 @@ export function Login() {
             }
 
             await new Promise(resolve => setTimeout(resolve, 100));
-            const emailDigitado = email.toLowerCase().trim();
-            const emailResponse = response.user?.email?.toLowerCase().trim();
-            const tipo = response.user?.tipo?.toLowerCase();
-            const role = response.user?.role?.toLowerCase();
+            const tipo = response.user?.tipo;
+            const role = response.user?.role;
             const isAdmin = response.user?.isAdmin || response.user?.is_admin;
 
-            
+            const tipoIsAdmin = typeof tipo === 'string' && tipo.toLowerCase() === 'adm';
+            const roleIsAdmin = typeof role === 'string' && role.toLowerCase() === 'adm';
 
-            const adminEmails = ['admin@test', 'admin@test.com'];
-            const isEmailAdmin = adminEmails.includes(emailDigitado) || adminEmails.includes(emailResponse);
-
-            if (isEmailAdmin || tipo === 'admin' || role === 'adm' || isAdmin === true) {
+            if (tipoIsAdmin || roleIsAdmin || isAdmin === true) {
                 navigate('/Admin-Dashboard', { replace: true });
             } else {
                 navigate('/', { replace: true });

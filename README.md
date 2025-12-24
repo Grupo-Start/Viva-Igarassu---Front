@@ -1,50 +1,78 @@
-# Viva Igarassu - Frontend
+# Viva Igarassu — Frontend
 
-Este projeto é o frontend do sistema Viva Igarassu, desenvolvido em React + Vite.
+Frontend do sistema Viva Igarassu, criado em React + Vite. Esta aplicação fornece a interface
+administrativa (Admin Dashboard) e as páginas públicas para gerenciar pontos turísticos, eventos,
+empresas, recompensas e usuários.
 
-## Funcionalidades
-- Dashboard administrativo para empresas, pontos turísticos, eventos, recompensas e usuários
-- CRUD completo para recompensas, incluindo upload de imagem e associação automática à empresa do perfil
-- Sidebar de navegação com acesso rápido às páginas principais
-- Autenticação via JWT
-- Integração com backend via Axios
-- Visualização de estatísticas e tabelas dinâmicas
+Principais características
+- Dashboard administrativo com cards de estatísticas e gráficos
+- CRUD para Recompensas, Eventos, Empresas e Pontos Turísticos
+- Upload de imagens usando FormData
+- Autenticação JWT com armazenamento do token em `localStorage`
+- Integração com backend via Axios (`src/services/api.js`)
 
-## Estrutura de Pastas
+Estrutura principal
 ```
 src/
-  componentes/         # Componentes reutilizáveis
-  paginas/             # Páginas do sistema
-    AdminDashboard/    # Páginas administrativas
+  components/         # Componentes reutilizáveis
+  paginas/            # Páginas (AdminDashboard, Login, Register, etc.)
+    AdminDashboard/
+      Dashboard/
       Empresas/
       PontosTuristicos/
       Eventos/
       Recompensas/
       Users/
-  routes/              # Rotas do sistema
-  services/            # Integração com API
-  assets/              # Imagens e arquivos estáticos
+  routes/             # Definição de rotas
+  services/           # Cliente axios e serviços (API)
+  assets/             # Imagens e estáticos
 ```
 
-## Como rodar o projeto
-1. Instale as dependências:
-   ```bash
-   npm install
-   ```
-2. Inicie o servidor de desenvolvimento:
-   ```bash
-   npm run dev
-   ```
-3. Acesse [http://localhost:3000](http://localhost:3000) no navegador.
-
-## Observações
-- O campo de empresa nas recompensas é preenchido automaticamente pelo perfil logado.
-- O upload de imagem é feito via FormData e salvo no backend.
-- O sidebar não possui mais o item "Configurações".
-
-## Requisitos
+Requisitos
 - Node.js >= 18
-- Backend rodando em [http://localhost:3001](http://localhost:3001)
+- Backend disponível (por padrão esperado em `http://localhost:3001`)
 
-## Licença
-MIT
+Instalação e execução (desenvolvimento)
+1. Instale dependências:
+
+```bash
+npm install
+```
+
+2. Inicie o servidor de desenvolvimento:
+
+```bash
+npm run dev
+```
+
+3. Abra o endereço exibido no terminal (por exemplo `http://localhost:5173`).
+
+Build e preview
+
+```bash
+npm run build
+npm run preview
+```
+
+Configuração do backend
+- Por padrão o cliente HTTP aponta para `http://localhost:3001` (veja `src/services/api.js`).
+- Se necessário, atualize a URL do backend nesse arquivo ou ajuste para usar uma variável de ambiente.
+
+Login de administrador
+- Para testar permissões de admin a aplicação verifica o perfil retornado pelo backend (campos `role`, `tipo` ou `isAdmin`).
+
+Notas de desenvolvimento
+- O layout do admin utiliza `admin-common.css` para estilos compartilhados entre páginas.
+- Interceptadores Axios tratam 401 removendo o token e redirecionando para `/login`.
+- Tratamento de 404 em chamadas GET retorna arrays vazios para evitar erros de render.
+
+Depuração comum
+- Se a aplicação carregar em branco ao navegar, abra o Console do navegador para ver erros de runtime.
+- Problemas de CORS devem ser resolvidos no backend (habilitar origin do frontend).
+
+Contribuindo
+- Sinta-se à vontade para abrir PRs com correções e melhorias. Mantenha consistência com o estilo
+  existente (componentes funcionais, hooks e CSS por página).
+
+Licença
+- MIT
