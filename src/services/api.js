@@ -56,6 +56,7 @@ export const dashboardService = {
     try {
       let config = {};
       let body = dados;
+      const isFormData = dados instanceof FormData;
       if (isFormData) {
         config.headers = { 'Content-Type': 'multipart/form-data' };
       } else {
@@ -77,6 +78,7 @@ export const dashboardService = {
     try {
       let config = {};
       let body = dados;
+      const isFormData = dados instanceof FormData;
       if (isFormData) {
         config.headers = { 'Content-Type': 'multipart/form-data' };
       } else {
@@ -179,6 +181,16 @@ export const dashboardService = {
     }
   },
 
+  setNomeEmpresa: async () => {
+    try {
+      let empresas = await request('get', '/empresa');
+      let nomeEmpresa = empresas[0]?.nome_empresa;
+      return nomeEmpresa;
+    } catch (error) {
+      throw error;
+    }
+  },
+
   getEmpresaById: async (id) => {
     try {
       return await request('get', `/empresa/${id}`);
@@ -187,9 +199,25 @@ export const dashboardService = {
     }
   },
 
+  getEmpresaByQuery: async (queryString) => {
+    try {
+      return await request('get', `/empresa?${queryString}`);
+    } catch (error) {
+      throw error;
+    }
+  },
+
   updateEmpresaStatus: async (empresaId, status) => {
     try {
       return await request('patch', `/empresa/${empresaId}/status`, { status });
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  updateEmpresa: async (empresaId, dados) => {
+    try {
+      return await request('put', `/empresa/${empresaId}`, dados);
     } catch (error) {
       throw error;
     }

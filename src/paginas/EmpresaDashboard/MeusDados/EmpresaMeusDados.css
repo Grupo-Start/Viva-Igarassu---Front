@@ -1,0 +1,30 @@
+.meusdados-main {
+  flex: 1;
+  padding: 24px;
+  background: #f8fafc;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+.meusdados-main h1 {
+  color: #0A3D62;
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 24px;
+}
+.meusdados-card {
+  max-width: 880px;
+  background: #fff;
+  padding: 18px;
+  border-radius: 8px;
+  box-shadow: 0 6px 18px rgba(2,6,23,0.06);
+}
+.meusdados-card .field {
+  display:flex;
+  justify-content:space-between;
+  padding:10px 0;
+  border-bottom:1px solid #f1f5f9;
+}
+.meusdados-card .field strong { color:#0b3b5b; }
+.meusdados-card .field span { color:#334155 }
+.loading{ color:#64748b }
+.error{ color:#b91c1c }
