@@ -1,4 +1,3 @@
-// Sidebar.jsx
 import { useState } from "react";
 import "./sidebar.css";
 
