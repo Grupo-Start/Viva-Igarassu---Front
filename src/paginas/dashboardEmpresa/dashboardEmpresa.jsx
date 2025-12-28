@@ -1,10 +1,11 @@
 import { Sidebar } from "../../components/sidebar/Sidebar"
+import { Header } from "../../components/header/Header"
 
-export function DashboardCo() {
+export function DashboardEmpresa() {
   return (
     <div>
           <header>
-            <p>Componente header aqui</p>
+            <Header/>
         </header>
         <nav>
             <Sidebar/>
