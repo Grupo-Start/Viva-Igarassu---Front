@@ -6,15 +6,33 @@ import { IoIosLock } from "react-icons/io";
 
 export function RegisterPerson() {
     return (
-        <div>
-            <div>
-                <img src={Img} alt="img-RegisterPerson" />
-            </div>
+
+        <div className="container-person">
 
             <div>
-                <h1></h1>
+                <img className="img-person" src={Img} alt="Viva-Igarassu" />
+            </div>
+
+            <div className="form-person">
+                <h1 className="person-h1">Cadastre-se</h1>
+
+
+                <div className="container-input-person">
+                    <input className="input-person" type="Name" placeholder="Nome completo" required />
+                </div>
+
+                <div className="container-input-person">
+                    <input className="input-person" type="E-mail" placeholder="E-mail" />
+                </div>
+
+                <div className="container-input-person">
+                    <input className="input-person" type="Password" placeholder="Senha" />
+                </div>
+
+                <Button text="Enviar" />
+
             </div>
         </div>
-    )
+    );
 }
 
