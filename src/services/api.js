@@ -325,9 +325,80 @@ export const dashboardService = {
 
   createPontoTuristico: async (dados) => {
     try {
-      const response = await api.post('/pontos-turisticos', dados);
-      return response.data;
+      // build minimal JSON payload
+      let jsonPayload = {};
+      if (dados instanceof FormData) {
+        for (const [k, v] of dados.entries()) jsonPayload[k] = v;
+      } else if (typeof dados === 'object' && dados !== null) {
+        jsonPayload = { ...dados };
+      } else {
+        jsonPayload = { nome: String(dados) };
+      }
+
+      // ensure required fields
+      const nomeVal = jsonPayload.nome || jsonPayload.name || jsonPayload.titulo || jsonPayload.nome_ponto || '';
+      jsonPayload.nome = jsonPayload.nome || nomeVal;
+      jsonPayload.nome_ponto = jsonPayload.nome_ponto || nomeVal;
+
+      if (jsonPayload.endereco && !jsonPayload.endereco_completo) jsonPayload.endereco_completo = jsonPayload.endereco;
+
+      if (!jsonPayload.descricao) jsonPayload.descricao = jsonPayload.description || '';
+      if (!jsonPayload.horario_funcionamento) jsonPayload.horario_funcionamento = jsonPayload.horario || '';
+
+      // attach empresa id if available
+      try {
+        const rawUser = localStorage.getItem('user');
+        const u = rawUser ? JSON.parse(rawUser) : {};
+        const empresaId = u.empresa || u.empresa_id || u.id_empresa || u.empresaId || u.id || u._id || null;
+        if (empresaId && !jsonPayload.id_empresa && !jsonPayload.empresa) {
+          jsonPayload.id_empresa = empresaId;
+          jsonPayload.empresa = empresaId;
+        }
+      } catch (e) {}
+
+      console.log('createPontoTuristico: payload final (antes de filtrar) ->', jsonPayload);
+
+      // validação cliente: nome é obrigatório no modelo Prisma do backend
+      if (!jsonPayload.nome || String(jsonPayload.nome).trim() === '') {
+        throw new Error('createPontoTuristico: campo "nome" é obrigatório');
+      }
+
+      // Filtrar somente os campos esperados pelo backend/prisma para evitar erros de campo inválido
+      const allowed = new Set([
+        'nome',
+        'descricao',
+        'horario_funcionamento',
+        'tipo',
+        'endereco_completo',
+        'id_endereco',
+        'id_figurinha',
+        'empresa',
+        'id_empresa'
+      ]);
+      const finalPayload = {};
+      for (const k of Object.keys(jsonPayload)) {
+        if (allowed.has(k)) finalPayload[k] = jsonPayload[k];
+      }
+
+      console.log('createPontoTuristico: payload enviado ->', finalPayload);
+
+      // Tentativa direta no endpoint canônico do backend
+      const endpoints = ['/pontos-turisticos'];
+      const config = { headers: { 'Content-Type': 'application/json' } };
+      let lastErr = null;
+      for (const ep of endpoints) {
+        try {
+          const res = await api.post(ep, finalPayload, config);
+          console.log('createPontoTuristico: resposta OK', ep, res.status, res.data);
+          return res.data;
+        } catch (err) {
+          lastErr = err;
+          console.warn('createPontoTuristico: tentativa', ep, 'falhou', err?.response?.status, err?.response?.data || err?.message);
+        }
+      }
+      throw lastErr || new Error('createPontoTuristico: sem endpoint disponível');
     } catch (error) {
+      console.error('createPontoTuristico: erro final', error?.response?.status, error?.response?.data || error?.message || error);
       throw error;
     }
   },

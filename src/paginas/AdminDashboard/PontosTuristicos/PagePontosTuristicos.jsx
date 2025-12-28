@@ -167,11 +167,20 @@ export function PagePontosTuristicos() {
 
       try { console.debug('PontoTuristico payload:', dadosBackend); } catch (e) {}
 
+      const minimalPayload = {
+        nome: dadosBackend.nome || formData.nome || 'Sem nome',
+        descricao: dadosBackend.descricao || formData.descricao || '',
+        horario_funcionamento: dadosBackend.horario_funcionamento || formData.horario_funcionamento || '',
+        tipo: dadosBackend.tipo || formData.tipo || undefined,
+        endereco_completo: dadosBackend.endereco_completo || dadosBackend.endereco || formData.endereco || undefined,
+        id_empresa: (function(){ try{ const u = JSON.parse(localStorage.getItem('user')||'{}'); return u.empresa || u.empresa_id || u.id_empresa || u.empresaId || null }catch(e){return null} })()
+      };
+
       if (isEditing) {
         await dashboardService.updatePontoTuristico(editingId, dadosBackend);
         alert('Ponto turístico atualizado com sucesso!');
       } else {
-        await dashboardService.createPontoTuristico(dadosBackend);
+        await dashboardService.createPontoTuristico(minimalPayload);
         alert('Ponto turístico adicionado com sucesso!');
       }
 
