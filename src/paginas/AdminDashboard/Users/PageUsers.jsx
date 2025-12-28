@@ -23,7 +23,6 @@ export function PageUsers() {
       
       const data = await dashboardService.getUsers();
       
-      // Adaptar estrutura do backend para o formato esperado
       const formattedUsers = Array.isArray(data) ? data.map(user => {
         const nome = user.nome || user.name || user.username || user.nomeCompleto || user.nome_completo || 'N/A';
         const tipo = (user.tipo || user.role || user.type || 'comum').toLowerCase();
@@ -67,7 +66,6 @@ export function PageUsers() {
     } catch (err) {
       console.error('Erro ao atualizar status:', err);
       setError('Erro ao atualizar status do usuário');
-      // Recarregar lista em caso de erro
       setTimeout(() => {
         setError(null);
         loadUsers();

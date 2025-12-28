@@ -46,7 +46,7 @@ export function PageRecompensas() {
   const handleOpenModal = (recompensa = null) => {
     if (recompensa) {
       setIsEditing(true);
-      setEditingId(recompensa.id);
+      setEditingId(recompensa.id ?? recompensa._id ?? recompensa.id_recompensas ?? recompensa.id_recompensa ?? recompensa.idRecompensa ?? recompensa.codigo ?? recompensa.cod ?? null);
       setFormData({
         nome: recompensa.nome || "",
         descricao: recompensa.descricao || "",
@@ -83,7 +83,7 @@ export function PageRecompensas() {
       fd.append('imagem', formData.imagem);
     }
     if (isEditing) {
-      dashboardService.updateRecompensa(editingId, fd, true)
+      dashboardService.updateRecompensa(editingId, fd)
         .then(() => {
           loadRecompensas();
           handleCloseModal();
@@ -91,7 +91,7 @@ export function PageRecompensas() {
         .catch(err => setError("Erro ao editar recompensa: " + (err.response?.data?.message || err.message)))
         .finally(() => setLoading(false));
     } else {
-      dashboardService.createRecompensa(fd, true)
+      dashboardService.createRecompensa(fd)
         .then(() => {
           loadRecompensas();
           handleCloseModal();
@@ -102,14 +102,20 @@ export function PageRecompensas() {
   };
 
   const handleDelete = (id) => {
-    if (window.confirm("Tem certeza que deseja excluir esta recompensa?")) {
-      setLoading(true);
-      setError(null);
-      dashboardService.deleteRecompensa(id)
-        .then(() => loadRecompensas())
-        .catch(err => setError("Erro ao excluir recompensa: " + (err.response?.data?.message || err.message)))
-        .finally(() => setLoading(false));
+    let resolvedId = id;
+    if (typeof id === 'object') resolvedId = (id.id ?? id._id ?? id.id_recompensas ?? id.id_recompensa ?? id.idRecompensa ?? id.codigo ?? id.cod ?? null);
+    if (!resolvedId) {
+      setError('Não foi possível determinar o id da recompensa para exclusão.');
+      return;
     }
+    if (!window.confirm("Tem certeza que deseja excluir esta recompensa?")) return;
+    setLoading(true);
+    setError(null);
+    console.debug('Excluindo recompensa id:', resolvedId);
+    dashboardService.deleteRecompensa(resolvedId)
+      .then(() => loadRecompensas())
+      .catch(err => setError("Erro ao excluir recompensa: " + (err.response?.data?.message || err.message)))
+      .finally(() => setLoading(false));
   };
 
   return (
@@ -163,12 +169,14 @@ export function PageRecompensas() {
                           </td>
                           <td>{recompensa.quantidade_disponivel ?? recompensa.quantidade ?? ''}</td>
                           <td>{recompensa.preco_moedas ?? recompensa.valor ?? ''}</td>
-                          <td>
-                            <div className="action-buttons">
-                              <button className="btn-acao editar" onClick={() => handleOpenModal(recompensa)}>Editar</button>
-                              <button className="btn-acao excluir" onClick={() => handleDelete(recompensa.id)}>Excluir</button>
-                            </div>
-                          </td>
+                              <td>
+                                <div className="action-buttons">
+                                  <>
+                                    <button className="btn-acao editar" onClick={() => handleOpenModal(recompensa)}>Editar</button>
+                                    <button className="btn-acao excluir" onClick={() => handleDelete(recompensa.id ?? recompensa._id ?? recompensa.id_recompensas ?? recompensa.id_recompensa ?? recompensa.idRecompensa ?? recompensa.codigo ?? recompensa.cod)}>Excluir</button>
+                                  </>
+                                </div>
+                              </td>
                         </tr>
                       ))
                     )}

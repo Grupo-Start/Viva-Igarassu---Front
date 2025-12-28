@@ -26,7 +26,6 @@ export function Sidebar() {
         return;
       }
 
-      // se não houver nome no user salvo, tentar buscar pela empresa vinculada ao usuário via backend
       const token = localStorage.getItem('token');
       const userId = u.id || u._id || u.usuario || u.usuario_id || u.userId;
       if (token && userId) {
@@ -34,11 +33,11 @@ export function Sidebar() {
           .then(list => {
             const arr = Array.isArray(list) ? list : (list?.data || list?.empresas || []);
             const found = arr.find(e => {
-              // checar campo id_usuario direto e variantes
+              
               if (e.id_usuario && String(e.id_usuario) === String(userId)) return true;
               if (e.usuario && (e.usuario === userId || String(e.usuario) === String(userId))) return true;
               if (e.usuario && typeof e.usuario === 'object' && (String(e.usuario.id) === String(userId) || String(e.usuario._id) === String(userId))) return true;
-              // possíveis arrays
+              
               if (Array.isArray(e.usuarios)) {
                 if (e.usuarios.some(x => String(x.id || x._id || x.usuario_id || x) === String(userId))) return true;
               }
@@ -49,10 +48,7 @@ export function Sidebar() {
           .catch(() => {});
       }
     } catch (err) {
-      // ignore
     }
-  }, []);
-
   return (
     <div className="layout">
       <aside className={open ? "sidebar open" : "sidebar"}>
@@ -89,10 +85,9 @@ export function Sidebar() {
               {open ? ' Eventos' : 'E'}
             </NavLink>
           </li>
-          {/* botão Sair removido conforme solicitado */}
         </ul>
       </aside>
     </div>
   );
+  }, []);
 }
-

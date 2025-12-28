@@ -6,20 +6,22 @@ import { MdEvent } from "react-icons/md";
 import { dashboardService } from "../../../services/api";
 
 export function EmpresaEventos() {
-  const [eventos, setEventos] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [showModal, setShowModal] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
-  const [editingId, setEditingId] = useState(null);
-  const [formData, setFormData] = useState({
+  const initialForm = {
     nome: '',
     data: '',
     horario: '',
     endereco: '',
     descricao: '',
     imagem: null
-  });
+  };
+
+  const [eventos, setEventos] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingId, setEditingId] = useState(null);
+  const [formData, setFormData] = useState(initialForm);
 
   useEffect(() => {
     loadEventos();
@@ -30,123 +32,80 @@ export function EmpresaEventos() {
       setLoading(true);
       setError(null);
       const data = await dashboardService.getEventos();
-      
+      const arr = Array.isArray(data) ? data : [];
 
-      let empresasMap = {};
-      try {
-        const allEmpresas = await dashboardService.getEmpresas();
-        if (Array.isArray(allEmpresas)) {
-          allEmpresas.forEach(e => {
-            const key = String(e.id ?? e._id ?? e.id_empresa ?? e.idEmpresa ?? e.codigo ?? e.id);
-            const nome = e.nome || e.nome_empresa || e.name || e.razao_social || '';
-            empresasMap[key] = nome || key;
-          });
-        }
-      } catch (err) {
-        console.warn('PageEventos - falha ao buscar empresas para lookup:', err);
+      const ids = Array.from(new Set(
+        arr.map(ev => ev.id_endereco || ev.idEndereco || ev.endereco_id || (ev.endereco && ev.endereco.id) || null)
+          .filter(Boolean)
+      ));
+
+      const addressMap = {};
+      const notFound = new Set();
+      if (ids.length > 0) {
+        await Promise.all(ids.map(async (id) => {
+          try {
+            const addr = await dashboardService.getEnderecoById(id);
+            addressMap[String(id)] = addr;
+          } catch (e) {
+            const status = e?.response?.status;
+            if (status === 404) {
+              notFound.add(String(id));
+              addressMap[String(id)] = null;
+            } else {
+              console.warn('Erro ao buscar endereco id', id, e?.message || e);
+            }
+          }
+        }));
       }
 
-      try {
-        
-        const dataArray = Array.isArray(data) ? data : [];
-        const idsParaBuscar = Array.from(new Set(dataArray
-          .map(ev => ev.id_empresa)
-          .filter(id => id !== undefined && id !== null && String(id) && !empresasMap[String(id)])
-        ));
+      const enriched = arr.map(ev => {
+        const id = ev.id_endereco || ev.idEndereco || ev.endereco_id || (ev.endereco && ev.endereco.id) || null;
+        const fetched = id ? addressMap[String(id)] : null;
+        const resolved = fetched ?? ev.endereco ?? ev.endereco_completo ?? ev.enderecos ?? ev.endereco_evento ?? null;
+        return { ...ev, _endereco_resolved: resolved };
+      });
 
-        if (idsParaBuscar.length > 0) {
-          const promises = idsParaBuscar.map(id =>
-            dashboardService.getEmpresaById(id)
-              .then(res => ({ id: String(id), nome: res?.nome || res?.nome_empresa || res?.name || '' }))
-              .catch(err => {
-                console.warn('PageEventos - falha ao buscar empresa por id', id, err);
-                return { id: String(id), nome: '' };
-              })
-          );
-          const resultados = await Promise.all(promises);
-          resultados.forEach(r => {
-            if (r && r.id) empresasMap[r.id] = r.nome || r.id;
-          });
-        }
-      } catch (err) {
-        console.warn('PageEventos - erro ao resolver empresas por id:', err);
-      }
+      const parseEventDate = (ev) => {
+        const dateStr = ev.data || ev.data_evento || ev.date || ev.data_hora || ev.start || '';
+        if (!dateStr) return Infinity;
+        try {
+          if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) {
+            const [d,m,y] = dateStr.split('/');
+            return new Date(`${y}-${m}-${d}T00:00:00`).getTime();
+          }
+          if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return new Date(dateStr + 'T00:00:00').getTime();
+          const t = Date.parse(dateStr);
+          return isNaN(t) ? Infinity : t;
+        } catch (e) { return Infinity; }
+      };
 
-      const eventosFormatados = Array.isArray(data) ? data.map(ev => {
-        const nome = ev.nome || ev.titulo || ev.name || '';
-        let empresa = '';
-        if (ev.nome_empresa) {
-          empresa = ev.nome_empresa;
-        } else if (ev.empresa_nome) {
-          empresa = ev.empresa_nome;
-        } else if (ev.empresa && typeof ev.empresa === 'object') {
-          empresa = ev.empresa.nome || ev.empresa.name || ev.empresa.nome_empresa || ev.empresa.razao_social || '';
-        } else if (typeof ev.empresa === 'string') {
-          empresa = ev.empresa;
-        } else if (ev.id_empresa) {
-          if (typeof ev.id_empresa === 'object') {
-            empresa = ev.id_empresa.nome || ev.id_empresa.name || ev.id_empresa.nome_empresa || '';
-          }
-          if (!empresa) {
-            // tentar mapear via empresasMap usando id direto
-            const key = String(ev.id_empresa);
-            if (empresasMap[key]) empresa = empresasMap[key];
-          }
-        } else if (ev.criador && typeof ev.criador === 'object') {
-          empresa = ev.criador.nome || ev.criador.name || '';
-        }
-        let endereco = '';
-        if (ev.endereco_completo) {
-          endereco = ev.endereco_completo;
-        } else if (ev.enderecos && typeof ev.enderecos === 'string') {
-          endereco = ev.enderecos;
-        } else if (ev.enderecos && typeof ev.enderecos === 'object') {
-          // pode ser objeto com campos de endereço
-          endereco = [ev.enderecos.rua || ev.enderecos.logradouro, ev.enderecos.numero, ev.enderecos.bairro, ev.enderecos.cidade, ev.enderecos.estado, ev.enderecos.cep].filter(Boolean).join(', ');
-        } else if (ev.endereco && typeof ev.endereco === 'string') {
-          endereco = ev.endereco;
-        } else if (ev.endereco && typeof ev.endereco === 'object') {
-          endereco = [ev.endereco.rua, ev.endereco.numero, ev.endereco.bairro, ev.endereco.cidade, ev.endereco.estado, ev.endereco.cep].filter(Boolean).join(', ');
-        } else if (ev.endereco_evento) {
-          endereco = ev.endereco_evento;
-        } else if (ev.address) {
-          endereco = ev.address;
-        }
-        const dataEvento = ev.data || ev.data_evento || ev.date || '';
-        const horario = ev.horario || ev.horario_evento || ev.hora || ev.horarioInicio || '';
-        return {
-          ...ev,
-          nome,
-          empresa,
-          data: dataEvento,
-          horario,
-          endereco,
-          descricao: ev.descricao || ev.description || ''
-        };
-      }) : [];
-      setEventos(eventosFormatados);
+      enriched.sort((a,b) => parseEventDate(b) - parseEventDate(a));
+      setEventos(enriched);
     } catch (err) {
-      setError("Erro ao carregar eventos: " + (err.response?.data?.message || err.message));
+      console.error('Falha ao carregar eventos', err);
+      setError('Erro ao carregar eventos: ' + (err?.message || err));
     } finally {
       setLoading(false);
     }
   };
 
-  const handleOpenModal = (evento = null) => {
+  const handleOpenModal = (evento) => {
+    setError(null);
     if (evento) {
       setIsEditing(true);
-      setEditingId(evento.id_evento || evento.id);
+      setEditingId(evento.id_evento || evento.id || null);
       setFormData({
-        nome: evento.nome || evento.titulo || evento.name || '',
-        data: evento.data || evento.data_evento || evento.date || '',
-        horario: evento.horario || evento.horario_evento || evento.hora || evento.horarioInicio || '',
-        endereco: evento.endereco_completo || evento.endereco || evento.endereco_evento || evento.address || '',
-        descricao: evento.descricao || evento.description || ''
+        nome: evento.nome || '',
+        data: evento.data ? String(evento.data).substring(0, 10) : '',
+        horario: evento.horario || '',
+        endereco: evento.endereco || evento.endereco_completo || '',
+        descricao: evento.descricao || '',
+        imagem: null
       });
     } else {
       setIsEditing(false);
       setEditingId(null);
-      setFormData({ nome: '', data: '', horario: '', endereco: '', descricao: '' });
+      setFormData(initialForm);
     }
     setShowModal(true);
   };
@@ -155,63 +114,123 @@ export function EmpresaEventos() {
     setShowModal(false);
     setIsEditing(false);
     setEditingId(null);
-    setFormData({ nome: '', data: '', horario: '', endereco: '', descricao: '' });
+    setFormData(initialForm);
+    setError(null);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    (async () => {
-      try {
-        let body;
-        if (formData.imagem instanceof File) {
-          const fd = new FormData();
-          fd.append('nome', formData.nome);
-          fd.append('data', formData.data);
-          fd.append('horario', formData.horario);
-          fd.append('endereco', formData.endereco);
-          fd.append('descricao', formData.descricao);
-          fd.append('imagem', formData.imagem);
-          body = fd;
-        } else {
-          body = {
-            nome: formData.nome,
-            data: formData.data,
-            horario: formData.horario,
-            endereco: formData.endereco,
-            descricao: formData.descricao
-          };
-        }
+    try {
+      const required = ['nome', 'data', 'horario', 'endereco', 'descricao'];
+      const missing = required.filter(key => !formData[key] || String(formData[key]).trim() === '');
+      if (missing.length > 0) {
+        setError('Campos obrigatórios não preenchidos: ' + missing.join(', '));
+        return;
+      }
 
-        if (isEditing) {
-          await dashboardService.updateEvento(editingId, body);
-        } else {
-          await dashboardService.createEvento(body);
-        }
+      let empresaId = null;
+      try {
+        const u = JSON.parse(localStorage.getItem('user') || '{}');
+        empresaId = u.empresa || u.empresa_id || u.id_empresa || u.empresaId || u.id || u._id || null;
+      } catch (e) { empresaId = null; }
+      if (!empresaId) {
+        setError('É necessário estar logado como empresa para cadastrar eventos.');
+        return;
+      }
+
+      let body;
+      const computedISO = (() => {
+        try {
+          if (formData.data && formData.horario) return new Date(`${formData.data}T${formData.horario}`).toISOString();
+        } catch (e) { /**/ }
+        return null;
+      })();
+
+      if (formData.imagem instanceof File) {
+      body = new FormData();
+        body.append('nome', formData.nome);
+        body.append('descricao', formData.descricao);
+        body.append('data', formData.data);
+        body.append('horario', formData.horario);
+        body.append('endereco', formData.endereco);
+        body.append('endereco_completo', formData.endereco);
+        body.append('imagem', formData.imagem);
+        if (computedISO) body.append('data_hora', computedISO);
+        body.append('titulo', formData.nome);
+        body.append('name', formData.nome);
+        body.append('date', formData.data);
+        body.append('data_evento', formData.data);
+        body.append('hora', formData.horario);
+        body.append('descricao_evento', formData.descricao);
+      } else {
+        body = {
+          nome: formData.nome,
+          titulo: formData.nome,
+          name: formData.nome,
+          descricao: formData.descricao,
+          descricao_evento: formData.descricao,
+          data: formData.data,
+          data_evento: formData.data,
+          date: formData.data,
+          horario: formData.horario,
+          hora: formData.horario,
+          endereco: formData.endereco,
+          endereco_completo: formData.endereco,
+          endereco_evento: formData.endereco,
+          descricao: formData.descricao,
+        };
+        if (computedISO) body.data_hora = computedISO;
+      }
+
+      const empresaVal = (empresaId && !isNaN(Number(empresaId))) ? Number(empresaId) : empresaId;
+      if (body instanceof FormData) {
+        body.append('id_empresa', String(empresaVal));
+        body.append('empresa_id', String(empresaVal));
+        body.append('empresa', String(empresaVal));
+      } else {
+        body.id_empresa = empresaVal;
+        body.empresa_id = empresaVal;
+        body.empresa = empresaVal;
+      }
+
+      if (isEditing) {
+        await dashboardService.updateEvento(editingId, body);
+      } else {
+        await dashboardService.createEvento(body);
+      }
+
+      await loadEventos();
+      handleCloseModal();
+    } catch (err) {
+      console.error('Falha ao salvar evento', err, err?.response?.data);
+      let serverMessage = err?.response?.data?.message ?? err?.response?.data ?? err.message;
+      try { if (typeof serverMessage === 'object') serverMessage = JSON.stringify(serverMessage); } catch(e){}
+      setError('Erro ao salvar evento: ' + serverMessage);
+    }
+  };
+
+  const handleDelete = (id) => {
+    (async () => {
+      if (!window.confirm('Tem certeza que deseja excluir este evento?')) return;
+      try {
+        console.debug('Deletando evento id (frontend):', id);
+        await dashboardService.deleteEvento(id);
         await loadEventos();
-        handleCloseModal();
       } catch (err) {
-        setError('Erro ao salvar evento: ' + (err.response?.data?.message || err.message));
+        console.error('Falha ao excluir evento', err);
+        setError('Erro ao excluir evento: ' + (err.response?.data?.message || err.message));
       }
     })();
   };
 
-  const handleDelete = (id) => {
-    if (window.confirm('Tem certeza que deseja excluir este evento?')) {
-      setEventos(eventos.filter(ev => (ev.id_evento || ev.id) !== id));
-    }
-  };
-
   function formatData(dataStr) {
     if (!dataStr) return '';
-    // Se vier no formato YYYY-MM-DD, exibe como está
     if (/^\d{4}-\d{2}-\d{2}$/.test(dataStr)) {
-      return dataStr.split('-').reverse().join('/'); // 2025-02-10 -> 10/02/2025
+      return dataStr.split('-').reverse().join('/');
     }
-    // Se vier no formato dd/mm/yyyy
     if (/^\d{2}\/\d{2}\/\d{4}$/.test(dataStr)) {
       return dataStr;
     }
-    // Se vier no formato ISO, extrai só a parte da data
     if (/^\d{4}-\d{2}-\d{2}T/.test(dataStr)) {
       return dataStr.substring(0, 10).split('-').reverse().join('/');
     }
@@ -220,12 +239,10 @@ export function EmpresaEventos() {
 
   function formatHora(horaStr) {
     if (!horaStr) return '';
-    // Se vier no formato HH:mm:ss ou HH:mm, exibe como está
     const match = horaStr.match(/^\d{2}:\d{2}(:\d{2})?/);
     if (match) {
       return match[0];
     }
-    // Se vier no formato ISO, extrai só a parte da hora
     if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(horaStr)) {
       return horaStr.substring(11, 16); // pega HH:mm
     }
@@ -268,21 +285,64 @@ export function EmpresaEventos() {
                     {eventos.length === 0 ? (
                       <tr><td colSpan="6">Nenhum evento encontrado.</td></tr>
                     ) : (
-                      eventos.map(evento => (
-                        <tr key={evento.id_evento || evento.id}>
-                          <td>{evento.nome}</td>
-                          <td>{evento.empresa || '-'}</td>
-                          <td>{formatData(evento.data)}</td>
-                          <td>{formatHora(evento.horario)}</td>
-                          <td>{evento.endereco || '-'}</td>
-                          <td>
-                            <div className="action-buttons">
-                              <button className="btn-acao editar" onClick={() => handleOpenModal(evento)}>Editar</button>
-                              <button className="btn-acao excluir" onClick={() => handleDelete(evento.id_evento || evento.id)}>Excluir</button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))
+                      eventos.map(evento => {
+                        console.debug('evento (debug):', evento);
+                        return (
+                          <tr key={evento.id_evento || evento.id}>
+                            <td>{evento.nome}</td>
+                            <td>{
+                              (evento.empresa && typeof evento.empresa === 'object')
+                                ? (evento.empresa.nome_empresa || evento.empresa.nome || evento.empresa.name || evento.empresa.razao_social || '-')
+                                : (evento.empresa || '-')
+                            }</td>
+                            <td>{formatData(evento.data)}</td>
+                            <td>{formatHora(evento.horario)}</td>
+                            <td>{(() => {
+                              const resolved = evento._endereco_resolved;
+                              if (resolved) {
+                                if (typeof resolved === 'object') {
+                                  if (resolved.endereco_completo) return resolved.endereco_completo;
+                                  const rua = resolved.logradouro || resolved.rua || resolved.nome || resolved.address || '';
+                                  const numero = resolved.numero || resolved.numero_endereco || resolved.n || '';
+                                  const complemento = resolved.complemento || resolved.compl || '';
+                                  const bairro = resolved.bairro || '';
+                                  const cidade = resolved.cidade || resolved.localidade || '';
+                                  const estado = resolved.estado || resolved.uf || '';
+                                  const cep = resolved.cep || resolved.codigo_postal || '';
+                                  const parts = [rua, numero, complemento, bairro, cidade, estado, cep].map(p => (p || '').toString().trim()).filter(Boolean);
+                                  if (parts.length > 0) return parts.join(', ');
+                                  return JSON.stringify(resolved);
+                                }
+                                return String(resolved);
+                              }
+                              const e = evento.endereco || evento.endereco_completo || evento.address || evento.id_endereco || null;
+                              if (!e) return '-';
+                              const isIdLike = typeof e === 'string' && /^[0-9a-fA-F\-]{8,}$/.test(e);
+                              if (isIdLike && !(e.includes(' ') || e.includes(','))) return `ID: ${e} (endereço não disponível)`;
+                              if (typeof e === 'object') {
+                                if (e.endereco_completo) return e.endereco_completo;
+                                const rua = e.logradouro || e.rua || e.nome || e.address || '';
+                                const numero = e.numero || e.numero_endereco || '';
+                                const complemento = e.complemento || '';
+                                const bairro = e.bairro || '';
+                                const cidade = e.cidade || e.localidade || '';
+                                const estado = e.estado || e.uf || '';
+                                const cep = e.cep || '';
+                                const parts = [rua, numero, complemento, bairro, cidade, estado, cep].map(p => (p || '').toString().trim()).filter(Boolean);
+                                if (parts.length > 0) return parts.join(', ');
+                                return JSON.stringify(e);
+                              }
+                              return e;
+                            })()}</td>
+                            <td>
+                              <div className="action-buttons">
+                                <button className="btn-acao editar" onClick={() => handleOpenModal(evento)}>Editar</button>
+                                <button className="btn-acao excluir" onClick={() => handleDelete(evento.id_evento || evento.id)}>Excluir</button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })
                     )}
                   </tbody>
                 </table>
@@ -311,6 +371,7 @@ export function EmpresaEventos() {
                     <label>Endereço:
                       <input type="text" value={formData.endereco} onChange={e => setFormData({ ...formData, endereco: e.target.value })} required />
                     </label>
+                    
                     <div className="modal-actions">
                       <button type="submit" className="btn-acao editar">{isEditing ? 'Salvar' : 'Adicionar'}</button>
                       <button type="button" className="btn-acao excluir" onClick={handleCloseModal}>Cancelar</button>

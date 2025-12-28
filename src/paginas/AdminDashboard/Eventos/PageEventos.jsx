@@ -125,6 +125,27 @@ export function PageEventos() {
           descricao: ev.descricao || ev.description || ''
         };
       }) : [];
+
+      // Ordenar por data (mais próxima primeiro). Tenta vários campos comuns.
+      const parseEventDate = (ev) => {
+        const dateStr = ev.data || ev.data_evento || ev.date || ev.data_hora || ev.start || '';
+        if (!dateStr) return Infinity;
+        try {
+          // dd/mm/yyyy -> ISO
+          if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) {
+            const [d,m,y] = dateStr.split('/');
+            return new Date(`${y}-${m}-${d}T00:00:00`).getTime();
+          }
+          // YYYY-MM-DD
+          if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return new Date(dateStr + 'T00:00:00').getTime();
+          // ISO or other parseable
+          const t = Date.parse(dateStr);
+          return isNaN(t) ? Infinity : t;
+        } catch (e) { return Infinity; }
+      };
+
+      // Mostrar mais recentes primeiro (ordem decrescente)
+      eventosFormatados.sort((a,b) => parseEventDate(b) - parseEventDate(a));
       setEventos(eventosFormatados);
     } catch (err) {
       setError("Erro ao carregar eventos: " + (err.response?.data?.message || err.message));
@@ -163,30 +184,172 @@ export function PageEventos() {
     e.preventDefault();
     (async () => {
       try {
+        // client-side validation: ensure required fields present
+        const required = ['nome', 'data', 'horario', 'endereco', 'descricao'];
+        const missing = required.filter(key => !formData[key] || String(formData[key]).trim() === '');
+        if (missing.length > 0) {
+          setError('Campos obrigatórios não preenchidos: ' + missing.join(', '));
+          return;
+        }
         let body;
         if (formData.imagem instanceof File) {
           const fd = new FormData();
           fd.append('nome', formData.nome);
+          fd.append('titulo', formData.nome);
+          fd.append('name', formData.nome);
+
           fd.append('data', formData.data);
+          fd.append('data_evento', formData.data);
+          fd.append('date', formData.data);
+          // combined datetime variants
+          try {
+            if (formData.data && formData.horario) {
+              const iso = new Date(`${formData.data}T${formData.horario}`).toISOString();
+              fd.append('data_hora', iso);
+              fd.append('datahora', iso);
+              fd.append('start', iso);
+            }
+          } catch(e) {}
+
           fd.append('horario', formData.horario);
+          fd.append('horario_evento', formData.horario);
+          fd.append('hora', formData.horario);
+
           fd.append('endereco', formData.endereco);
+          fd.append('endereco_evento', formData.endereco);
+          fd.append('endereco_completo', formData.endereco);
+
           fd.append('descricao', formData.descricao);
+          fd.append('description', formData.descricao);
+
           fd.append('imagem', formData.imagem);
           body = fd;
         } else {
           body = {
             nome: formData.nome,
+            titulo: formData.nome,
+            name: formData.nome,
+
             data: formData.data,
+            data_evento: formData.data,
+            date: formData.data,
+
             horario: formData.horario,
+            horario_evento: formData.horario,
+            hora: formData.horario,
+
             endereco: formData.endereco,
-            descricao: formData.descricao
+            endereco_evento: formData.endereco,
+            endereco_completo: formData.endereco,
+
+            descricao: formData.descricao,
+            description: formData.descricao
           };
+          // combined datetime variants for JSON body
+          try {
+            if (formData.data && formData.horario) {
+              const iso = new Date(`${formData.data}T${formData.horario}`).toISOString();
+              body.data_hora = iso;
+              body.datahora = iso;
+              body.start = iso;
+            }
+          } catch(e) {}
         }
 
-        if (isEditing) {
-          await dashboardService.updateEvento(editingId, body);
-        } else {
-          await dashboardService.createEvento(body);
+        // DEBUG: log payload to help backend validation troubleshooting
+        try {
+          console.group('Evento payload');
+          if (body instanceof FormData) {
+            for (const pair of body.entries()) console.debug('form:', pair[0], pair[1]);
+          } else {
+            console.debug('json body:', body);
+          }
+          console.groupEnd();
+        } catch (e) { console.warn('Falha ao logar payload', e); }
+
+        try {
+          // prefer user-provided id_endereco; only try to create endereco when absent
+          let id_endereco = formData.id_endereco || null;
+          if (!id_endereco) {
+            if (body instanceof FormData) {
+              const enderecoStr = body.get('endereco') || body.get('endereco_completo') || '';
+              if (enderecoStr) {
+                try {
+                  const addr = await dashboardService.createEndereco({ endereco_completo: enderecoStr });
+                  id_endereco = addr?.id ?? addr?.id_endereco ?? addr?.idEndereco ?? addr?._id ?? addr?.codigo ?? null;
+                  if (id_endereco) body.append('id_endereco', id_endereco);
+                } catch (e) { console.warn('Falha ao criar endereco (ignorando, continue):', e); }
+              }
+            } else {
+              const enderecoStr = body.endereco || body.endereco_completo || '';
+              if (enderecoStr) {
+                try {
+                  const addr = await dashboardService.createEndereco({ endereco_completo: enderecoStr });
+                  id_endereco = addr?.id ?? addr?.id_endereco ?? addr?.idEndereco ?? addr?._id ?? addr?.codigo ?? null;
+                  if (id_endereco) body.id_endereco = id_endereco;
+                } catch (e) { console.warn('Falha ao criar endereco (ignorando, continue):', e); }
+              }
+            }
+            // fallback: attach raw address string to payload so backend can accept it
+            try {
+              const raw = (body instanceof FormData)
+                ? (body.get('endereco') || body.get('endereco_completo') || '')
+                : (body.endereco || body.endereco_completo || '');
+              if (raw && !id_endereco) {
+                if (body instanceof FormData) {
+                  body.append('endereco_completo', raw);
+                  body.append('endereco', raw);
+                  body.append('address', raw);
+                } else {
+                  body.endereco_completo = raw;
+                  body.endereco = raw;
+                  body.address = raw;
+                }
+                console.debug('Fallback: anexado endereco_completo ao payload', raw);
+              }
+            } catch (e) { console.warn('Falha ao anexar fallback de endereco:', e); }
+          } else {
+            if (body instanceof FormData) {
+              body.append('id_endereco', id_endereco);
+            } else {
+              body.id_endereco = id_endereco;
+            }
+          }
+
+          // Ensure backend receives company identifier expected by DB (id_empresa)
+          try {
+            let empresaId = formData.id_empresa || formData.empresa || null;
+            if (!empresaId) {
+              try {
+                const u = JSON.parse(localStorage.getItem('user') || '{}');
+                empresaId = u.empresa || u.empresa_id || u.id_empresa || u.empresaId || u.id || u._id || null;
+              } catch (e) { empresaId = null; }
+            }
+            if (empresaId) {
+              if (body instanceof FormData) {
+                body.append('id_empresa', empresaId);
+                body.append('empresa', empresaId);
+                body.append('empresa_id', empresaId);
+              } else {
+                body.id_empresa = empresaId;
+                body.empresa = empresaId;
+                body.empresa_id = empresaId;
+              }
+            }
+
+            if (isEditing) {
+              await dashboardService.updateEvento(editingId, body);
+            } else {
+              await dashboardService.createEvento(body);
+            }
+          } catch (e) {
+            throw e;
+          }
+        } catch (err) {
+          console.error('Falha ao salvar evento (admin)', err, err?.response?.data);
+          let serverMessage = err?.response?.data?.message ?? err?.response?.data ?? err.message;
+          try { if (typeof serverMessage === 'object') serverMessage = JSON.stringify(serverMessage); } catch(e){}
+          setError('Erro ao salvar evento: ' + serverMessage);
         }
         await loadEventos();
         handleCloseModal();
@@ -197,9 +360,17 @@ export function PageEventos() {
   };
 
   const handleDelete = (id) => {
-    if (window.confirm('Tem certeza que deseja excluir este evento?')) {
-      setEventos(eventos.filter(ev => (ev.id_evento || ev.id) !== id));
-    }
+    (async () => {
+      if (!window.confirm('Tem certeza que deseja excluir este evento?')) return;
+      try {
+        console.debug('Deletando evento id (frontend):', id);
+        await dashboardService.deleteEvento(id);
+        await loadEventos();
+      } catch (err) {
+        console.error('Falha ao excluir evento', err);
+        setError('Erro ao excluir evento: ' + (err.response?.data?.message || err.message));
+      }
+    })();
   };
 
   function formatData(dataStr) {
@@ -312,6 +483,7 @@ export function PageEventos() {
                     <label>Endereço:
                       <input type="text" value={formData.endereco} onChange={e => setFormData({ ...formData, endereco: e.target.value })} required />
                     </label>
+                    
                     <div className="modal-actions">
                       <button type="submit" className="btn-acao editar">{isEditing ? 'Salvar' : 'Adicionar'}</button>
                       <button type="button" className="btn-acao excluir" onClick={handleCloseModal}>Cancelar</button>

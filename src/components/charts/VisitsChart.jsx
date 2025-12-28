@@ -1,5 +1,5 @@
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import './VisitsChart.css';
+import './Chart.css';
 
 const defaultData = [
   { mes: 'Jan', visitas: 400 },

@@ -6,8 +6,8 @@ import { FaGift } from "react-icons/fa";
 import { BiGift } from "react-icons/bi";
 import { DashboardHeader } from "../../../components/dashboardHeader/DashboardHeader";
 import { Sidebar } from "../../../components/sidebar/Sidebar";
-import { dashboardService } from "../../../services/api";
-import { EventsChart } from "../../../components/charts/EventsChart";
+import { api, dashboardService } from "../../../services/api";
+import EventsChart from "../../../components/charts/EventsChart";
 
 export function EmpresaDashboard() {
   const [eventsCount, setEventsCount] = useState(0);
@@ -15,67 +15,77 @@ export function EmpresaDashboard() {
   const [redeemedCount, setRedeemedCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [eventsChartData, setEventsChartData] = useState([]);
+
   useEffect(() => {
     let mounted = true;
-    async function loadStats() {
+
+    async function load() {
+      setLoading(true);
       try {
-        setLoading(true);
-        const eventos = await dashboardService.getEventos();
-        const eventosArray = Array.isArray(eventos) ? eventos : (Array.isArray(eventos?.data) ? eventos.data : []);
-        const eventosCount = eventosArray.length || (eventos.count || 0);
-        const recompensasCount = await dashboardService.getRecompensasCount();
-        const resgatesCount = await dashboardService.getResgatesCount();
+        const [count, eventosRes, recompensasCount, resgatesCount] = await Promise.all([
+          dashboardService.countEventosMe().catch(() => 0),
+          (async () => {
+            try { return await api.get('/empresa/me/eventos'); }
+            catch (e1) { try { return await api.get('/eventos'); } catch (e2) { return { data: [] }; } }
+          })(),
+          dashboardService.getRecompensasCount().catch(() => 0),
+          dashboardService.getResgatesCount().catch(() => 0),
+        ]);
+
+        const eventosRaw = eventosRes?.data ?? eventosRes ?? [];
 
         if (!mounted) return;
-        setEventsCount(eventosCount || 0);
-        setRewardsCount(recompensasCount || 0);
-        setRedeemedCount(resgatesCount || 0);
+        setEventsCount(Number(count) || 0);
+        setRewardsCount(Number(recompensasCount) || 0);
+        setRedeemedCount(Number(resgatesCount) || 0);
+
+        
         const normalizeDate = (d) => {
           if (!d) return null;
-          if (/^\d{4}-\d{2}-\d{2}$/.test(d)) return d;
-          if (/^\d{4}-\d{2}-\d{2}T/.test(d)) return d.substring(0,10);
-          if (/^\d{2}\/\d{2}\/\d{4}$/.test(d)) {
+          if (typeof d === 'string' && /^\d{4}-\d{2}-\d{2}/.test(d)) return d.substring(0,10);
+          if (typeof d === 'string' && /^\d{2}\/\d{2}\/\d{4}$/.test(d)) {
             const [dd, mm, yyyy] = d.split('/');
             return `${yyyy}-${mm}-${dd}`;
           }
           const parsed = new Date(d);
-          if (!isNaN(parsed.getTime())) {
-            const y = parsed.getFullYear();
-            const m = String(parsed.getMonth() + 1).padStart(2,'0');
-            const day = String(parsed.getDate()).padStart(2,'0');
-            return `${y}-${m}-${day}`;
-          }
+          if (!isNaN(parsed.getTime())) return `${parsed.getFullYear()}-${String(parsed.getMonth()+1).padStart(2,'0')}-${String(parsed.getDate()).padStart(2,'0')}`;
           return null;
         };
 
-        const days = [];
-        const today = new Date();
-        for (let i = 29; i >= 0; i--) {
-          const d = new Date(today);
-          d.setDate(today.getDate() - i);
-          const y = d.getFullYear();
-          const m = String(d.getMonth() + 1).padStart(2,'0');
-          const day = String(d.getDate()).padStart(2,'0');
-          days.push(`${y}-${m}-${day}`);
-        }
-
-        const countsMap = {};
-        eventosArray.forEach(ev => {
-          const raw = ev.data || ev.data_evento || ev.date || ev.createdAt || ev.created_at || ev.data_criacao || ev.dataCadastro || ev.data_cadastro || '';
-          const nd = normalizeDate(raw);
-          if (!nd) return;
-          countsMap[nd] = (countsMap[nd] || 0) + 1;
+        const now = new Date();
+        const months = Array.from({ length: 12 }, (_, i) => {
+          const d = new Date(now.getFullYear(), now.getMonth() - (11 - i), 1);
+          return { key: `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`, mes: `${String(d.toLocaleString('pt-BR',{month:'short'})).replace('.', '')}/${d.getFullYear()}`, eventos: 0 };
         });
 
-        const chartData = days.map(d => ({ data: d, total_eventos: countsMap[d] || 0 }));
+        const counts = {};
+        if (Array.isArray(eventosRaw)) {
+          for (const ev of eventosRaw) {
+            const dateVal = ev.data || ev.data_evento || ev.date || ev.createdAt || ev.created_at || ev.dataCadastro || ev.data_cadastro || null;
+            const nd = normalizeDate(dateVal);
+            if (!nd) continue;
+            const [y, m] = nd.split('-');
+            const key = `${y}-${m}`;
+            counts[key] = (counts[key] || 0) + (Number(ev.countEventos ?? ev.count_eventos ?? ev.total_eventos ?? ev.eventos ?? 1) || 0);
+          }
+        }
+
+        const chartData = months.map(m => ({ mes: m.mes, eventos: counts[m.key] || 0 }));
         setEventsChartData(chartData);
+
+        
+        const derivedTotal = Object.values(counts).reduce((s, v) => s + (Number(v) || 0), 0);
+        if ((Number(count) || 0) === 0 && derivedTotal > 0) {
+          setEventsCount(derivedTotal);
+        }
       } catch (err) {
-        console.error('Erro ao carregar estatísticas da empresa', err);
+        console.error('Erro ao carregar dashboard:', err);
       } finally {
         if (mounted) setLoading(false);
       }
     }
-    loadStats();
+
+    load();
     return () => { mounted = false; };
   }, []);
 
@@ -96,7 +106,7 @@ export function EmpresaDashboard() {
             <div className="chart-section">
               <div className="chart-header">
                 <div className="chart-title-group">
-                  <h2>Eventos cadastrados por dia (últimos 30 dias)</h2>
+                  <h2>Eventos por mês</h2>
                 </div>
               </div>
               <EventsChart data={eventsChartData} />
@@ -107,3 +117,5 @@ export function EmpresaDashboard() {
     </div>
   );
 }
+
+

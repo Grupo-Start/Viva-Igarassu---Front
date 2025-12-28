@@ -104,6 +104,30 @@
   }
 }
 
+@media (max-width: 600px) {
+  .recompensas-table-container { overflow-x: visible; }
+  .recompensas-table thead { display: none; }
+  .recompensas-table, .recompensas-table tbody, .recompensas-table tr, .recompensas-table td {
+    display: block;
+    width: 100%;
+  }
+  .recompensas-table tr { margin-bottom: 12px; border-bottom: 1px solid #e5e7eb; padding-bottom: 8px; }
+  .recompensas-table td { padding: 8px 6px; border: none; white-space: normal; word-break: break-word; }
+  .recompensas-table td::before { display: block; margin-bottom: 6px; font-weight: 700; color: #0b3b5b; }
+  .recompensas-table td { display: flex; flex-direction: column; align-items: flex-start; overflow: visible; }
+  .recompensas-table td:nth-child(1)::before { content: 'Nome'; }
+  .recompensas-table td:nth-child(2)::before { content: 'Descrição'; }
+  .recompensas-table td:nth-child(3)::before { content: 'Empresa'; }
+  .recompensas-table td:nth-child(4)::before { content: 'Imagem'; }
+  .recompensas-table td:nth-child(5)::before { content: 'Quantidade'; }
+  .recompensas-table td:nth-child(6)::before { content: 'Valor'; }
+  .recompensas-table td:nth-child(7)::before { content: 'Ações'; }
+  .recompensas-table td img { max-width: 100%; height: auto; }
+  /* override para garantir que não haja largura mínima que force scroll */
+  .recompensas-table { min-width: 0 !important; }
+  .recompensas-table-container { overflow-x: visible !important; }
+}
+
 .form-group {
   display: flex;
   flex-direction: column;

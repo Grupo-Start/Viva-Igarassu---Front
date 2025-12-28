@@ -248,3 +248,27 @@
 	}
 }
 
+/* Mobile: empilhar linhas da tabela de eventos */
+@media (max-width: 600px) {
+	.eventos-table-container { overflow-x: visible; }
+	.eventos-table thead { display: none; }
+	.eventos-table, .eventos-table tbody, .eventos-table tr, .eventos-table td {
+		display: block;
+		width: 100%;
+	}
+	.eventos-table tr { margin-bottom: 12px; border-bottom: 1px solid #e5e7eb; padding-bottom: 8px; }
+	.eventos-table td { padding: 8px 6px; border: none; white-space: normal; word-break: break-word; }
+	.eventos-table td::before { display: block; margin-bottom: 6px; font-weight: 700; color: #0b3b5b; }
+	.eventos-table td:nth-child(1)::before { content: 'Nome'; }
+	.eventos-table td { display: flex; flex-direction: column; align-items: flex-start; overflow: visible; }
+	.eventos-table td:nth-child(2)::before { content: 'Empresa'; }
+	.eventos-table td:nth-child(3)::before { content: 'Data'; }
+	.eventos-table td:nth-child(4)::before { content: 'Horário'; }
+	.eventos-table td:nth-child(5)::before { content: 'Endereço'; }
+	.eventos-table td:nth-child(6)::before { content: 'Ações'; }
+	.eventos-table td .action-buttons { margin-top: 6px; display:flex; gap:8px; flex-wrap:wrap; }
+	/* override para garantir que não haja largura mínima que force scroll */
+	.eventos-table { min-width: 0 !important; }
+	.eventos-table-container { overflow-x: visible !important; }
+}
+

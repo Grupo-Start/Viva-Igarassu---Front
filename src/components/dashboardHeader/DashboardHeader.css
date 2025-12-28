@@ -64,7 +64,7 @@
 .Admin span {
   display: inline-flex;
   align-items: center;
-  height: 34px; /* corresponde ao tamanho do ícone */
+  height: 34px; 
   line-height: 1;
 }
 
@@ -106,5 +106,11 @@
 
 .admin-menu-item:hover {
   background: #f3f4f6;
+}
+
+@media (max-width: 768px) {
+  .header-company {
+    display: none;
+  }
 }
 

@@ -30,11 +30,9 @@ export function EmpresaMeusDados() {
         console.debug('EmpresaMeusDados - usuário localStorage:', u);
         let empresaObj = null;
 
-        // tenta buscar por id direto (usa getEmpresasByID que mapeia /empresa/getempresasbyID)
         if (empresaId) {
           try {
             const res = await dashboardService.getEmpresaById(empresaId);
-            // lidar com respostas que envolvem { empresa: {...} } ou arrays
             if (Array.isArray(res)) empresaObj = res[0] || null;
             else empresaObj = res?.empresa || res || null;
             console.debug('EmpresaMeusDados - getEmpresasByID result:', res);
@@ -43,8 +41,6 @@ export function EmpresaMeusDados() {
             empresaObj = null;
           }
         }
-
-        // se ainda não encontrou, tentar buscar em lista de empresas e correlacionar por vários campos
         if (!empresaObj) {
           try {
             const list = await dashboardService.getEmpresas();
@@ -55,7 +51,6 @@ export function EmpresaMeusDados() {
               const idFields = [e.id, e._id, e.id_empresa, e.idUsuario, e.id_usuario, e.usuario, e.usuario_id];
               const matchesId = idFields.some(x => x !== undefined && possibleIds.some(pid => pid !== undefined && String(pid) === String(x)));
               if (matchesId) return true;
-              // tentar casar por email ou nome
               if (u.email && (String(e.email || e.contato || '') === String(u.email))) return true;
               if (u.nome_empresa && (String(e.nome_empresa || e.nome || '') === String(u.nome_empresa))) return true;
               return false;
@@ -66,8 +61,6 @@ export function EmpresaMeusDados() {
             console.warn('EmpresaMeusDados - falha ao listar empresas', err);
           }
         }
-
-        // tentar endpoints alternativos caso não tenha encontrado ainda
         if (!empresaObj) {
           try {
             if (empresaId) {
@@ -102,8 +95,6 @@ export function EmpresaMeusDados() {
             console.warn('EmpresaMeusDados - erro em tentativas alternativas', err);
           }
         }
-
-        // fallback final: usar dados embutidos no user
         if (!empresaObj) {
           empresaObj = u.empresa || u;
           console.debug('EmpresaMeusDados - fallback para user.empresa ou user direto:', empresaObj);
@@ -170,9 +161,6 @@ export function EmpresaMeusDados() {
                   <span>{formData.tipo_servico || '-'}</span>
                 )}
               </div>
-              {/* Endereço removido conforme solicitado */}
-              {/* Descrição removida conforme solicitado */}
-
               <div style={{ marginTop: 12 }}>
                 {!isEditing ? (
                   <button className="btn-acao editar" onClick={() => setIsEditing(true)}>Editar</button>

@@ -28,3 +28,20 @@
 .meusdados-card .field span { color:#334155 }
 .loading{ color:#64748b }
 .error{ color:#b91c1c }
+
+@media (max-width: 600px) {
+  .meusdados-card {
+    padding: 12px;
+  }
+  .meusdados-card .field {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 12px 0;
+  }
+  .meusdados-card .field input {
+    width: 100%;
+    box-sizing: border-box;
+  }
+}
