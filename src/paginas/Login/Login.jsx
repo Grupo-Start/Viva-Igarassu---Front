@@ -35,47 +35,29 @@ export function Login() {
             localStorage.removeItem('token');
             localStorage.removeItem('user');
 
-            console.log('Tentando fazer login com:', { email });
             const response = await authService.login({ email, password });
-            console.log('Login bem-sucedido! Resposta completa:', response);
-            console.log('Token recebido?', !!response.token);
-            console.log('User recebido?', !!response.user);
 
             if (response.token) {
                 localStorage.setItem('token', response.token);
-                console.log('✓ Token salvo no localStorage');
             } else {
                 console.error('✗ Token não foi retornado pelo backend!');
             }
 
             if (response.user) {
                 localStorage.setItem('user', JSON.stringify(response.user));
-                console.log('✓ User salvo no localStorage');
             }
 
             await new Promise(resolve => setTimeout(resolve, 100));
-            const emailDigitado = email.toLowerCase().trim();
-            const emailResponse = response.user?.email?.toLowerCase().trim();
-            const tipo = response.user?.tipo?.toLowerCase();
-            const role = response.user?.role?.toLowerCase();
+            const tipo = response.user?.tipo;
+            const role = response.user?.role;
             const isAdmin = response.user?.isAdmin || response.user?.is_admin;
 
-            console.log('=== VERIFICAÇÃO ADMIN ===');
-            console.log('Email digitado:', emailDigitado);
-            console.log('Email do response:', emailResponse);
-            console.log('Tipo:', tipo);
-            console.log('Role:', role);
-            console.log('isAdmin:', isAdmin);
+            const tipoIsAdmin = typeof tipo === 'string' && tipo.toLowerCase() === 'adm';
+            const roleIsAdmin = typeof role === 'string' && role.toLowerCase() === 'adm';
 
-            if (emailDigitado === 'admin@test' ||
-                emailResponse === 'admin@test' ||
-                tipo === 'admin' ||
-                role === 'admin' ||
-                isAdmin === true) {
-                console.log('✓✓✓ ADMIN CONFIRMADO! Redirecionando...');
+            if (tipoIsAdmin || roleIsAdmin || isAdmin === true) {
                 navigate('/Admin-Dashboard', { replace: true });
             } else {
-                console.log('✗ Usuário comum, redirecionando para Home...');
                 navigate('/', { replace: true });
             }
         } catch (err) {

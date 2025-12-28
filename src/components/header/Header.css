@@ -1,4 +1,3 @@
-/* Container principal do header */
 .header {
   display: flex;
   align-items: center;
@@ -10,8 +9,6 @@
   box-sizing: border-box;
 }
 
-
-/* Logo */
 .header-logo img {
   height: 68px;
   cursor: pointer;
@@ -25,25 +22,21 @@
 
 .header-nav {
   display: flex;
-  gap: 40px; /* aumenta o espaço */
+  gap: 40px; 
   color: white;
 }
 
-/* Área da pesquisa + login */
 .header-actions {
   display: flex;
   align-items: center;
   gap: 15px;
 }
 
-/* Área da pesquisa + login */
 .header-actions {
   display: flex;
   align-items: center;
   gap: 15px;
 }
-
-/* Login */
 
 .login img {
   width: 26px;
