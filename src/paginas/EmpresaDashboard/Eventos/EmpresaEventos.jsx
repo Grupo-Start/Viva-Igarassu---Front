@@ -31,8 +31,43 @@ export function EmpresaEventos() {
     try {
       setLoading(true);
       setError(null);
-      const data = await dashboardService.getEventos();
-      const arr = Array.isArray(data) ? data : [];
+      const data = await dashboardService.getEventosMe();
+      let arr = Array.isArray(data) ? data : [];
+
+      // Garantia adicional: filtrar apenas eventos da empresa logada (fallback caso backend retorne tudo)
+      let empresaId = null;
+      let empresaName = null;
+      try {
+        const u = JSON.parse(localStorage.getItem('user') || '{}');
+        empresaId = u.empresa || u.empresa_id || u.id_empresa || u.empresaId || u.empresa?.id || u.id || u._id || null;
+        empresaName = u.nome_empresa || u.nome || u.name || u.razao_social || null;
+      } catch (e) { empresaId = null; }
+
+      if (empresaId || empresaName) {
+        const checkEventEmpresa = (ev) => {
+          const evEmpresaId = ev.id_empresa ?? ev.empresa_id ?? ev.idEmpresa ?? ev.empresa?.id ?? ev.empresaId ?? ev.empresa?._id ?? ev.empresa ?? null;
+          if (evEmpresaId && empresaId && String(evEmpresaId) === String(empresaId)) return true;
+
+          // comparar por nome da empresa quando presente
+          const evEmpresaName = (ev.empresa && typeof ev.empresa === 'object')
+            ? (ev.empresa.nome_empresa || ev.empresa.nome || ev.empresa.name || ev.empresa.razao_social || null)
+            : (typeof ev.empresa === 'string' ? ev.empresa : (ev.nome_empresa || ev.empresa_nome || ev.razao_social || null));
+          if (empresaName && evEmpresaName && String(evEmpresaName).toLowerCase().includes(String(empresaName).toLowerCase())) return true;
+
+          const creator = ev.criador || ev.creator || ev.owner || ev.usuario || ev.user || ev.responsavel;
+          if (creator && typeof creator === 'object') {
+            const cid = creator.id || creator._id || creator.id_empresa || creator.empresa_id;
+            if (cid && empresaId && String(cid) === String(empresaId)) return true;
+            const cname = creator.nome_empresa || creator.nome || creator.name || creator.razao_social || null;
+            if (empresaName && cname && String(cname).toLowerCase().includes(String(empresaName).toLowerCase())) return true;
+          }
+
+          try { if (empresaId && JSON.stringify(ev).includes(String(empresaId))) return true; } catch(e){}
+          try { if (empresaName && JSON.stringify(ev).toLowerCase().includes(String(empresaName).toLowerCase())) return true; } catch(e){}
+          return false;
+        };
+        arr = arr.filter(checkEventEmpresa);
+      }
 
       const ids = Array.from(new Set(
         arr.map(ev => ev.id_endereco || ev.idEndereco || ev.endereco_id || (ev.endereco && ev.endereco.id) || null)

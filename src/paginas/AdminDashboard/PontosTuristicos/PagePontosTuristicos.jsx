@@ -341,7 +341,6 @@ export function PagePontosTuristicos() {
                     <th>Status</th>
                     <th>QR Code</th>
                     <th>Ações</th>
-                    <th>Excluir</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -363,21 +362,10 @@ export function PagePontosTuristicos() {
                         </button>
                       </td>
                       <td>
-                        <button 
-                          className="btn-edit"
-                          onClick={() => handleEditPonto(ponto)}
-                        >
-                          Editar
-                        </button>
-                      </td>
-                      <td>
-                        <button
-                          className="btn-delete"
-                          onClick={() => handleDeletePonto(ponto.id)}
-                          style={{ background: '#e74c3c', color: '#fff', border: 'none', padding: '6px 10px', borderRadius: '6px' }}
-                        >
-                          Excluir
-                        </button>
+                        <div className="action-buttons">
+                          <button className="btn-acao editar" onClick={() => handleEditPonto(ponto)}>Editar</button>
+                          <button className="btn-acao excluir" onClick={() => handleDeletePonto(ponto.id)}>Excluir</button>
+                        </div>
                       </td>
                     </tr>
                   ))}

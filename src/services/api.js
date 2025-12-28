@@ -482,7 +482,14 @@ export const dashboardService = {
   },
   getEventosMe: async () => {
     try {
-      const resp = await api.get('/eventos');
+      // Primeiro, tentar o endpoint específico da empresa (se o backend suportar)
+      let resp;
+      try {
+        resp = await api.get('/empresa/me/eventos');
+      } catch (e) {
+        // fallback genérico
+        resp = await api.get('/eventos');
+      }
       const respData = resp?.data ?? [];
       let arr = [];
       if (Array.isArray(respData)) arr = respData;
@@ -500,7 +507,7 @@ export const dashboardService = {
       if (!empresaId) return arr;
 
       const filtered = arr.filter(ev => {
-        const evEmpresaId = ev.id_empresa ?? ev.empresa_id ?? ev.idEmpresa ?? ev.empresa?.id ?? ev.empresaId ?? ev.empresa?._id ?? ev.empresa;
+        const evEmpresaId = ev.id_empresa ?? ev.empresa_id ?? ev.idEmpresa ?? ev.empresa?.id ?? ev.empresaId ?? ev.empresa?._id ?? ev.empresa ?? null;
         if (evEmpresaId && String(evEmpresaId) === String(empresaId)) return true;
         const creator = ev.criador || ev.creator || ev.owner || ev.usuario || ev.user || ev.responsavel;
         if (creator && typeof creator === 'object') {
