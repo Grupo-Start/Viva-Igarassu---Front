@@ -350,6 +350,21 @@ export const dashboardService = {
     }
   },
 
+  deletePontoTuristico: async (pontoId) => {
+    try {
+      const response = await api.delete(`/pontos-turisticos/${encodeURIComponent(pontoId)}`);
+      return response.data;
+    } catch (error) {
+      // fallback: some backends expect DELETE with body
+      try {
+        const resp2 = await api.delete('/pontos-turisticos', { data: { id_ponto: pontoId, id: pontoId } });
+        return resp2.data;
+      } catch (e) {
+        throw error;
+      }
+    }
+  },
+
   downloadPDF: async (pontoId) => {
     try {
       const token = localStorage.getItem('token');

@@ -49,6 +49,8 @@ export function Sidebar() {
       }
     } catch (err) {
     }
+  }, []);
+
   return (
     <div className="layout">
       <aside className={open ? "sidebar open" : "sidebar"}>
@@ -89,5 +91,4 @@ export function Sidebar() {
       </aside>
     </div>
   );
-  }, []);
 }
