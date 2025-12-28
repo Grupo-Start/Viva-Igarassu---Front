@@ -19,11 +19,11 @@ export const paginas = createBrowserRouter([
         element: <Register />
     },
     { 
-        path : '/RegisterPerson',
+        path : '/register-person',
         element: <RegisterPerson />
     },
     {
-        path: '/Admin-Dashboard',
+        path: '/admin-dashboard',
         element: <AdminDashboard />
     }
 ])

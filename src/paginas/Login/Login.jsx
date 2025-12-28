@@ -4,7 +4,7 @@ import { Button } from "../../components/button/Button";
 import "./Login.css";
 import Img from "../../assets/WhatsApp Image 2025-12-07 at 10.19.02 (1).jpeg";
 import { FaUser } from "react-icons/fa";
-import { IoIosLock } from "react-icons/io";
+import { IoIosLock, IoIosUnlock } from "react-icons/io";
 import { authService } from "../../services/api";
 
 export function Login() {
@@ -12,6 +12,12 @@ export function Login() {
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+    const [mostrarSenha, setMostrarSenha] = useState(false);
+
+    function toggleSenha() {
+        setMostrarSenha(!mostrarSenha);
+    }
+
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
@@ -91,7 +97,7 @@ export function Login() {
             </div>
 
             <div className="form-login">
-                <h1 className="login-h1">Login</h1>
+                <h1 className="text-global">Login</h1>
                 <p className="subtitle-p">Entre na sua conta</p>
 
                 <div className="form-login-container">
@@ -99,16 +105,31 @@ export function Login() {
                     <FaUser className="img-cadeado" />
                 </div>
 
-                <div className="form-login-container">
-                    <input className="login-input" type="password" placeholder="Senha" required />
-                    <IoIosLock className="img-cadeado" />
+                <div className="container-input-person">
+                    <input
+                        className="input-person"
+                        type={mostrarSenha ? "text" : "password"}
+                        placeholder="Senha"
+                    />
+
+                    {mostrarSenha ? (
+                        <IoIosUnlock
+                        className="img-cadeado"
+                        onClick={toggleSenha}
+                        />
+                    ) : (
+                        <IoIosLock
+                        className="img-cadeado"
+                        onClick={toggleSenha}
+                        />
+                    )}
                 </div>
 
                 <Button text="Entrar" />
 
                 <div className="form-login-request">
                     <p><strong className="underline-login">Esqueceu sua senha ?</strong></p>
-                <p>Não tem conta ? <strong className="underline-login" onClick={() => navigation('/register')}>Cadastre-se</strong></p>
+                <p>Não tem conta ? <strong className="underline-login" onClick={() => navigate('/register')}>Cadastre-se</strong></p>
                 </div>
             </div>
 

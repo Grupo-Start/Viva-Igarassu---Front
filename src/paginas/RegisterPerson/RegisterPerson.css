@@ -33,12 +33,12 @@
     justify-content: center;
 }
 
-.person-h1 {
-    font-size: 66px;
+/* .person-h1 {
+    font-size: 54px;
     margin-bottom: 40px;
     text-align: center;
     font-weight: 100px;
-}
+} */
 
 .container-input-person {
     display: flex;
@@ -57,4 +57,7 @@
 .input-person {
     width: 100%;
     background-color: transparent;
+    border: none;
+    outline: none;
+    height: 100%;
 }
