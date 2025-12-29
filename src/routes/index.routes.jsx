@@ -8,12 +8,13 @@ import { RegisterPerson } from "../paginas/RegisterPerson/RegisterPerson";
 import { CompanyRegistration } from "../paginas/companyregistration/CompanyRegistration";
 
 
-import { AdminDashboard }  from "../paginas/AdminDashboard/Dashboard/AdminDashboard";
+import { AdminDashboard } from "../paginas/AdminDashboard/Dashboard/AdminDashboard";
 import { PageUsers } from "../paginas/AdminDashboard/Users/PageUsers";
 import { PageEmpresas } from "../paginas/AdminDashboard/Empresas/PageEmpresas";
 import { PagePontosTuristicos } from "../paginas/AdminDashboard/PontosTuristicos/PagePontosTuristicos";
 import { PageEventos } from "../paginas/AdminDashboard/Eventos/PageEventos";
 import { PageRecompensas } from "../paginas/AdminDashboard/Recompensas/PageRecompensas";
+import { PasswordReset } from "../paginas/passwordreset/PasswordReset";
 
 
 export const paginas = createBrowserRouter([
@@ -61,6 +62,11 @@ export const paginas = createBrowserRouter([
     {
         path: '/Admin-Dashboard/Recompensas',
         element: <PageRecompensas />
- 
+
+    },
+    {
+        path: '/passwordreset',
+        element: <PasswordReset />
     }
+
 ])
