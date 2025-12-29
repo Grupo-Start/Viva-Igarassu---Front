@@ -30,7 +30,7 @@ export const paginas = createBrowserRouter([
         element: <Register />
     },
     { 
-        path : '/RegisterPerson',
+        path : '/register-person',
         element: <RegisterPerson />
     },
         {
