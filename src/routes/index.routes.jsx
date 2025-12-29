@@ -16,6 +16,7 @@ import { PageEventos } from "../paginas/AdminDashboard/Eventos/PageEventos";
 import { PageRecompensas } from "../paginas/AdminDashboard/Recompensas/PageRecompensas";
 import { PasswordReset } from "../paginas/passwordreset/PasswordReset";
 import { TokenReset } from "../paginas/tokenreset/TokenReset";
+import { NewPassword } from "../paginas/newpassword/Newpassword";
 
 
 export const paginas = createBrowserRouter([
@@ -70,8 +71,12 @@ export const paginas = createBrowserRouter([
         element: <PasswordReset />
     },
     {
-      path: '/tokenreset',
-       element: <TokenReset/>
+        path: '/tokenreset',
+        element: <TokenReset />
 
+    },
+    {
+       path: '/newpassword',
+       element: <NewPassword/>
     }
 ])
