@@ -134,7 +134,6 @@ export const dashboardService = {
   deleteRecompensa: async (id) => {
     try {
       if (!id) throw new Error('deleteRecompensa: id inválido ou ausente');
-      // Normaliza caso o componente tenha passado um objeto com o id em campos diversos
       const resolvedId = (typeof id === 'object' && id !== null)
         ? (id.id || id._id || id.id_recompensas || id.idRecompensas || id.id_recompensa || id.recompensaId || id.uuid || id.toString && id.toString())
         : id;
@@ -325,7 +324,6 @@ export const dashboardService = {
 
   createPontoTuristico: async (dados) => {
     try {
-      // build minimal JSON payload
       let jsonPayload = {};
       if (dados instanceof FormData) {
         for (const [k, v] of dados.entries()) jsonPayload[k] = v;
@@ -335,7 +333,6 @@ export const dashboardService = {
         jsonPayload = { nome: String(dados) };
       }
 
-      // ensure required fields
       const nomeVal = jsonPayload.nome || jsonPayload.name || jsonPayload.titulo || jsonPayload.nome_ponto || '';
       jsonPayload.nome = jsonPayload.nome || nomeVal;
       jsonPayload.nome_ponto = jsonPayload.nome_ponto || nomeVal;
@@ -345,7 +342,6 @@ export const dashboardService = {
       if (!jsonPayload.descricao) jsonPayload.descricao = jsonPayload.description || '';
       if (!jsonPayload.horario_funcionamento) jsonPayload.horario_funcionamento = jsonPayload.horario || '';
 
-      // attach empresa id if available
       try {
         const rawUser = localStorage.getItem('user');
         const u = rawUser ? JSON.parse(rawUser) : {};
@@ -358,12 +354,10 @@ export const dashboardService = {
 
       console.log('createPontoTuristico: payload final (antes de filtrar) ->', jsonPayload);
 
-      // validação cliente: nome é obrigatório no modelo Prisma do backend
       if (!jsonPayload.nome || String(jsonPayload.nome).trim() === '') {
         throw new Error('createPontoTuristico: campo "nome" é obrigatório');
       }
 
-      // Filtrar somente os campos esperados pelo backend/prisma para evitar erros de campo inválido
       const allowed = new Set([
         'nome',
         'descricao',
@@ -382,7 +376,6 @@ export const dashboardService = {
 
       console.log('createPontoTuristico: payload enviado ->', finalPayload);
 
-      // Tentativa direta no endpoint canônico do backend
       const endpoints = ['/pontos-turisticos'];
       const config = { headers: { 'Content-Type': 'application/json' } };
       let lastErr = null;
@@ -426,7 +419,6 @@ export const dashboardService = {
       const response = await api.delete(`/pontos-turisticos/${encodeURIComponent(pontoId)}`);
       return response.data;
     } catch (error) {
-      // fallback: some backends expect DELETE with body
       try {
         const resp2 = await api.delete('/pontos-turisticos', { data: { id_ponto: pontoId, id: pontoId } });
         return resp2.data;
@@ -482,12 +474,10 @@ export const dashboardService = {
   },
   getEventosMe: async () => {
     try {
-      // Primeiro, tentar o endpoint específico da empresa (se o backend suportar)
       let resp;
       try {
         resp = await api.get('/empresa/me/eventos');
       } catch (e) {
-        // fallback genérico
         resp = await api.get('/eventos');
       }
       const respData = resp?.data ?? [];

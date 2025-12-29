@@ -34,7 +34,6 @@ export function EmpresaEventos() {
       const data = await dashboardService.getEventosMe();
       let arr = Array.isArray(data) ? data : [];
 
-      // Garantia adicional: filtrar apenas eventos da empresa logada (fallback caso backend retorne tudo)
       let empresaId = null;
       let empresaName = null;
       try {
@@ -47,8 +46,6 @@ export function EmpresaEventos() {
         const checkEventEmpresa = (ev) => {
           const evEmpresaId = ev.id_empresa ?? ev.empresa_id ?? ev.idEmpresa ?? ev.empresa?.id ?? ev.empresaId ?? ev.empresa?._id ?? ev.empresa ?? null;
           if (evEmpresaId && empresaId && String(evEmpresaId) === String(empresaId)) return true;
-
-          // comparar por nome da empresa quando presente
           const evEmpresaName = (ev.empresa && typeof ev.empresa === 'object')
             ? (ev.empresa.nome_empresa || ev.empresa.nome || ev.empresa.name || ev.empresa.razao_social || null)
             : (typeof ev.empresa === 'string' ? ev.empresa : (ev.nome_empresa || ev.empresa_nome || ev.razao_social || null));

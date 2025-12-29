@@ -89,7 +89,6 @@ export function PageEventos() {
             empresa = ev.id_empresa.nome || ev.id_empresa.name || ev.id_empresa.nome_empresa || '';
           }
           if (!empresa) {
-            // tentar mapear via empresasMap usando id direto
             const key = String(ev.id_empresa);
             if (empresasMap[key]) empresa = empresasMap[key];
           }
@@ -102,7 +101,6 @@ export function PageEventos() {
         } else if (ev.enderecos && typeof ev.enderecos === 'string') {
           endereco = ev.enderecos;
         } else if (ev.enderecos && typeof ev.enderecos === 'object') {
-          // pode ser objeto com campos de endereço
           endereco = [ev.enderecos.rua || ev.enderecos.logradouro, ev.enderecos.numero, ev.enderecos.bairro, ev.enderecos.cidade, ev.enderecos.estado, ev.enderecos.cep].filter(Boolean).join(', ');
         } else if (ev.endereco && typeof ev.endereco === 'string') {
           endereco = ev.endereco;
@@ -126,25 +124,20 @@ export function PageEventos() {
         };
       }) : [];
 
-      // Ordenar por data (mais próxima primeiro). Tenta vários campos comuns.
       const parseEventDate = (ev) => {
         const dateStr = ev.data || ev.data_evento || ev.date || ev.data_hora || ev.start || '';
         if (!dateStr) return Infinity;
         try {
-          // dd/mm/yyyy -> ISO
           if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) {
             const [d,m,y] = dateStr.split('/');
             return new Date(`${y}-${m}-${d}T00:00:00`).getTime();
           }
-          // YYYY-MM-DD
           if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return new Date(dateStr + 'T00:00:00').getTime();
-          // ISO or other parseable
           const t = Date.parse(dateStr);
           return isNaN(t) ? Infinity : t;
         } catch (e) { return Infinity; }
       };
 
-      // Mostrar mais recentes primeiro (ordem decrescente)
       eventosFormatados.sort((a,b) => parseEventDate(b) - parseEventDate(a));
       setEventos(eventosFormatados);
     } catch (err) {
@@ -184,7 +177,6 @@ export function PageEventos() {
     e.preventDefault();
     (async () => {
       try {
-        // client-side validation: ensure required fields present
         const required = ['nome', 'data', 'horario', 'endereco', 'descricao'];
         const missing = required.filter(key => !formData[key] || String(formData[key]).trim() === '');
         if (missing.length > 0) {
@@ -201,7 +193,6 @@ export function PageEventos() {
           fd.append('data', formData.data);
           fd.append('data_evento', formData.data);
           fd.append('date', formData.data);
-          // combined datetime variants
           try {
             if (formData.data && formData.horario) {
               const iso = new Date(`${formData.data}T${formData.horario}`).toISOString();
@@ -245,7 +236,6 @@ export function PageEventos() {
             descricao: formData.descricao,
             description: formData.descricao
           };
-          // combined datetime variants for JSON body
           try {
             if (formData.data && formData.horario) {
               const iso = new Date(`${formData.data}T${formData.horario}`).toISOString();
@@ -256,7 +246,6 @@ export function PageEventos() {
           } catch(e) {}
         }
 
-        // DEBUG: log payload to help backend validation troubleshooting
         try {
           console.group('Evento payload');
           if (body instanceof FormData) {
@@ -268,7 +257,6 @@ export function PageEventos() {
         } catch (e) { console.warn('Falha ao logar payload', e); }
 
         try {
-          // prefer user-provided id_endereco; only try to create endereco when absent
           let id_endereco = formData.id_endereco || null;
           if (!id_endereco) {
             if (body instanceof FormData) {
@@ -290,7 +278,7 @@ export function PageEventos() {
                 } catch (e) { console.warn('Falha ao criar endereco (ignorando, continue):', e); }
               }
             }
-            // fallback: attach raw address string to payload so backend can accept it
+
             try {
               const raw = (body instanceof FormData)
                 ? (body.get('endereco') || body.get('endereco_completo') || '')
@@ -316,7 +304,6 @@ export function PageEventos() {
             }
           }
 
-          // Ensure backend receives company identifier expected by DB (id_empresa)
           try {
             let empresaId = formData.id_empresa || formData.empresa || null;
             if (!empresaId) {
@@ -375,15 +362,12 @@ export function PageEventos() {
 
   function formatData(dataStr) {
     if (!dataStr) return '';
-    // Se vier no formato YYYY-MM-DD, exibe como está
     if (/^\d{4}-\d{2}-\d{2}$/.test(dataStr)) {
-      return dataStr.split('-').reverse().join('/'); // 2025-02-10 -> 10/02/2025
+      return dataStr.split('-').reverse().join('/');
     }
-    // Se vier no formato dd/mm/yyyy
     if (/^\d{2}\/\d{2}\/\d{4}$/.test(dataStr)) {
       return dataStr;
     }
-    // Se vier no formato ISO, extrai só a parte da data
     if (/^\d{4}-\d{2}-\d{2}T/.test(dataStr)) {
       return dataStr.substring(0, 10).split('-').reverse().join('/');
     }
@@ -392,14 +376,12 @@ export function PageEventos() {
 
   function formatHora(horaStr) {
     if (!horaStr) return '';
-    // Se vier no formato HH:mm:ss ou HH:mm, exibe como está
     const match = horaStr.match(/^\d{2}:\d{2}(:\d{2})?/);
     if (match) {
       return match[0];
     }
-    // Se vier no formato ISO, extrai só a parte da hora
     if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(horaStr)) {
-      return horaStr.substring(11, 16); // pega HH:mm
+      return horaStr.substring(11, 16);
     }
     return horaStr;
   }

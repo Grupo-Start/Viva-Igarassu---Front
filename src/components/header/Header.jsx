@@ -4,12 +4,10 @@ import { Link } from 'react-router-dom';
 export function Header() {
   return (
     <header className="header">
-  {/* Logo */}
       <div className="header-logo">
        <img src="header-logo.png" alt="logo viva igarassu" />
       </div>
 
-      {/* Menu */}
       <nav className="header-nav">
         <Link to="/home">Home</Link>
         <p>|</p>
@@ -20,7 +18,6 @@ export function Header() {
         <Link to="/contato">Contato</Link>
       </nav>
 
-      {/* Pesquisa + Login */}
       <div className="header-actions">
         <input 
           type="text" 

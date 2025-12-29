@@ -117,7 +117,6 @@ export function PagePontosTuristicos() {
         tipo: formData.tipo || undefined,
       };
 
-      // Se estivermos editando e o ponto original tiver id_endereco, reaproveitamos
       if (isEditing) {
         const pontoOriginal = pontos.find(p => p.id === editingId);
         if (pontoOriginal && pontoOriginal.id_endereco) {
@@ -125,8 +124,6 @@ export function PagePontosTuristicos() {
         }
       }
 
-      // Se não houver id_endereco e o usuário forneceu um endereço em texto,
-      // tentamos criar um recurso de endereço antes de criar o ponto turístico.
       if (!dadosBackend.id_endereco && formData.endereco) {
         try {
           const enderecoRes = await dashboardService.createEndereco(formData.endereco);
@@ -139,7 +136,6 @@ export function PagePontosTuristicos() {
         }
       }
 
-      // Preencher empresa e aliases
       try {
         const rawUser = localStorage.getItem('user');
         const u = rawUser ? JSON.parse(rawUser) : {};
@@ -159,7 +155,6 @@ export function PagePontosTuristicos() {
         dadosBackend.rua = dadosBackend.rua || formData.endereco;
       }
       if (formData.tipo) {
-        // envie o tipo primário e também aliases que o backend possa esperar
         dadosBackend.tipo = dadosBackend.tipo || formData.tipo;
         dadosBackend.tipo_ponto = dadosBackend.tipo_ponto || formData.tipo;
         dadosBackend.categoria = dadosBackend.categoria || formData.tipo;
