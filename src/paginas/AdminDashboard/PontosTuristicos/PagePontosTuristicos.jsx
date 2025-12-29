@@ -16,7 +16,7 @@ export function PagePontosTuristicos() {
   const [formData, setFormData] = useState({
     nome: '',
     endereco: '',
-    categoria: '',
+    tipo: '',
     descricao: '',
     horario_funcionamento: ''
   });
@@ -86,11 +86,16 @@ export function PagePontosTuristicos() {
     return true;
   });
 
-  const categorias = ['igreja', 'praia', 'museu', 'praça', 'outros'];
+  const tipos = [
+    { value: 'Hist_rico', label: 'Histórico' },
+    { value: 'Natural', label: 'Natural' },
+    { value: 'Cultural', label: 'Cultural' },
+    { value: 'outro', label: 'Outro' },
+  ];
 
-  const countByCategoria = (categoria) => {
-    if (categoria === 'todos') return pontos.length;
-    return pontos.filter(p => normalizeString(p.categoria) === normalizeString(categoria)).length;
+  const countByTipo = (tipo) => {
+    if (tipo === 'todos') return pontos.length;
+    return pontos.filter(p => normalizeString(p.categoria) === normalizeString(tipo)).length;
   };
 
   const capitalize = (str) => {
@@ -108,28 +113,79 @@ export function PagePontosTuristicos() {
       const dadosBackend = {
         nome: formData.nome,
         descricao: formData.descricao,
-        horario_funcionamento: formData.horario_funcionamento
+        horario_funcionamento: formData.horario_funcionamento,
+        tipo: formData.tipo || undefined,
       };
+
       if (isEditing) {
         const pontoOriginal = pontos.find(p => p.id === editingId);
         if (pontoOriginal && pontoOriginal.id_endereco) {
           dadosBackend.id_endereco = pontoOriginal.id_endereco;
         }
       }
+
+      if (!dadosBackend.id_endereco && formData.endereco) {
+        try {
+          const enderecoRes = await dashboardService.createEndereco(formData.endereco);
+          const enderecoId = enderecoRes?.id || enderecoRes?._id || enderecoRes?.id_endereco || enderecoRes?.endereco_id || enderecoRes?.uuid || null;
+          if (enderecoId) dadosBackend.id_endereco = enderecoId;
+          else if (enderecoRes?.endereco_completo) dadosBackend.endereco = enderecoRes;
+        } catch (createEnderecoErr) {
+          console.warn('Falha ao criar endereco antes de criar ponto:', createEnderecoErr?.response?.data || createEnderecoErr?.message || createEnderecoErr);
+          dadosBackend.endereco_completo = formData.endereco;
+        }
+      }
+
+      try {
+        const rawUser = localStorage.getItem('user');
+        const u = rawUser ? JSON.parse(rawUser) : {};
+        const empresaId = u.empresa || u.empresa_id || u.id_empresa || u.empresaId || u.id || u._id || null;
+        if (empresaId) {
+          dadosBackend.empresa = dadosBackend.empresa || empresaId;
+          dadosBackend.id_empresa = dadosBackend.id_empresa || empresaId;
+          dadosBackend.empresa_id = dadosBackend.empresa_id || empresaId;
+        }
+      } catch (e) {
+        // ignore
+      }
+
+      if (formData.endereco) {
+        dadosBackend.endereco = dadosBackend.endereco || formData.endereco;
+        dadosBackend.endereco_completo = dadosBackend.endereco_completo || formData.endereco;
+        dadosBackend.rua = dadosBackend.rua || formData.endereco;
+      }
+      if (formData.tipo) {
+        dadosBackend.tipo = dadosBackend.tipo || formData.tipo;
+        dadosBackend.tipo_ponto = dadosBackend.tipo_ponto || formData.tipo;
+        dadosBackend.categoria = dadosBackend.categoria || formData.tipo;
+      }
+
+      try { console.debug('PontoTuristico payload:', dadosBackend); } catch (e) {}
+
+      const minimalPayload = {
+        nome: dadosBackend.nome || formData.nome || 'Sem nome',
+        descricao: dadosBackend.descricao || formData.descricao || '',
+        horario_funcionamento: dadosBackend.horario_funcionamento || formData.horario_funcionamento || '',
+        tipo: dadosBackend.tipo || formData.tipo || undefined,
+        endereco_completo: dadosBackend.endereco_completo || dadosBackend.endereco || formData.endereco || undefined,
+        id_empresa: (function(){ try{ const u = JSON.parse(localStorage.getItem('user')||'{}'); return u.empresa || u.empresa_id || u.id_empresa || u.empresaId || null }catch(e){return null} })()
+      };
+
       if (isEditing) {
         await dashboardService.updatePontoTuristico(editingId, dadosBackend);
         alert('Ponto turístico atualizado com sucesso!');
       } else {
-        await dashboardService.createPontoTuristico(dadosBackend);
+        await dashboardService.createPontoTuristico(minimalPayload);
         alert('Ponto turístico adicionado com sucesso!');
       }
+
       setShowModal(false);
       setIsEditing(false);
       setEditingId(null);
       setFormData({
         nome: '',
         endereco: '',
-        categoria: '',
+        tipo: '',
         descricao: '',
         horario_funcionamento: ''
       });
@@ -143,7 +199,7 @@ export function PagePontosTuristicos() {
     setFormData({
       nome: ponto.nome,
       endereco: ponto.endereco || '',
-      categoria: ponto.categoria,
+      tipo: ponto.tipo || ponto.categoria || ponto.tipo_ponto || '',
       descricao: ponto.descricao,
       horario_funcionamento: ponto.horario_funcionamento || ''
     });
@@ -156,7 +212,7 @@ export function PagePontosTuristicos() {
     setFormData({
       nome: '',
       endereco: '',
-      categoria: '',
+      tipo: '',
       descricao: '',
       horario_funcionamento: ''
     });
@@ -172,6 +228,19 @@ export function PagePontosTuristicos() {
       loadPontosTuristicos();
     } catch (err) {
       alert('Erro ao alterar status do ponto turístico.');
+    }
+  };
+
+  const handleDeletePonto = async (pontoId) => {
+    const ok = window.confirm('Confirma exclusão deste ponto turístico?');
+    if (!ok) return;
+    try {
+      await dashboardService.deletePontoTuristico(pontoId);
+      alert('Ponto turístico excluído com sucesso.');
+      loadPontosTuristicos();
+    } catch (err) {
+      console.warn('deletePontoTuristico erro', err?.response?.data || err?.message || err);
+      alert('Erro ao excluir ponto turístico. Verifique os logs do servidor.');
     }
   };
 
@@ -267,7 +336,6 @@ export function PagePontosTuristicos() {
                     <th>Status</th>
                     <th>QR Code</th>
                     <th>Ações</th>
-                    <th>Ativar/Desativar</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -289,20 +357,10 @@ export function PagePontosTuristicos() {
                         </button>
                       </td>
                       <td>
-                        <button 
-                          className="btn-edit"
-                          onClick={() => handleEditPonto(ponto)}
-                        >
-                          Editar
-                        </button>
-                      </td>
-                      <td>
-                        <button 
-                          className={`btn-toggle ${ponto.status === 'ativo' ? 'btn-desativar' : 'btn-ativar'}`}
-                          onClick={() => handleToggleStatusFrontend(ponto.id)}
-                        >
-                          {ponto.status === 'ativo' ? 'Desativar' : 'Ativar'}
-                        </button>
+                        <div className="action-buttons">
+                          <button className="btn-acao editar" onClick={() => handleEditPonto(ponto)}>Editar</button>
+                          <button className="btn-acao excluir" onClick={() => handleDeletePonto(ponto.id)}>Excluir</button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -355,19 +413,17 @@ export function PagePontosTuristicos() {
                 />
               </div>
               <div className="form-group">
-                <label>Categoria</label>
+                <label>Tipo</label>
                 <select 
-                  name="categoria"
-                  value={formData.categoria}
+                  name="tipo"
+                  value={formData.tipo}
                   onChange={handleFormChange}
                   required
                 >
-                  <option value="">Selecione uma categoria</option>
-                  <option value="igreja">Igreja</option>
-                  <option value="praia">Praia</option>
-                  <option value="museu">Museu</option>
-                  <option value="praça">Praça</option>
-                  <option value="outros">Outros</option>
+                  <option value="">Selecione um tipo</option>
+                  {tipos.map(t => (
+                    <option key={t.value} value={t.value}>{t.label}</option>
+                  ))}
                 </select>
               </div>
               <div className="form-group">

@@ -1,12 +1,11 @@
 import { useState, useEffect } from "react";
-import "../admin-common.css";
-import "./PageRecompensas.css";
+import "./EmpresaRecompensas.css";
 import { DashboardHeader } from "../../../components/dashboardHeader/DashboardHeader";
-import { SidebarAdmin } from "../../../components/sidebarAdmin/SidebarAdmin";
+import { Sidebar } from "../../../components/sidebar/Sidebar";
 import { FaGift } from "react-icons/fa";
 import { dashboardService } from "../../../services/api";
 
-export function PageRecompensas() {
+export function EmpresaRecompensas() {
   const usuario = JSON.parse(localStorage.getItem('user') || '{}');
   const empresaPerfil = usuario.empresa || usuario.empresa_id || usuario.id_empresa || '';
   const [empresas, setEmpresas] = useState([]);
@@ -35,7 +34,16 @@ export function PageRecompensas() {
       setLoading(true);
       setError(null);
       const data = await dashboardService.getRecompensas();
-      setRecompensas(Array.isArray(data) ? data : []);
+      const all = Array.isArray(data) ? data : [];
+      const filtroEmpresa = String(empresaPerfil || '');
+      const pertence = (r) => {
+        if (!r) return false;
+        const id1 = String(r.empresa?.id_empresa || r.empresa_id || r.id_empresa || r.empresa?._id || r.empresa || '');
+        const id2 = String(r.id_empresa || r.empresa_id || r.idEmpresa || r.id || '');
+        return (filtroEmpresa && (id1 === filtroEmpresa || id2 === filtroEmpresa));
+      };
+      const filtered = filtroEmpresa ? all.filter(pertence) : all;
+      setRecompensas(filtered);
     } catch (err) {
       setError("Erro ao carregar recompensas: " + (err.response?.data?.message || err.message));
     } finally {
@@ -43,10 +51,15 @@ export function PageRecompensas() {
     }
   };
 
+  const getRecompensaId = (r) => {
+    if (!r) return null;
+    return r.id ?? r._id ?? r.id_recompensas ?? r.id_recompensa ?? r.idRecompensa ?? r.codigo ?? r.cod ?? null;
+  };
+
   const handleOpenModal = (recompensa = null) => {
     if (recompensa) {
       setIsEditing(true);
-      setEditingId(recompensa.id ?? recompensa._id ?? recompensa.id_recompensas ?? recompensa.id_recompensa ?? recompensa.idRecompensa ?? recompensa.codigo ?? recompensa.cod ?? null);
+      setEditingId(getRecompensaId(recompensa));
       setFormData({
         nome: recompensa.nome || "",
         descricao: recompensa.descricao || "",
@@ -79,11 +92,12 @@ export function PageRecompensas() {
     fd.append('descricao', formData.descricao);
     fd.append('valor', formData.valor);
     fd.append('quantidade', formData.quantidade);
+    if (empresaPerfil) fd.append('empresa', empresaPerfil);
     if (formData.imagem instanceof File) {
       fd.append('imagem', formData.imagem);
     }
     if (isEditing) {
-      dashboardService.updateRecompensa(editingId, fd)
+      dashboardService.updateRecompensa(editingId, fd, true)
         .then(() => {
           loadRecompensas();
           handleCloseModal();
@@ -91,7 +105,7 @@ export function PageRecompensas() {
         .catch(err => setError("Erro ao editar recompensa: " + (err.response?.data?.message || err.message)))
         .finally(() => setLoading(false));
     } else {
-      dashboardService.createRecompensa(fd)
+      dashboardService.createRecompensa(fd, true)
         .then(() => {
           loadRecompensas();
           handleCloseModal();
@@ -101,18 +115,18 @@ export function PageRecompensas() {
     }
   };
 
-  const handleDelete = (id) => {
-    let resolvedId = id;
-    if (typeof id === 'object') resolvedId = (id.id ?? id._id ?? id.id_recompensas ?? id.id_recompensa ?? id.idRecompensa ?? id.codigo ?? id.cod ?? null);
-    if (!resolvedId) {
+  const handleDelete = (maybeIdOrRecompensa) => {
+    let id = maybeIdOrRecompensa;
+    if (typeof maybeIdOrRecompensa === 'object') id = getRecompensaId(maybeIdOrRecompensa);
+    if (!id) {
       setError('Não foi possível determinar o id da recompensa para exclusão.');
       return;
     }
     if (!window.confirm("Tem certeza que deseja excluir esta recompensa?")) return;
     setLoading(true);
     setError(null);
-    console.debug('Excluindo recompensa id:', resolvedId);
-    dashboardService.deleteRecompensa(resolvedId)
+    console.debug('Excluindo recompensa id:', id);
+    dashboardService.deleteRecompensa(id)
       .then(() => loadRecompensas())
       .catch(err => setError("Erro ao excluir recompensa: " + (err.response?.data?.message || err.message)))
       .finally(() => setLoading(false));
@@ -122,8 +136,8 @@ export function PageRecompensas() {
     <div>
       <DashboardHeader />
       <div style={{ display: "flex", overflow: "hidden" }}>
-        <SidebarAdmin />
-        <div className="admin-dashboard">
+        <Sidebar />
+        <div className="empresa-dashboard">
           <h1 className="titulo-admin">Recompensas</h1>
           <div className="dashboard-content">
             <div className="recompensas-header">
@@ -169,14 +183,12 @@ export function PageRecompensas() {
                           </td>
                           <td>{recompensa.quantidade_disponivel ?? recompensa.quantidade ?? ''}</td>
                           <td>{recompensa.preco_moedas ?? recompensa.valor ?? ''}</td>
-                              <td>
-                                <div className="action-buttons">
-                                  <>
-                                    <button className="btn-acao editar" onClick={() => handleOpenModal(recompensa)}>Editar</button>
-                                    <button className="btn-acao excluir" onClick={() => handleDelete(recompensa.id ?? recompensa._id ?? recompensa.id_recompensas ?? recompensa.id_recompensa ?? recompensa.idRecompensa ?? recompensa.codigo ?? recompensa.cod)}>Excluir</button>
-                                  </>
-                                </div>
-                              </td>
+                          <td>
+                            <div className="action-buttons">
+                              <button className="btn-acao editar" onClick={() => handleOpenModal(recompensa)}>Editar</button>
+                              <button className="btn-acao excluir" onClick={() => handleDelete(getRecompensaId(recompensa))}>Excluir</button>
+                            </div>
+                          </td>
                         </tr>
                       ))
                     )}

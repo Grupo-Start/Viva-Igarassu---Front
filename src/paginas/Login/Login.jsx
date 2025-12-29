@@ -48,15 +48,18 @@ export function Login() {
             }
 
             await new Promise(resolve => setTimeout(resolve, 100));
-            const tipo = response.user?.tipo;
-            const role = response.user?.role;
+            const tipo = response.user?.tipo?.toString().toLowerCase() || '';
+            const role = response.user?.role?.toString().toLowerCase() || '';
             const isAdmin = response.user?.isAdmin || response.user?.is_admin;
+            const isEmpresa = response.user?.isEmpresa || response.user?.is_empresa || response.user?.isCompany;
 
-            const tipoIsAdmin = typeof tipo === 'string' && tipo.toLowerCase() === 'adm';
-            const roleIsAdmin = typeof role === 'string' && role.toLowerCase() === 'adm';
+            const tipoIsAdmin = tipo === 'adm' || role === 'adm' || isAdmin === true;
+            const tipoIsEmpresa = isEmpresa === true || tipo.includes('empresa') || tipo.includes('empreendedor') || role.includes('empresa') || role.includes('empreendedor');
 
-            if (tipoIsAdmin || roleIsAdmin || isAdmin === true) {
+            if (tipoIsAdmin) {
                 navigate('/Admin-Dashboard', { replace: true });
+            } else if (tipoIsEmpresa) {
+                navigate('/Empresa-Dashboard', { replace: true });
             } else {
                 navigate('/', { replace: true });
             }
