@@ -4,7 +4,7 @@ import { Login } from "../paginas/Login/Login";
 import { Register } from "../paginas/register/register";
 import { RegisterPerson } from "../paginas/RegisterPerson/RegisterPerson";
 
-import { AdminDashboard } from "../paginas/AdminDashboard/AdminDashboard";
+
 import { CompanyRegistration } from "../paginas/companyregistration/CompanyRegistration";
 
 
