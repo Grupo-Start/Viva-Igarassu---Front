@@ -21,7 +21,7 @@ export function Login() {
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
-        e.preventDefault();
+        if (e && typeof e.preventDefault === 'function') e.preventDefault();
 
         if (!email || !password) {
             setError("Preencha todos os campos");
@@ -65,7 +65,7 @@ export function Login() {
             }
         } catch (err) {
             console.error('Erro no login:', err);
-            setError(err.message || 'Erro ao fazer login. Verifique suas credenciais.');
+            setError('E-mail ou senha inválidos. Tente novamente.');
         } finally {
             setLoading(false);
         }
@@ -86,7 +86,14 @@ export function Login() {
                 <p className="subtitle-p">Entre na sua conta</p>
 
                 <div className="form-login-container">
-                    <input className="login-input" type="email" placeholder="E-mail" required />
+                    <input
+                        className="login-input"
+                        type="email"
+                        placeholder="E-mail"
+                        required
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                    />
                     <FaUser className="img-cadeado" />
                 </div>
 
@@ -95,6 +102,8 @@ export function Login() {
                         className="input-person"
                         type={mostrarSenha ? "text" : "password"}
                         placeholder="Senha"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
                     />
 
                     {mostrarSenha ? (
@@ -110,7 +119,11 @@ export function Login() {
                     )}
                 </div>
 
-                <Button text="Entrar" />
+                {error && (
+                    <p className="login-error" style={{ color: 'red', marginTop: 8 }}>{error}</p>
+                )}
+
+                <Button text="Entrar" onClick={handleSubmit} disabled={loading} />
 
                 <div className="form-login-request">
                     <p><strong className="underline-login">Esqueceu sua senha ?</strong></p>
