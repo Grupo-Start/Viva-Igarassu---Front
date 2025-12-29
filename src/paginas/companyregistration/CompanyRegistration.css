@@ -58,35 +58,35 @@
 }
 
 @media (max-width: 320px) {
-    .container-imagem {
+    .container-imagem-company {
         display: none;
     }
 
-    .form-login {
+    .form-company {
         width: 100%;
     }
 }
 
 @media (max-width: 768px) {
-    .container-login {
+    .container-company {
         flex-direction: column;
     }
 
-    .container-imagem {
+    .container-imagem-company {
         display: none;
     }
 
-    .img-login {
+    .img-company {
         width: 100%;
         max-width: 0;
     }
 
-    .form-login {
+    .form-company {
         width: 100%;
         padding: 20px;
     }
 
-    .container-imagem {
+    .container-imagem-company{
         padding: 0;
     }
 }

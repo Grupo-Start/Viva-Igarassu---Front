@@ -12,7 +12,9 @@ export function CompanyRegistration() {
         setMostrarSenha(!mostrarSenha);
     }
     return (
+        
         <div className="container-company">
+            
             <div className="container-imagem-company">
                 <img className="img-company" src={Img} alt="Viva-Igarassu" />
             </div>
