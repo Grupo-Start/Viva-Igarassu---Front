@@ -56,3 +56,37 @@
     height: 100%;
     display: block;
 }
+
+@media (max-width: 320px) {
+    .container-imagem {
+        display: none;
+    }
+
+    .form-login {
+        width: 100%;
+    }
+}
+
+@media (max-width: 768px) {
+    .container-login {
+        flex-direction: column;
+    }
+
+    .container-imagem {
+        display: none;
+    }
+
+    .img-login {
+        width: 100%;
+        max-width: 0;
+    }
+
+    .form-login {
+        width: 100%;
+        padding: 20px;
+    }
+
+    .container-imagem {
+        padding: 0;
+    }
+}
