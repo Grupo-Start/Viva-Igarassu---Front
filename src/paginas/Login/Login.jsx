@@ -21,7 +21,7 @@ export function Login() {
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
-        e.preventDefault();
+        if (e && typeof e.preventDefault === 'function') e.preventDefault();
 
         if (!email || !password) {
             setError("Preencha todos os campos");
@@ -48,21 +48,24 @@ export function Login() {
             }
 
             await new Promise(resolve => setTimeout(resolve, 100));
-            const tipo = response.user?.tipo;
-            const role = response.user?.role;
+            const tipo = response.user?.tipo?.toString().toLowerCase() || '';
+            const role = response.user?.role?.toString().toLowerCase() || '';
             const isAdmin = response.user?.isAdmin || response.user?.is_admin;
+            const isEmpresa = response.user?.isEmpresa || response.user?.is_empresa || response.user?.isCompany;
 
-            const tipoIsAdmin = typeof tipo === 'string' && tipo.toLowerCase() === 'adm';
-            const roleIsAdmin = typeof role === 'string' && role.toLowerCase() === 'adm';
+            const tipoIsAdmin = tipo === 'adm' || role === 'adm' || isAdmin === true;
+            const tipoIsEmpresa = isEmpresa === true || tipo.includes('empresa') || tipo.includes('empreendedor') || role.includes('empresa') || role.includes('empreendedor');
 
-            if (tipoIsAdmin || roleIsAdmin || isAdmin === true) {
+            if (tipoIsAdmin) {
                 navigate('/Admin-Dashboard', { replace: true });
+            } else if (tipoIsEmpresa) {
+                navigate('/Empresa-Dashboard', { replace: true });
             } else {
                 navigate('/', { replace: true });
             }
         } catch (err) {
             console.error('Erro no login:', err);
-            setError(err.message || 'Erro ao fazer login. Verifique suas credenciais.');
+            setError('E-mail ou senha inválidos. Tente novamente.');
         } finally {
             setLoading(false);
         }
@@ -83,7 +86,14 @@ export function Login() {
                 <p className="subtitle-p">Entre na sua conta</p>
 
                 <div className="form-login-container">
-                    <input className="login-input" type="email" placeholder="E-mail" required />
+                    <input
+                        className="login-input"
+                        type="email"
+                        placeholder="E-mail"
+                        required
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                    />
                     <FaUser className="img-cadeado" />
                 </div>
 
@@ -92,6 +102,8 @@ export function Login() {
                         className="input-person"
                         type={mostrarSenha ? "text" : "password"}
                         placeholder="Senha"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
                     />
 
                     {mostrarSenha ? (
@@ -107,7 +119,11 @@ export function Login() {
                     )}
                 </div>
 
-                <Button text="Entrar" />
+                {error && (
+                    <p className="login-error" style={{ color: 'red', marginTop: 8 }}>{error}</p>
+                )}
+
+                <Button text="Entrar" onClick={handleSubmit} disabled={loading} />
 
                 <div className="form-login-request">
                     <p><strong className="underline-login" onClick={() => navigate('/passwordreset')}>Esqueceu sua senha ?</strong></p>

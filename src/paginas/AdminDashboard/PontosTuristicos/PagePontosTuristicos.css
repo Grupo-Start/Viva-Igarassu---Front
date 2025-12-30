@@ -127,6 +127,21 @@
   color: #6b7280;
 }
 
+@media (max-width: 600px) {
+  .pontos-table-container { overflow-x: visible !important; }
+  .pontos-table thead { display: none; }
+  .pontos-table, .pontos-table tbody, .pontos-table tr, .pontos-table td { display: block; width: 100%; }
+  .pontos-table tr { margin-bottom: 12px; border-bottom: 1px solid #e5e7eb; padding-bottom: 8px; }
+  .pontos-table td { padding: 8px 6px; border: none; white-space: normal; word-break: break-word; display:flex; flex-direction:column; align-items:flex-start; overflow:visible; }
+  .pontos-table td::before { display:block; margin-bottom:6px; font-weight:700; color:#0b3b5b; }
+  .pontos-table td:nth-child(1)::before { content: 'Nome'; }
+  .pontos-table td:nth-child(2)::before { content: 'Tipo'; }
+  .pontos-table td:nth-child(3)::before { content: 'Local'; }
+  .pontos-table td:nth-child(4)::before { content: 'Status'; }
+  .pontos-table td:nth-child(5)::before { content: 'Ações'; }
+  .pontos-table { min-width: 0 !important; }
+}
+
 @media (max-width: 768px) {
   .pontos-header {
     flex-direction: column;

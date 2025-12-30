@@ -18,6 +18,12 @@ import { PasswordReset } from "../paginas/passwordreset/PasswordReset";
 import { TokenReset } from "../paginas/tokenreset/TokenReset";
 import { NewPassword } from "../paginas/newpassword/Newpassword";
 
+import { EmpresaDashboard } from "../paginas/EmpresaDashboard/Dashboard/EmpresaDashboard";
+import EmpresaRoute from "../components/guards/EmpresaRoute";
+import AdminRoute from "../components/guards/AdminRoute";
+import { EmpresaRecompensas } from "../paginas/EmpresaDashboard/Recompensas/EmpresaRecompensas";
+import { EmpresaEventos } from "../paginas/EmpresaDashboard/Eventos/EmpresaEventos";
+import { EmpresaMeusDados} from "../paginas/EmpresaDashboard/MeusDados/EmpresaMeusDados";
 
 export const paginas = createBrowserRouter([
     {
@@ -79,4 +85,84 @@ export const paginas = createBrowserRouter([
        path: '/newpassword',
        element: <NewPassword/>
     }
+        {
+                path: '/Admin-Dashboard',
+                element: (
+                    <AdminRoute>
+                        <AdminDashboard />
+                    </AdminRoute>
+                )
+        },
+        {
+                path: '/Admin-Dashboard/Users',
+                element: (
+                    <AdminRoute>
+                        <PageUsers />
+                    </AdminRoute>
+                )
+        },
+        {
+                path: '/Admin-Dashboard/Empresas',
+                element: (
+                    <AdminRoute>
+                        <PageEmpresas />
+                    </AdminRoute>
+                )
+        },
+        {
+                path: '/Admin-Dashboard/PontosTuristicos',
+                element: (
+                    <AdminRoute>
+                        <PagePontosTuristicos />
+                    </AdminRoute>
+                )
+        },
+        {
+                path: '/Admin-Dashboard/Eventos',
+                element: (
+                    <AdminRoute>
+                        <PageEventos />
+                    </AdminRoute>
+                )
+        },
+        {
+                path: '/Admin-Dashboard/Recompensas',
+                element: (
+                    <AdminRoute>
+                        <PageRecompensas />
+                    </AdminRoute>
+                )
+        },
+        {
+                path: '/Empresa-Dashboard',
+                element: (
+                    <EmpresaRoute>
+                        <EmpresaDashboard />
+                    </EmpresaRoute>
+                )
+        },
+        {
+                path: '/Empresa-Dashboard/MeusDados',
+                element: (
+                    <EmpresaRoute>
+                        <EmpresaMeusDados />
+                    </EmpresaRoute>
+                )
+        },
+        {
+                path: '/Empresa-Dashboard/Recompensas',
+                element: (
+                    <EmpresaRoute>
+                        <EmpresaRecompensas />
+                    </EmpresaRoute>
+                )
+        },
+        {
+                path: '/Empresa-Dashboard/Eventos',
+                element: (
+                    <EmpresaRoute>
+                        <EmpresaEventos />
+                    </EmpresaRoute>
+                )
+        }
 ])

@@ -110,6 +110,21 @@
   }
 }
 
+@media (max-width: 600px) {
+  .empresas-table-container { overflow-x: visible !important; }
+  .empresas-table thead { display: none; }
+  .empresas-table, .empresas-table tbody, .empresas-table tr, .empresas-table td { display: block; width: 100%; }
+  .empresas-table tr { margin-bottom: 12px; border-bottom: 1px solid #e5e7eb; padding-bottom: 8px; }
+  .empresas-table td { padding: 8px 6px; border: none; white-space: normal; word-break: break-word; display:flex; flex-direction:column; align-items:flex-start; overflow:visible; }
+  .empresas-table td::before { display:block; margin-bottom:6px; font-weight:700; color:#0b3b5b; }
+  .empresas-table td:nth-child(1)::before { content: 'Nome'; }
+  .empresas-table td:nth-child(2)::before { content: 'CNPJ'; }
+  .empresas-table td:nth-child(3)::before { content: 'Email'; }
+  .empresas-table td:nth-child(4)::before { content: 'Status'; }
+  .empresas-table td:nth-child(5)::before { content: 'Ações'; }
+  .empresas-table { min-width: 0 !important; }
+}
+
 .modal h2 {
   margin: 0 0 12px 0;
   color: #0A3D62;

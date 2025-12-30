@@ -6,7 +6,8 @@
 
 .layout {
   display: flex;
-  height: 100vh;
+  min-height: 100vh;
+  align-items: stretch;
 }
 
 .sidebar {
@@ -15,25 +16,78 @@
   width: 70px;
   transition: width 0.3s ease;
   overflow: hidden;
+  min-height: 100vh;
+  height: auto;
+  overflow-y: visible;
+  --side-padding: clamp(8px, 1.8vh, 20px);
+  --menu-padding: clamp(8px, 1.6vh, 20px);
+  --menu-font: clamp(14px, 1.6vh, 18px);
+  --toggle-size: clamp(18px, 2.2vh, 28px);
 }
 
 .sidebar.open {
   width: 220px;
 }
 
+@media (max-width: 480px) {
+  .sidebar { width: 56px; }
+  .sidebar.open { width: 180px; }
+}
+
+@media (min-width: 481px) and (max-width: 1024px) {
+  .sidebar { width: 70px; }
+  .sidebar.open { width: 220px; }
+}
+
+@media (min-width: 1025px) and (max-width: 1366px) {
+  .sidebar { width: 80px; }
+  .sidebar.open { width: 240px; }
+}
+
+@media (min-width: 1367px) {
+  .sidebar { width: 90px; }
+  .sidebar.open { width: 260px; }
+}
+
 .sidebar-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 15px;
+  padding: var(--side-padding);
 }
 
 .toggle {
   background: none;
   border: none;
   color: white;
-  font-size: 20px;
+  font-size: var(--toggle-size);
   cursor: pointer;
+}
+
+.sidebar:not(.open) .sidebar-header {
+  justify-content: center;
+}
+.sidebar:not(.open) .sidebar-header h2 {
+  display: none;
+}
+.sidebar:not(.open) .toggle {
+  margin: 4px auto;
+  display: block;
+}
+
+.sidebar:not(.open) .menu-item {
+  text-indent: -9999px;
+  white-space: nowrap;
+  overflow: hidden;
+  display: block;
+  width: 100%;
+  text-align: center;
+}
+.sidebar:not(.open) .menu li {
+  padding: 12px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .menu {
@@ -43,9 +97,9 @@
 }
 
 .menu li {
-  padding: 15px;
+  padding: var(--menu-padding);
   cursor: pointer;
-  font-size: 18px;
+  font-size: var(--menu-font);
   transition: 0.2s;
 }
 
@@ -55,6 +109,25 @@
 
 .content {
   flex: 1;
-  padding: 30px;
+  padding: clamp(16px, 2.5vh, 30px);
+}
+
+.menu-item {
+  color: inherit;
+  text-decoration: none;
+  display: block;
+}
+
+.menu-active {
+  font-weight: 600;
+}
+
+.logout-btn {
+  background: none;
+  border: none;
+  color: inherit;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 0;
 }
 
