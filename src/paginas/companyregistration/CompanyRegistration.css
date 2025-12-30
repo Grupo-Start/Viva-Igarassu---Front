@@ -1,4 +1,4 @@
-.container-person {
+.container-company {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -6,7 +6,7 @@
     height: 100vh;
 }
 
-.container-imagem-person {
+.container-imagem-company {
     height: 100vh;
     width: 70%;
     display: flex;
@@ -15,12 +15,12 @@
     padding: 50px 0;
 }
 
-.img-person {
+.img-company {
     width: 800px;
     height: 550px;
 }
 
-.form-person {
+.form-company {
     padding: 60px;
     display: flex;
     flex-direction: column;
@@ -33,14 +33,7 @@
     justify-content: center;
 }
 
-/* .person-h1 {
-    font-size: 54px;
-    margin-bottom: 40px;
-    text-align: center;
-    font-weight: 100px;
-} */
-
-.container-input-person {
+.container-input-company {
     display: flex;
     width: 100%;
     gap: 5px;
@@ -52,50 +45,48 @@
     font-size: 15px;
     transition: 0.2s;
     background-color: white;
+    max-width: 400px;
 }
 
-.input-person {
+.input-company {
     width: 100%;
     background-color: transparent;
     border: none;
     outline: none;
     height: 100%;
+    display: block;
 }
 
 @media (max-width: 320px) {
-    .container-imagem {
+    .container-imagem-company {
         display: none;
     }
 
-    .form-login {
+    .form-company {
         width: 100%;
     }
 }
 
 @media (max-width: 768px) {
-    .container-person {
+    .container-company {
         flex-direction: column;
     }
 
-    .container-imagem-person {
+    .container-imagem-company {
         display: none;
     }
 
-    .img-person {
+    .img-company {
         width: 100%;
         max-width: 0;
     }
 
-    .form-person {
+    .form-company {
         width: 100%;
         padding: 20px;
     }
 
-    .container-imagem {
+    .container-imagem-company{
         padding: 0;
     }
-    .container-imagem-person{
-        padding: 0;
-    }
-
 }

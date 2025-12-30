@@ -126,7 +126,7 @@ export function Login() {
                 <Button text="Entrar" onClick={handleSubmit} disabled={loading} />
 
                 <div className="form-login-request">
-                    <p><strong className="underline-login">Esqueceu sua senha ?</strong></p>
+                    <p><strong className="underline-login" onClick={() => navigate('/passwordreset')}>Esqueceu sua senha ?</strong></p>
                 <p>Não tem conta ? <strong className="underline-login" onClick={() => navigate('/register')}>Cadastre-se</strong></p>
                 </div>
             </div>

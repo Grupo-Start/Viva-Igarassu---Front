@@ -22,7 +22,7 @@ export function Register() {
 
                 <div className="button-register">
                     <Button text="Pessoa física" onClick={() => navigate('/register-person')} />
-                    <Button text="Empresa" />
+                    <Button text="Empresa" onClick={() => navigate('/company-registration')}  />
                 </div>
             </div>
 
