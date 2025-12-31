@@ -1,17 +1,18 @@
-/* Container principal do header */
+
 .header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   width: 100%;
   height: 70px;
-  background-color: #0a3d62; /* cor base */
+  background-color: #0a3d62; 
   padding: 0 30px;
   box-sizing: border-box;
+  
 }
 
 
-/* Logo */
+
 .header-logo img {
   height: 68px;
   cursor: pointer;
@@ -25,25 +26,25 @@
 
 .header-nav {
   display: flex;
-  gap: 40px; /* aumenta o espaço */
+  gap: 40px; 
   color: white;
 }
 
-/* Área da pesquisa + login */
+
 .header-actions {
   display: flex;
   align-items: center;
   gap: 15px;
 }
 
-/* Área da pesquisa + login */
+
 .header-actions {
   display: flex;
   align-items: center;
   gap: 15px;
 }
 
-/* Login */
+
 
 .login img {
   width: 26px;
