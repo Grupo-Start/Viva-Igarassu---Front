@@ -1,6 +1,19 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:3001';
+// Resolve API base URL from environment (Vite: import.meta.env.VITE_API_URL, CRA: REACT_APP_API_URL)
+let API_BASE_URL = 'http://localhost:3001';
+try {
+  if (typeof import.meta !== 'undefined' && import.meta && import.meta.env && import.meta.env.VITE_API_URL) {
+    API_BASE_URL = import.meta.env.VITE_API_URL;
+  }
+} catch (e) {
+  // import.meta may not be available in some bundlers; fall back to process.env check
+  try {
+    if (typeof process !== 'undefined' && process && process.env && process.env.REACT_APP_API_URL) {
+      API_BASE_URL = process.env.REACT_APP_API_URL;
+    }
+  } catch (e2) {}
+}
 
 const LOGIN_ENDPOINT = '/usuarios/login';
 const DASHBOARD_ENDPOINT = '/dashboard/admin';
@@ -317,6 +330,171 @@ export const dashboardService = {
     try {
       const response = await api.get('/pontos-turisticos');
       return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  registrarVisita: async (pontoId) => {
+    try {
+      if (!pontoId) throw new Error('registrarVisita: pontoId inválido');
+      const endpoints = [
+        `/pontos-turisticos/${encodeURIComponent(pontoId)}/visita`,
+        `/pontos-turisticos/${encodeURIComponent(pontoId)}/visitar`,
+        `/pontos-turisticos/${encodeURIComponent(pontoId)}/registrar-visita`,
+        '/visitas',
+        '/resgates',
+      ];
+
+      const payloadOptions = [
+        {},
+        { id_ponto: pontoId },
+        { ponto_id: pontoId },
+        { pontoId },
+        { id: pontoId },
+      ];
+
+      let lastErr = null;
+      for (const ep of endpoints) {
+        for (const payload of payloadOptions) {
+          try {
+            const body = Object.keys(payload).length ? payload : {};
+            const res = await api.post(ep, body);
+            return res.data;
+          } catch (err) {
+            lastErr = err;
+          }
+        }
+      }
+      throw lastErr || new Error('registrarVisita: nenhum endpoint disponível');
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  resolveQrToken: async (token) => {
+    try {
+      if (!token) throw new Error('resolveQrToken: token ausente');
+      const tryPaths = [
+        `/visitas/qr?token=${encodeURIComponent(token)}`,
+        `/qr?token=${encodeURIComponent(token)}`,
+        `/qrcodes/resolve?token=${encodeURIComponent(token)}`,
+        `/qrcodes?token=${encodeURIComponent(token)}`,
+        `/registrar/qr?token=${encodeURIComponent(token)}`,
+      ];
+      for (const p of tryPaths) {
+        try {
+          const resp = await api.get(p);
+          return resp.data;
+        } catch (e) {
+          // tentar próximo
+        }
+      }
+    } catch (error) {
+      // tentar outros caminhos comuns
+      try {
+        const resp2 = await api.get(`/qrcodes/resolve?token=${encodeURIComponent(token)}`);
+        return resp2.data;
+      } catch (e) {
+        throw error;
+      }
+    }
+  },
+
+  visitarViaQr: async (token) => {
+    try {
+      if (!token) throw new Error('visitarViaQr: token ausente');
+      // Primeiro tentar o endpoint que o backend tem: POST /visitas/qr?token=...
+      try {
+        console.debug('visitarViaQr: tentando primeiro POST /visitas/qr?token=...');
+        const respDirect = await api.post(`/visitas/qr?token=${encodeURIComponent(token)}`, {});
+        console.debug('visitarViaQr: POST /visitas/qr OK', respDirect?.status, respDirect?.data);
+        return respDirect.data;
+      } catch (firstErr) {
+        const statusFirst = firstErr?.response?.status || null;
+        // se já possui figurinha (409), retornar a resposta do servidor como sucesso sem lançar
+        if (statusFirst === 409) {
+          try { return firstErr.response.data; } catch (e) { /* fallthrough */ }
+        }
+        console.warn('visitarViaQr: POST /visitas/qr inicial falhou, seguindo para outros endpoints', statusFirst, firstErr?.response?.data || firstErr?.message || firstErr);
+        // continuar com tentativas alternativas
+      }
+
+      // Priorizar POST /qr com payload { token } (ou chaves similares). Depois tentar GET /qr?token=...
+      const endpoint = '/qr';
+      const payloadKeys = ['token', 'id_qr_code', 'id_qrcode', 'id', 'codigo', 'code', 'qr'];
+      const headersJson = { 'Content-Type': 'application/json' };
+      const headersForm = { 'Content-Type': 'application/x-www-form-urlencoded' };
+
+      let lastErr = null;
+      const authHeader = {};
+      try {
+        const t = localStorage.getItem('token');
+        if (t) authHeader.Authorization = `Bearer ${t}`;
+      } catch (e) {}
+
+      // tentar POST /qr com várias chaves (JSON e form)
+      for (const key of payloadKeys) {
+        const body = { [key]: token };
+        try {
+          console.debug('visitarViaQr: tentando POST', endpoint, 'payloadKey:', key, 'body:', body);
+          const res = await api.post(endpoint, body, { headers: { ...headersJson, ...authHeader } });
+          console.debug('visitarViaQr: resposta OK', endpoint, res?.status, res?.data);
+          return res.data;
+        } catch (e) {
+          lastErr = e;
+          console.warn('visitarViaQr: POST JSON falhou', endpoint, key, e?.response?.status, e?.response?.data || e?.message || e);
+        }
+        try {
+          const params = new URLSearchParams();
+          params.append(key, token);
+          console.debug('visitarViaQr: tentando POST form', endpoint, 'field:', key, 'params:', params.toString());
+          const res2 = await api.post(endpoint, params.toString(), { headers: { ...headersForm, ...authHeader } });
+          console.debug('visitarViaQr: resposta OK (form)', endpoint, res2?.status, res2?.data);
+          return res2.data;
+        } catch (e) {
+          lastErr = e;
+          console.warn('visitarViaQr: POST form falhou', endpoint, key, e?.response?.status, e?.response?.data || e?.message || e);
+        }
+      }
+
+      // tentar GET /qr?token=...
+      try {
+        const resg = await api.get(`${endpoint}?token=${encodeURIComponent(token)}`, { headers: { ...authHeader } });
+        return resg.data;
+      } catch (eg) {
+        lastErr = eg;
+      }
+
+      // Fallback: algumas versões do backend expõem POST em /visitas/qr?token=... (sem corpo)
+      try {
+        console.debug('visitarViaQr: tentando fallback POST /visitas/qr?token=...');
+        const respFallback = await api.post(`/visitas/qr?token=${encodeURIComponent(token)}`, {}, { headers: { ...authHeader } });
+        console.debug('visitarViaQr: fallback /visitas/qr OK', respFallback?.status, respFallback?.data);
+        return respFallback.data;
+      } catch (efb) {
+        lastErr = efb;
+        console.warn('visitarViaQr: fallback POST /visitas/qr falhou', efb?.response?.status, efb?.response?.data || efb?.message || efb);
+      }
+
+      // Último recurso: tentar com chamada absoluta (algumas configurações do axios/baseURL conflitantes)
+      try {
+        const jwt = (typeof localStorage !== 'undefined') ? localStorage.getItem('token') : null;
+        const headersAbs = jwt ? { Authorization: `Bearer ${jwt}` } : {};
+        console.debug('visitarViaQr: tentando fallback absoluto', API_BASE_URL + `/visitas/qr?token=${encodeURIComponent(token)}`);
+        const absResp = await axios.post(`${API_BASE_URL}/visitas/qr?token=${encodeURIComponent(token)}`, {}, { headers: headersAbs });
+        console.debug('visitarViaQr: fallback absoluto OK', absResp?.status, absResp?.data);
+        return absResp.data;
+      } catch (eabs) {
+        lastErr = eabs;
+        const st = eabs?.response?.status || null;
+        if (st === 409) {
+          try { return eabs.response.data; } catch (e2) {}
+        }
+        console.warn('visitarViaQr: fallback absoluto falhou', eabs?.response?.status, eabs?.response?.data || eabs?.message || eabs);
+      }
+
+      throw lastErr || new Error('visitarViaQr: sem endpoint válido');
     } catch (error) {
       throw error;
     }

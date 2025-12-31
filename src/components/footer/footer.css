@@ -1,0 +1,56 @@
+.footer {
+  background-color: #252525;
+  color: #fff;
+  padding: 40px 20px 20px;
+   margin-top: 60px;
+}
+
+.footer-container {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  max-width: 1200px;
+  margin: auto;
+    gap: 80px;
+}
+
+.footer-logo img {
+  max-width: 210px; 
+  height: auto;
+}
+
+.footer h4 {
+  margin-bottom: 10px;
+}
+
+.footer a {
+  display: block;
+  color: #ccc;
+  text-decoration: none;
+  margin-bottom: px;
+}
+
+.footer a:hover {
+  color: #fff;
+}
+
+.footer-contato p {
+  color: #ccc;
+  font-size: 14px;
+}
+
+.footer-copy {
+  text-align: center;
+  font-size: 13px;
+  color: #aaa;
+  margin-top: 30px;
+  border-top: 1px solid #333;
+  padding-top: 15px;
+}
+
+/* Ocultar footer em telas pequenas para melhorar a responsividade */
+@media (max-width: 520px) {
+  .footer {
+    display: none !important;
+  }
+}

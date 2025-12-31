@@ -17,7 +17,7 @@ export function Register() {
             </div>
 
             <div className="right">
-                <h1 className="text-global">Cadastro</h1>
+                <h1 className="text-global">Cadastre-se</h1>
                 <p>Selecione uma opção abaixo</p>
 
                 <div className="button-register">

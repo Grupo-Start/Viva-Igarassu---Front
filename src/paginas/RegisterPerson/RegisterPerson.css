@@ -20,6 +20,33 @@
     height: 550px;
 }
 
+@media (max-width: 768px) {
+    .container-imagem-person {
+        display: none;
+    }
+
+    .img-person { display: none; }
+
+    .form-person {
+        width: 100%;
+        padding: 20px;
+        height: auto;
+    }
+}
+
+/* ensure mobile background fills viewport for RegisterPerson */
+@media (max-width: 768px) {
+    html, body {
+        background: #DCE5F1;
+        min-height: 100vh;
+        margin: 0;
+        padding: 0;
+        width: 100%;
+    }
+
+    .container-person { background: #DCE5F1; width: 100%; }
+}
+
 .form-person {
     padding: 60px;
     display: flex;
@@ -60,4 +87,41 @@
     border: none;
     outline: none;
     height: 100%;
+}
+
+/* Responsive rules mirrored from register.css */
+@media (max-width: 320px) {
+    .container-imagem-person {
+        display: none;
+    }
+
+    .form-person {
+        width: 100%;
+    }
+}
+
+@media (max-width: 768px) {
+    .container-person {
+        flex-direction: column;
+    }
+
+    .container-imagem-person {
+        display: none;
+    }
+
+    .img-person {
+        width: 100%;
+        max-width: 0;
+    }
+
+    .form-person {
+        width: 100%;
+        padding: 20px;
+        height: auto;
+    }
+
+    .form-person .text-global {
+        font-size: 40px;
+        white-space: nowrap;
+    }
 }

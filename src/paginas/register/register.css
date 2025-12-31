@@ -84,7 +84,7 @@
 } */
 
 .right h1 {
-    font-size: 75px;
+    font-size: 54px;
     margin-bottom: -5px;
     text-align: center;
     font-weight: 100px;
@@ -128,6 +128,11 @@
     .right {
         width: 100%;
         padding: 20px;
+    }
+
+    .right h1 {
+        font-size: 40px;
+        white-space: nowrap;
     }
 
     .container-imagem {

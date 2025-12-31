@@ -15,6 +15,8 @@ import AdminRoute from "../components/guards/AdminRoute";
 import { EmpresaRecompensas } from "../paginas/EmpresaDashboard/Recompensas/EmpresaRecompensas";
 import { EmpresaEventos } from "../paginas/EmpresaDashboard/Eventos/EmpresaEventos";
 import { EmpresaMeusDados} from "../paginas/EmpresaDashboard/MeusDados/EmpresaMeusDados";
+import { Quemsomos } from "../paginas/Quemsomos/Quemsomos";
+import { ScanQRCode } from "../paginas/ScanQRCode/scanqrcode";
 
 export const paginas = createBrowserRouter([
     {
@@ -32,6 +34,10 @@ export const paginas = createBrowserRouter([
     { 
         path : '/register-person',
         element: <RegisterPerson />
+    },
+    { 
+        path : '/quem-somos',
+        element: <Quemsomos />
     },
         {
                 path: '/Admin-Dashboard',
@@ -112,5 +118,14 @@ export const paginas = createBrowserRouter([
                         <EmpresaEventos />
                     </EmpresaRoute>
                 )
+        }
+        ,
+        {
+            path: '/scan',
+            element: <ScanQRCode />
+        },
+        {
+            path: '/scan/:pointId',
+            element: <ScanQRCode />
         }
 ])
