@@ -1,5 +1,4 @@
-import { useState, useEffect } from "react";
-import { dashboardService } from '../../services/api';
+import { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import "./sidebar.css";
 import { LuMenu } from "react-icons/lu";
@@ -7,55 +6,20 @@ import { LuMenu } from "react-icons/lu";
 export function Sidebar() {
   const [open, setOpen] = useState(true);
   const navigate = useNavigate();
-  const [companyName, setCompanyName] = useState('');
-
+  // Sidebar will display a static greeting; header shows company/user name
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     navigate('/login');
   };
 
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem('user');
-      if (!raw) return;
-      const u = JSON.parse(raw);
-      const name = u.nome_empresa || u.nome || u.name || u.razao_social || u.empresa?.nome || u.empresa_nome || '';
-      if (name) {
-        setCompanyName(name || '');
-        return;
-      }
-
-      const token = localStorage.getItem('token');
-      const userId = u.id || u._id || u.usuario || u.usuario_id || u.userId;
-      if (token && userId) {
-        dashboardService.getEmpresas()
-          .then(list => {
-            const arr = Array.isArray(list) ? list : (list?.data || list?.empresas || []);
-            const found = arr.find(e => {
-              
-              if (e.id_usuario && String(e.id_usuario) === String(userId)) return true;
-              if (e.usuario && (e.usuario === userId || String(e.usuario) === String(userId))) return true;
-              if (e.usuario && typeof e.usuario === 'object' && (String(e.usuario.id) === String(userId) || String(e.usuario._id) === String(userId))) return true;
-              
-              if (Array.isArray(e.usuarios)) {
-                if (e.usuarios.some(x => String(x.id || x._id || x.usuario_id || x) === String(userId))) return true;
-              }
-              return false;
-            });
-            if (found) setCompanyName(found.nome_empresa || found.nome || found.razao_social || found.name || '');
-          })
-          .catch(() => {});
-      }
-    } catch (err) {
-    }
-  }, []);
+  // no dynamic company name in sidebar; keep static greeting
 
   return (
     <div className="layout">
       <aside className={open ? "sidebar open" : "sidebar"}>
         <div className="sidebar-header">
-          <h2>{open ? (companyName || "Olá!") : ""}</h2>
+          <h2>{open ? "Olá!" : ""}</h2>
           <button className="toggle" onClick={() => setOpen(!open)}>
             <LuMenu />
           </button>

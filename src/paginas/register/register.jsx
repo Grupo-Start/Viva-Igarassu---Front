@@ -21,8 +21,8 @@ export function Register() {
                 <p>Selecione uma opção abaixo</p>
 
                 <div className="button-register">
-                    <Button text="Pessoa física" onClick={() => navigate('/register-person')} />
-                    <Button text="Empresa" />
+                    <Button text="Pessoa física" onClick={() => navigate('/register-person', { state: { role: 'comum' } })} />
+                    <Button text="Empresa" onClick={() => navigate('/register-person', { state: { next: '/company-registration', role: 'empreendedor' } })}  />
                 </div>
             </div>
 

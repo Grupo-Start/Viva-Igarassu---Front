@@ -22,13 +22,41 @@ export function EmpresaDashboard() {
     async function load() {
       setLoading(true);
       try {
+        // determine empresa id from session (user saved on login/registration)
+        let sessionUser = null;
+        try { sessionUser = JSON.parse(localStorage.getItem('user') || 'null'); } catch (e) { sessionUser = null; }
+        const empresaId = sessionUser?.empresa || sessionUser?.empresa_id || sessionUser?.id_empresa || sessionUser?.empresaId || sessionUser?.id || sessionUser?._id || null;
+
         const [count, eventosRes, recompensasCount, resgatesCount] = await Promise.all([
           dashboardService.countEventosMe().catch(() => 0),
           (async () => {
             try { return await api.get('/empresa/me/eventos'); }
             catch (e1) { try { return await api.get('/eventos'); } catch (e2) { return { data: [] }; } }
           })(),
-          dashboardService.getRecompensasCount().catch(() => 0),
+          (async () => {
+            try {
+              if (empresaId) {
+                const r = await api.get(`/recompensas?empresa=${encodeURIComponent(empresaId)}`);
+                const data = r?.data ?? [];
+                const arr = Array.isArray(data) ? data : (Array.isArray(data.items) ? data.items : []);
+                if (arr.length > 0) {
+                  const filtroEmpresa = String(empresaId || '');
+                  const pertence = (rwd) => {
+                    if (!rwd) return false;
+                    const id1 = String(rwd.empresa?.id_empresa || rwd.empresa_id || rwd.id_empresa || rwd.empresa?._id || rwd.empresa || '');
+                    const id2 = String(rwd.id_empresa || rwd.empresa_id || rwd.idEmpresa || rwd.id || '');
+                    return (filtroEmpresa && (id1 === filtroEmpresa || id2 === filtroEmpresa));
+                  };
+                  return arr.filter(pertence).length;
+                }
+                // fallback to count field if provided
+                return (data && (data.count || data.total)) || 0;
+              }
+            } catch (e) {
+              // fallback to global count
+            }
+            try { return await dashboardService.getRecompensasCount(); } catch (e) { return 0; }
+          })(),
           dashboardService.getResgatesCount().catch(() => 0),
         ]);
 
@@ -86,7 +114,9 @@ export function EmpresaDashboard() {
     }
 
     load();
-    return () => { mounted = false; };
+    const onLocalUserChange = () => { if (mounted) load(); };
+    window.addEventListener('localUserChange', onLocalUserChange);
+    return () => { mounted = false; window.removeEventListener('localUserChange', onLocalUserChange); };
   }, []);
 
   return (

@@ -32,10 +32,29 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      window.location.href = '/login';
+    try {
+      const cfg = error?.config || {};
+      const headers = cfg.headers || {};
+      // merge possible nested header containers (axios sometimes uses headers.common)
+      const combined = { ...(headers.common || {}), ...headers };
+      let skipHeader = false;
+      for (const k of Object.keys(combined)) {
+        try {
+          if (String(k).toLowerCase() === 'x-skip-auth-redirect') {
+            skipHeader = true;
+            break;
+          }
+        } catch (e) {}
+      }
+      const status = error.response?.status;
+      console.warn('api.interceptor.response: request error', { url: cfg.url, method: cfg.method, status, skipHeader });
+      if (status === 401 && !skipHeader) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+      }
+    } catch (e) {
+      // ignore
     }
     return Promise.reject(error);
   }
@@ -258,9 +277,32 @@ export const dashboardService = {
   setNomeEmpresa: async () => {
     try {
       const res = await api.get('/empresa');
-      const empresas = res.data;
-      const nomeEmpresa = empresas[0]?.nome_empresa;
-      return nomeEmpresa;
+      const empresas = res.data || [];
+      let chosen = null;
+      try {
+        const raw = localStorage.getItem('user');
+        const u = raw ? JSON.parse(raw) : null;
+        const userId = u && (u.id || u._id || u.id_usuario || u.usuario_id || u.usuario);
+        const userEmail = u && (u.email || u.usuario || null);
+        const userNomeEmpresa = u && (u.nome_empresa || u.nome_empresa || u.nome || null);
+
+        if (Array.isArray(empresas) && empresas.length) {
+          chosen = empresas.find(e => {
+            try {
+              if (userId && (String(e.id_usuario) === String(userId) || String(e.usuario) === String(userId) || String(e.id) === String(userId) || String(e._id) === String(userId))) return true;
+              if (userEmail && (String(e.email || e.contato || '') === String(userEmail))) return true;
+              if (userNomeEmpresa && (String(e.nome_empresa || e.nome || e.razao_social || '') === String(userNomeEmpresa))) return true;
+            } catch (err) {}
+            return false;
+          }) || empresas[0];
+        } else {
+          chosen = empresas;
+        }
+      } catch (e) {
+        chosen = empresas[0];
+      }
+      const nome = chosen && (chosen.nome_empresa || chosen.nome || chosen.razao_social || null);
+      return nome;
     } catch (error) {
       throw error;
     }
@@ -800,6 +842,44 @@ export const dashboardService = {
 };
 
 export const authService = {
+  register: async (user) => {
+    try {
+      if (!user) throw new Error('register: payload ausente');
+      // Try the canonical public registration endpoint first and only
+      const nome = user.nome || user.name || user.nome_completo || user.nomeCompleto;
+      const email = user.email || user.usuario || user.emailAddress;
+      const senha = user.senha || user.password || user.pwd;
+      const role = user.role || user.tipo || user.type || 'comum';
+
+      // backend expects exactly: nome_completo, email, senha
+      const body = {
+        ...(nome ? { nome_completo: nome } : {}),
+        ...(email ? { email } : {}),
+        ...(senha ? { senha } : {}),
+        ...(user && user.role ? { role: user.role } : {}),
+      };
+
+      try {
+        const res = await api.post('/usuarios/cadastrar', body, { headers: { 'X-Skip-Auth-Redirect': '1' } });
+        console.debug('authService.register: /usuarios/cadastrar sucesso', res?.data);
+        return res.data;
+      } catch (err) {
+        // If backend returns 401 with message 'Token não fornecido', surface a clearer error
+        const status = err?.response?.status;
+        const respData = err?.response?.data;
+        console.warn('authService.register: /usuarios/cadastrar falhou', status, respData);
+        if (status === 401) {
+          const msg = (respData && respData.message) ? respData.message : '401 Unauthorized';
+          const e = new Error(`register: endpoint exige autorização - ${msg}`);
+          e.response = err.response;
+          throw e;
+        }
+        throw err;
+      }
+    } catch (error) {
+      throw error;
+    }
+  },
   login: async (credentials) => {
     const url = `${API_BASE_URL}${LOGIN_ENDPOINT}`;
     const loginDataFormats = [
@@ -808,16 +888,19 @@ export const authService = {
       { usuario: credentials.email, password: credentials.password },
       { usuario: credentials.email, senha: credentials.password },
     ];
+    let lastErr = null;
     for (let i = 0; i < loginDataFormats.length; i++) {
       const loginData = loginDataFormats[i];
       try {
-        const res = await api.post(LOGIN_ENDPOINT, loginData);
+        const res = await api.post(LOGIN_ENDPOINT, loginData, { headers: { 'X-Skip-Auth-Redirect': '1' } });
         const data = res.data;
         if (data) return data;
       } catch (error) {
-
+        lastErr = error;
       }
     }
+    // if we have an axios error with response, throw it so callers can inspect status/data
+    if (lastErr) throw lastErr;
     throw new Error('Todas as tentativas falharam. Verifique email/senha ou backend.');
   },
   logout: () => {

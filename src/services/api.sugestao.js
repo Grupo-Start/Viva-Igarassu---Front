@@ -1,20 +1,5 @@
-import axios from "axios";
+// Reuse the central axios instance from `src/services/api.js`
+import { api as mainApi } from './api';
 
-export const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL,
-    timeout: 5000,
-    headers: { 'Content-Type': 'application/json' }
-})
-
-api.interceptors.request.use((config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-        config.headers['Authorization'] = `Bearer ${token}`;
-        config.headers['Access-Control-Allow-Origin'] = '*';
-    }
-    return config;
-});
-
-api.interceptors.response.use((response) => {
-    return response
-});
+// Export the shared axios instance so other modules can import from this file if they expect `api.sugestao.js`.
+export const api = mainApi;

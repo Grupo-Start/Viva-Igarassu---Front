@@ -33,14 +33,17 @@ export function EmpresaMeusDados() {
         if (empresaId) {
           try {
             const res = await dashboardService.getEmpresaById(empresaId);
+            // normalize possible shapes: array, { empresa: {...} }, object
             if (Array.isArray(res)) empresaObj = res[0] || null;
-            else empresaObj = res?.empresa || res || null;
+            else if (res?.empresa) empresaObj = res.empresa;
+            else empresaObj = res || null;
             console.debug('EmpresaMeusDados - getEmpresasByID result:', res);
           } catch (err) {
             console.warn('EmpresaMeusDados - getEmpresasByID falhou para id', empresaId, err);
             empresaObj = null;
           }
         }
+        // only fall back to list-search if id lookup failed
         if (!empresaObj) {
           try {
             const list = await dashboardService.getEmpresas();
@@ -118,6 +121,58 @@ export function EmpresaMeusDados() {
         setLoading(false);
       }
     })();
+    const onLocalUserChange = () => {
+      setLoading(true);
+      setEmpresa(null);
+      setError(null);
+      (async () => {
+        try {
+          const raw = localStorage.getItem('user');
+          if (!raw) { setLoading(false); return; }
+          const u = JSON.parse(raw);
+          const empresaId = u.empresa || u.empresa_id || u.id_empresa || u.empresaId || u.empresa?.id || u.id || u._id || '';
+          let empresaObj = null;
+          if (empresaId) {
+            try {
+              const res = await dashboardService.getEmpresaById(empresaId);
+              if (Array.isArray(res)) empresaObj = res[0] || null;
+              else empresaObj = res?.empresa || res || null;
+            } catch (err) { empresaObj = null; }
+          }
+          if (!empresaObj) {
+            try {
+              const list = await dashboardService.getEmpresas();
+              const arr = Array.isArray(list) ? list : (list?.data || list?.empresas || []);
+              const possibleIds = [empresaId, u.id, u._id, u.usuario, u.userId];
+              const found = arr.find(e => {
+                const idFields = [e.id, e._id, e.id_empresa, e.idUsuario, e.id_usuario, e.usuario, e.usuario_id];
+                const matchesId = idFields.some(x => x !== undefined && possibleIds.some(pid => pid !== undefined && String(pid) === String(x)));
+                if (matchesId) return true;
+                if (u.email && (String(e.email || e.contato || '') === String(u.email))) return true;
+                if (u.nome_empresa && (String(e.nome_empresa || e.nome || '') === String(u.nome_empresa))) return true;
+                return false;
+              });
+              empresaObj = found || null;
+            } catch (err) {}
+          }
+          if (!empresaObj) empresaObj = u.empresa || u;
+          if (!empresaObj) setError('Empresa não encontrada para o usuário atual.');
+          else {
+            setEmpresa(empresaObj);
+            setFormData({
+              nome_empresa: empresaObj?.nome_empresa || empresaObj?.nome || '',
+              cnpj: empresaObj?.cnpj || empresaObj?.cpf || '',
+              email: empresaObj?.email || empresaObj?.contato || u.email || '',
+              tipo_servico: empresaObj?.tipo_servico || empresaObj?.servico || empresaObj?.tipo || ''
+            });
+          }
+        } catch (err) {
+          setError('Erro ao carregar dados da empresa: ' + (err?.response?.data?.message || err?.message || ''));
+        } finally { setLoading(false); }
+      })();
+    };
+    window.addEventListener('localUserChange', onLocalUserChange);
+    return () => window.removeEventListener('localUserChange', onLocalUserChange);
   }, []);
 
   const f = (k) => empresa?.[k] || empresa?.[k.replace('_', '')] || empresa?.[k.replace('nome_', 'nome')] || '';

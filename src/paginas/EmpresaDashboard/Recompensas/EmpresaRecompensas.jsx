@@ -6,9 +6,14 @@ import { FaGift } from "react-icons/fa";
 import { dashboardService } from "../../../services/api";
 
 export function EmpresaRecompensas() {
-  const usuario = JSON.parse(localStorage.getItem('user') || '{}');
-  const empresaPerfil = usuario.empresa || usuario.empresa_id || usuario.id_empresa || '';
   const [empresas, setEmpresas] = useState([]);
+  const [usuario, setUsuario] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('user') || 'null') || {}; } catch (e) { return {}; }
+  });
+  const [empresaPerfil, setEmpresaPerfil] = useState(() => {
+    const u = (function(){ try { return JSON.parse(localStorage.getItem('user')||'null'); } catch(e){ return null } })();
+    return u ? (u.empresa || u.empresa_id || u.id_empresa || '') : '';
+  });
   const [recompensas, setRecompensas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -27,6 +32,18 @@ export function EmpresaRecompensas() {
   useEffect(() => {
     loadRecompensas();
     dashboardService.getEmpresas().then(data => setEmpresas(Array.isArray(data) ? data : [])).catch(() => setEmpresas([]));
+
+    const onLocalUserChange = () => {
+      try {
+        const u = JSON.parse(localStorage.getItem('user') || 'null');
+        setUsuario(u || {});
+        setEmpresaPerfil(u ? (u.empresa || u.empresa_id || u.id_empresa || '') : '');
+        // reload rewards filtered for new empresa
+        setTimeout(() => loadRecompensas(), 50);
+      } catch (e) {}
+    };
+    window.addEventListener('localUserChange', onLocalUserChange);
+    return () => window.removeEventListener('localUserChange', onLocalUserChange);
   }, []);
 
   const loadRecompensas = async () => {
