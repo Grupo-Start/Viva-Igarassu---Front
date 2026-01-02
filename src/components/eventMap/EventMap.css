@@ -29,7 +29,7 @@
   border-radius: 4px;
 }
 
-/* Responsividade */
+
 @media (max-width: 768px) {
   .event-map {
     padding: 15px;

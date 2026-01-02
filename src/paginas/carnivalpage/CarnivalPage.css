@@ -3,7 +3,7 @@
 }
 
 .carnival-page h2 {
-    font-size: 28px;
+    font-size: 40px;
     margin-bottom: 20px;
     color: #0a3d62;
     text-align: center;
@@ -15,7 +15,7 @@
     gap: 20px;
 }
 
-/* Responsividade */
+
 @media (max-width: 1024px) {
     .carnival-page main {
         padding: 20px;
