@@ -5,10 +5,12 @@ import Header from "../../components/header/header";
 
 export function Quemsomos() {
   return (
+   <div>
+   <Header/>
+   
 
-  
     <main className="conteudo">
-            <Header/>
+           
       <section className="blocos">
 
     
@@ -95,5 +97,6 @@ export function Quemsomos() {
       <br />
       <Footer />
     </main>
+    </div>
   );
 }
