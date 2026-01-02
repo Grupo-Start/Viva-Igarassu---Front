@@ -3,6 +3,11 @@ import { Home } from "../paginas/home/home";
 import { Login } from "../paginas/Login/Login";
 import { Register } from "../paginas/register/register";
 import { RegisterPerson } from "../paginas/RegisterPerson/RegisterPerson";
+import { AdminDashboard } from "../paginas/AdminDashboard/AdminDashboard";
+import { DashboardEmpresa } from "../paginas/dashboardEmpresa/dashboardEmpresa";
+import { UsuarioDashboard } from "../paginas/UsuarioDashboard/UsuarioDashboard";
+import { UsuarioDados } from "../paginas/UsuarioDados/Usuariodados";
+import { UsuarioFigurinhas } from "../paginas/UsuarioFigurinhas/UsuarioFigurinhas";
 import { Quemsomos } from "../paginas/Quemsomos/Quemsomos";
 import { Pontoturistico } from "../paginas/pontoturistico/Pontoturistico";
 import { Pontos } from "../paginas/pontos/pontos";
@@ -65,6 +70,25 @@ export const paginas = createBrowserRouter([
         element: <NewPassword/>
     },
     {
+        path: '/Admin-Dashboard',
+        element: <AdminDashboard />
+    },
+    {
+        path: '/dashboardEmpresa',
+        element: <DashboardEmpresa />
+    },
+    {
+        path: '/usuarioDashboard',
+        element: <UsuarioDashboard />
+    },
+    {
+        path: '/usuarioDados',
+        element: <UsuarioDados />
+    },
+    {
+        path: '/usuarioFigurinhas',
+        element: <UsuarioFigurinhas />
+    }
         path: '/admin-dashboard',
         element: (
             <AdminRoute>
