@@ -1,0 +1,36 @@
+.event-map {
+  flex: 1;
+  min-width: 300px;
+  background-color: #e0f7fa;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.event-map h3 {
+  font-size: 20px;
+  margin-bottom: 10px;
+  color: #006064;
+}
+
+.event-map iframe {
+  width: 100%;
+  height: 250px;
+  border: none;
+  border-radius: 4px;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .event-map {
+    padding: 15px;
+  }
+
+  .event-map h3 {
+    font-size: 18px;
+  }
+
+  .event-map iframe {
+    height: 200px;
+  }
+}

@@ -25,6 +25,7 @@ import { EmpresaEventos } from "../paginas/EmpresaDashboard/Eventos/EmpresaEvent
 import { EmpresaMeusDados} from "../paginas/EmpresaDashboard/MeusDados/EmpresaMeusDados";
 import { ScanQRCode } from "../paginas/ScanQRCode/scanqrcode";
 import { EventsPage } from "../paginas/eventspage/EventsPage";
+import { CarnivalPage } from "../paginas/carnivalPage/CarnivalPage";
 
 export const paginas = createBrowserRouter([
     {
@@ -167,5 +168,9 @@ export const paginas = createBrowserRouter([
         {
             path: '/eventspage',
             element: <EventsPage/>
+        },
+        {
+            path: '/carnivalpage',
+            element: <CarnivalPage/> 
         }
 ])

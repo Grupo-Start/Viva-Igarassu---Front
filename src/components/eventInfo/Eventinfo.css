@@ -1,0 +1,33 @@
+.event-info {
+  flex: 1;
+  min-width: 300px;
+  background-color: #fff3e0;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.event-info h3 {
+  font-size: 20px;
+  margin-bottom: 10px;
+  color: #e65100;
+}
+
+.event-info p {
+  margin-bottom: 10px;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .event-info {
+    padding: 15px;
+  }
+
+  .event-info h3 {
+    font-size: 18px;
+  }
+
+  .event-info p {
+    font-size: 14px;
+  }
+}
