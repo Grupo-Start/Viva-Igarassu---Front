@@ -1,0 +1,72 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+
+
+.events-page {
+  padding: 0px;
+  /* max-width: 1200px; */
+  width: 100%;
+  min-height: 100vh;
+  margin: 0 auto;
+}
+
+.events-page main {
+  padding-top: 24px;
+}
+
+.events-page h2 {
+  text-align: center;
+  font-size: 28px;
+  margin-bottom: 32px; /* mais espaço abaixo do título */
+  color: #0A3D62;
+}
+
+/* Grid dos cards */
+.events-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* 4 colunas no desktop */
+  gap: 3px; /* espaçamento maior entre os cards */
+  justify-items: center; /* centraliza os cards dentro das colunas */
+  margin-top: 80px;
+}
+
+/* Mensagem quando não há eventos */
+.empty {
+  text-align: center;
+  color: #777;
+  font-style: italic;
+  margin-top: 20px;
+}
+
+/* Responsividade para tablets */
+@media (max-width: 1024px) {
+  .events-grid {
+    grid-template-columns: repeat(2, 1fr); /* 2 colunas no tablet */
+    gap: 24px;
+  }
+
+  .events-page h2 {
+    font-size: 24px;
+  }
+}
+
+/* Responsividade para celulares */
+@media (max-width: 600px) {
+  .events-grid {
+    grid-template-columns: 1fr; /* 1 coluna no celular */
+    gap: 20px;
+  }
+
+  .events-page {
+    padding: 16px;
+  }
+
+  .events-page h2 {
+    font-size: 20px;
+    margin-bottom: 24px;
+  }
+}

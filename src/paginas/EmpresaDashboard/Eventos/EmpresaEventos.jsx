@@ -59,8 +59,8 @@ export function EmpresaEventos() {
             if (empresaName && cname && String(cname).toLowerCase().includes(String(empresaName).toLowerCase())) return true;
           }
 
-          try { if (empresaId && JSON.stringify(ev).includes(String(empresaId))) return true; } catch(e){}
-          try { if (empresaName && JSON.stringify(ev).toLowerCase().includes(String(empresaName).toLowerCase())) return true; } catch(e){}
+          try { if (empresaId && JSON.stringify(ev).includes(String(empresaId))) return true; } catch (e) { }
+          try { if (empresaName && JSON.stringify(ev).toLowerCase().includes(String(empresaName).toLowerCase())) return true; } catch (e) { }
           return false;
         };
         arr = arr.filter(checkEventEmpresa);
@@ -102,7 +102,7 @@ export function EmpresaEventos() {
         if (!dateStr) return Infinity;
         try {
           if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) {
-            const [d,m,y] = dateStr.split('/');
+            const [d, m, y] = dateStr.split('/');
             return new Date(`${y}-${m}-${d}T00:00:00`).getTime();
           }
           if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return new Date(dateStr + 'T00:00:00').getTime();
@@ -111,7 +111,7 @@ export function EmpresaEventos() {
         } catch (e) { return Infinity; }
       };
 
-      enriched.sort((a,b) => parseEventDate(b) - parseEventDate(a));
+      enriched.sort((a, b) => parseEventDate(b) - parseEventDate(a));
       setEventos(enriched);
     } catch (err) {
       console.error('Falha ao carregar eventos', err);
@@ -179,7 +179,7 @@ export function EmpresaEventos() {
       })();
 
       if (formData.imagem instanceof File) {
-      body = new FormData();
+        body = new FormData();
         body.append('nome', formData.nome);
         body.append('descricao', formData.descricao);
         body.append('data', formData.data);
@@ -209,7 +209,6 @@ export function EmpresaEventos() {
           endereco: formData.endereco,
           endereco_completo: formData.endereco,
           endereco_evento: formData.endereco,
-          descricao: formData.descricao,
         };
         if (computedISO) body.data_hora = computedISO;
       }
@@ -236,7 +235,7 @@ export function EmpresaEventos() {
     } catch (err) {
       console.error('Falha ao salvar evento', err, err?.response?.data);
       let serverMessage = err?.response?.data?.message ?? err?.response?.data ?? err.message;
-      try { if (typeof serverMessage === 'object') serverMessage = JSON.stringify(serverMessage); } catch(e){}
+      try { if (typeof serverMessage === 'object') serverMessage = JSON.stringify(serverMessage); } catch (e) { }
       setError('Erro ao salvar evento: ' + serverMessage);
     }
   };
@@ -403,7 +402,7 @@ export function EmpresaEventos() {
                     <label>Endereço:
                       <input type="text" value={formData.endereco} onChange={e => setFormData({ ...formData, endereco: e.target.value })} required />
                     </label>
-                    
+
                     <div className="modal-actions">
                       <button type="submit" className="btn-acao editar">{isEditing ? 'Salvar' : 'Adicionar'}</button>
                       <button type="button" className="btn-acao excluir" onClick={handleCloseModal}>Cancelar</button>
