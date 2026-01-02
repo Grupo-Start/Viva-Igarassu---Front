@@ -1,0 +1,136 @@
+.ponto-container {
+  font-family: "Poppins", sans-serif;
+  color: #083b5c;
+}
+
+.ponto-titulo {
+  max-width: 1100px;
+  margin: 60px auto 40px;
+}
+
+.ponto-titulo h4 {
+  font-size: 35px;
+  font-weight: 00;
+  color: #083b5c;
+  margin-bottom: 8px;
+}
+
+.ponto-titulo h1 {
+  font-size: 32px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.ponto-principal {
+  max-width: 1100px;
+  margin: 0 auto 60px;
+  display: flex;
+  gap: 40px;
+  align-items: flex-start;
+}
+
+.ponto-imagem {
+  width: 420px;
+  border-radius: 16px;
+  object-fit: cover;
+}
+
+.ponto-descricao {
+  font-size: 24px;
+  line-height: 1.6;
+}
+
+.ponto-cards {
+  max-width: 1100px;
+  margin: 0 auto 80px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 40px;
+}
+
+.card-info {
+  border: 2px solid #2c5d8f;
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.card-info h3 {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+.card-info ul {
+  padding-left: 20px;
+}
+
+.card-info li {
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+.mapa-imagem {
+
+  border-radius: 8px;
+  width: 300px;   
+  height: auto; 
+  display: block;
+  margin: 0 auto;
+}
+
+.ponto-cta {
+  text-align: center;
+  margin-bottom: 100px;
+}
+
+.ponto-cta h2 {
+  font-size: 20px;
+  font-weight: 800;
+  margin-bottom: 24px;
+}
+
+.ponto-cta button {
+  background: #4ec3bf;
+  color: #ffffff;
+  border: none;
+  padding: 16px 60px;
+  font-size: 18px;
+  font-weight: 700;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.ponto-cta button:hover {
+  opacity: 0.9;
+}
+
+@media (max-width: 900px) {
+  .ponto-principal {
+    flex-direction: column;
+  }
+
+  .ponto-imagem {
+    width: 100%;
+  }
+
+  .ponto-cards {
+    grid-template-columns: 1fr;
+  }
+}
+
+.card-header {
+  background: #2c5d8f;
+  padding: 14px 20px;
+  border-radius: 10px 10px 0 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.card-header h3 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #ffffff;
+  text-align: center;
+}

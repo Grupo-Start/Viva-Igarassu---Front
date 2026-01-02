@@ -1,7 +1,7 @@
 import "./Quemsomos.css";
 import { FaStar } from "react-icons/fa";
-import Footer from "../../components/footer/Footer";
-import Header from "../../components/header/Header";
+import Footer from "../../components/footer/footer";
+import Header from "../../components/header/header";
 
 export function Quemsomos() {
   return (
