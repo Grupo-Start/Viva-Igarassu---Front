@@ -38,7 +38,6 @@ export function EmpresaRecompensas() {
         const u = JSON.parse(localStorage.getItem('user') || 'null');
         setUsuario(u || {});
         setEmpresaPerfil(u ? (u.empresa || u.empresa_id || u.id_empresa || '') : '');
-        // reload rewards filtered for new empresa
         setTimeout(() => loadRecompensas(), 50);
       } catch (e) {}
     };

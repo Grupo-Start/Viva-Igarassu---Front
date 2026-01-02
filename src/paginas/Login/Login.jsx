@@ -45,9 +45,7 @@ export function Login() {
             }
 
             if (response.user) {
-                // save user immediately
                 localStorage.setItem('user', JSON.stringify(response.user));
-                // attempt to resolve associated company now so UI loads correct empresa before navigation
                 (async () => {
                     try {
                         const u = response.user;

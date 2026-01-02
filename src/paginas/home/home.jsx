@@ -19,7 +19,7 @@ export function Home() {
 
         <div className="faixa-info">
           <span className="faixa-texto">
-            Agenda | Pontos Turísticos | Trilha Sítio Histórico | Recompensas
+            Agenda | <span className="faixa-link" onClick={() => navigate('/pontos-turisticos')}>Pontos Turísticos</span> | Trilha Sítio Histórico | Recompensas
           </span>
         </div>
       </section>
@@ -90,8 +90,6 @@ export function Home() {
         
 
         <div className="lista-locais">
-          {/* Exemplo de pontos da trilha com estado bloqueado/desbloqueado. */}
-          {/* Em produção, substituir por dados vindos da API com estado do usuário. */}
           {(() => {
             const initialPoints = [
               { id: 1, name: "Igreja Matriz dos Santos Cosme e Damião", unlocked: true, image: "igreja.jpg" },

@@ -35,16 +35,16 @@
 
 .form-tokenreset h2 {
   font-size: clamp(1.4rem, 5vw, 3.0rem);
-  margin-bottom: -5px;   /* igual ao da senha */
+  margin-bottom: -5px;
   text-align: center;
-  font-weight: 100px;    /* igual ao da senha */
+  font-weight: 100px;
 }
 
 .subtitle-token {
-  margin: 25px;          /* igual ao da senha */
+  margin: 25px;
   font-weight: 600;
   text-align: center;
-  font-size: clamp(0.9rem, 2.5vw, 1.2rem); /* igual ao da senha */
+  font-size: clamp(0.9rem, 2.5vw, 1.2rem);
   color: black;
 }
 
@@ -65,12 +65,12 @@
   background-color: transparent;
   border: none;
   outline: none;
-  height: 100%;          /* igual ao da senha */
-  font-size: 15px;       /* igual ao da senha */
+  height: 100%;
+  font-size: 15px;
 }
 
 .icon-lock {
-  font-size: 20px;       /* igual ao da senha (.img-cadeado) */
+  font-size: 20px;      
 }
 
 .btn-tokenreset {
@@ -89,7 +89,6 @@
   background-color: #0f7ae5;
 }
 
-/* Responsividade */
 @media (max-width: 320px) {
   .container-imagem-tokenreset {
     display: none;
@@ -100,7 +99,7 @@
   }
 
   .form-tokenreset h2 {
-    font-size: 28px; /* igual ao da senha */
+    font-size: 28px;
   }
 }
 
@@ -120,7 +119,7 @@
 
   .form-tokenreset {
     width: 100%;
-    padding: 20px; /* igual ao da senha */
+    padding: 20px;
   }
 
   .container-imagem-tokenreset {
@@ -128,6 +127,6 @@
   }
 
   .form-tokenreset h2 {
-    font-size: 40px; /* igual ao da senha */
+    font-size: 40px;
   }
 }

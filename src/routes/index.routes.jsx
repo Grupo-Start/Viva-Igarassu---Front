@@ -158,11 +158,11 @@ export const paginas = createBrowserRouter([
             element: <ScanQRCode />
         },
         {
-            path: "/pontos",
+            path: "/pontos-turisticos",
             element: <Pontos />
         },
         { 
-            path : '/ponto/:id',
+            path : '/pontos-turisticos/:id',
             element: <Pontoturistico />
         },
         {

@@ -5,7 +5,6 @@
    margin-top: 60px;
 }
 
-/* make footer full-bleed across viewport while keeping inner container centered */
 .footer {
   width: 100vw;
   position: relative;
@@ -16,7 +15,6 @@
   box-sizing: border-box;
 }
 
-/* prevent accidental horizontal scroll from children */
 html, body {
   overflow-x: hidden;
 }
@@ -66,7 +64,6 @@ html, body {
   padding-top: 15px;
 }
 
-/* Ajuste do footer em telas pequenas: empilha conteúdo em vez de ocultar */
 @media (max-width: 520px) {
   .footer {
     padding: 24px 12px 16px;
@@ -83,7 +80,6 @@ html, body {
   .footer-copy { margin-top: 18px; }
 }
 
-/* Narrow mobile adjustments (<=375px) — preserve layout but center and fit */
 @media (max-width: 375px) {
   .footer-container {
     justify-content: center;
@@ -99,7 +95,6 @@ html, body {
   .footer-copy { text-align: center; }
 }
 
-/* Page-specific adjustments when footer is inside the 'conteudo' wrapper (e.g., Quem somos) */
 .conteudo .footer {
   margin-top: 24px;
   padding: 20px 12px 16px;

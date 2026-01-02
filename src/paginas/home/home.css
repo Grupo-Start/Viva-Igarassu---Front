@@ -32,6 +32,16 @@
   line-height: 1.4;
 }
 
+.faixa-link {
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.faixa-link:hover {
+  color: #46c7c2;
+  text-decoration: underline;
+}
+
 .hero {
   margin-top: 140px;
   text-align: center;
@@ -96,7 +106,6 @@
   align-items: stretch;
 }
 
-/* Ensure desktop layout shows 2 columns x 2 rows for the Como funciona cards */
 @media (min-width: 900px) {
   .cards {
     display: grid !important;
@@ -114,7 +123,6 @@
   }
 }
 
-/* Desktop card appearance: icon above title, centered (2x2 layout) */
 @media (min-width: 900px) {
   .card {
     display: flex;
@@ -245,7 +253,6 @@
   opacity: 0.9;
 }
 
-/* Hero CTAs */
 .hero-ctas{display:flex;gap:12px;justify-content:center;margin-top:20px}
 .btn-primary{background:#4ec3bf;color:#ffffff;border:none;padding:12px 20px;border-radius:8px;font-weight:700;cursor:pointer}
 .btn-primary:hover{opacity:0.95;transform:translateY(-2px)}
@@ -284,7 +291,6 @@
   .faixa-topo-historico h2 { font-size: 28px; }
 
   .trail-timeline { padding: 0 12px; max-width: 100%; }
-  /* Keep the vertical timeline line visible on mobile as well */
   .trail-timeline::before { display: block; }
   .timeline-row { display: grid; grid-template-columns: 1fr; gap: 12px; min-height: auto; padding: 8px 0; }
   .timeline-circle { width: 72px; height: 72px; margin: 0 auto 12px; }
@@ -295,8 +301,6 @@
   .imagem-trilha { width: 100%; max-width: 100%; margin-bottom: 12px; }
   .lista-locais { width: 100%; }
 }
-
-/* .card-icon — configured above with explicit sizing for card layout */
 
 .faixa-topo-historico {
   position: static;
@@ -318,7 +322,6 @@
   color: #ffffff;
 }
 
-/* ensure faixa-topo-historico stays visible and above other content */
 .faixa-topo-historico {
   position: relative;
   z-index: 6;
@@ -345,13 +348,10 @@
   border-radius: 8px;
 }
 
-/* Trilha: pontos em formato de cards alinhados horizontalmente com estado locked/unlocked */
-
-
 .trail-timeline {
   display: flex;
   flex-direction: column;
-  gap: 28px; /* vertical spacing between points */
+  gap: 28px;
   align-items: stretch;
   margin: 24px auto;
   max-width: 920px;
@@ -368,14 +368,14 @@
 .trail-timeline::before {
   content: '';
   position: absolute;
-  left: 60px; /* center of circle column */
+  left: 60px;
   top: 12px;
   bottom: 12px;
   width: 2px;
   background-image: linear-gradient(#cfe8ee 33%, rgba(255,255,255,0) 0%);
   background-size: 2px 12px;
   background-repeat: repeat-y;
-  z-index: 0; /* behind masking */
+  z-index: 0;
 }
 
 .timeline-row { display: grid; grid-template-columns: 120px 1fr; align-items: center; gap: 28px; padding: 12px 0; min-height: 120px; }
@@ -394,10 +394,8 @@
   color: #fff;
   box-shadow: 0 6px 14px rgba(2,6,23,0.06);
   transition: transform 140ms ease;
-  z-index: 3; /* above the vertical line */
+  z-index: 3;
 }
-
-/* removed mask so circles remain fully visible */
 
 .timeline-circle.unlocked { background: #ffd454; color: #083b5c; }
 .timeline-circle.locked { background: #2fa9a6; color: #fff; opacity: 0.98 }
@@ -412,7 +410,7 @@
   display: block;
   border: 6px solid #ffffff;
   position: relative;
-  z-index: 4; /* ensure image is above the mask */
+  z-index: 4;
 }
 
 .timeline-badge {
@@ -432,7 +430,6 @@
 .timeline-labels { display: block; }
 .timeline-label__text { font-family: 'Poppins', sans-serif; font-size:18px; color:#083b5c; padding-left: 12px; text-align: left; max-width:520px; }
 
-/* Mobile narrow: preserve layout, scale and stack to fit <= 375px */
 @media (max-width: 375px) {
   .imagem-topo img {
     height: 160px;
@@ -461,7 +458,6 @@
   .como-funciona { margin: 32px auto 24px; }
   .como-funciona h2 { font-size: 22px; margin-bottom: 24px; }
 
-  /* Stack cards vertically and center */
   .cards {
     display: flex;
     flex-direction: column;
@@ -493,7 +489,6 @@
   .hero-ctas { flex-direction: column; gap: 10px; align-items: center; }
   .btn-primary, .btn-secondary { width: 100%; max-width: 260px; padding: 12px 16px; font-size: 14px; }
 
-  /* Timeline centered */
   .trail-timeline { padding: 0 16px; max-width: 100%; align-items: center; }
   .trail-timeline::before { left: 50%; transform: translateX(-50%); }
   .timeline-row { 
@@ -511,10 +506,8 @@
 
   .imagem-trilha { width: 100%; max-width: 100%; margin-bottom: 16px; border-radius: 8px; }
 
-  /* center the list and timeline column on narrow screens */
   .lista-locais { display: flex; flex-direction: column; align-items: center; padding: 0 16px; }
 
-  /* keep spacing compact but visible */
   .faixa-topo-historico {
     margin: 24px 16px;
     padding: 14px 16px;
@@ -531,7 +524,6 @@
   }
 
   .faixa-topo-historico h2 { font-size: 18px; text-align: center; color: #fff; margin: 0; }
-  /* hide the hash/tag on very narrow screens to save vertical space */
   .tag-historico { display: none; }
 }
 

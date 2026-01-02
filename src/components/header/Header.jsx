@@ -14,12 +14,17 @@ export function Header() {
     } catch (e) {
       setUser(null);
     }
-    // if the stored user lacks empresa info, try to resolve it from API and merge
     const tryAttachCompany = async () => {
       try {
         const r = localStorage.getItem('user');
         if (!r) return;
         const u = JSON.parse(r);
+        
+        const tipo = (u.tipo || u.role || '').toString().toLowerCase();
+        const isEmpresa = u.isEmpresa || u.is_empresa || u.isCompany || 
+                          tipo.includes('empresa') || tipo.includes('empreendedor');
+        if (!isEmpresa) return;
+        
         const hasCompany = u && (u.nome_empresa || u.empresa || u.id_empresa || u.empresa_id || (u.empresa && (u.empresa.nome_empresa || u.empresa.nome)));
         if (hasCompany) return;
         const token = localStorage.getItem('token');
@@ -95,7 +100,6 @@ export function Header() {
       u = getStoredUser();
     }
     if (!u) return null;
-    // Prefer company fields when available, regardless of role
     try {
       const companyName = u.nome_empresa
         || (u.empresa_obj && (u.empresa_obj.nome_empresa || u.empresa_obj.nome || u.empresa_obj.razao_social))
@@ -129,7 +133,7 @@ export function Header() {
   return (
     <header className="header">
       <div className="header-logo">
-       <img src="header-logo.png" alt="logo viva igarassu" />
+       <img src="/header-logo.png" alt="logo viva igarassu" />
       </div>
 
       <nav className="header-nav">

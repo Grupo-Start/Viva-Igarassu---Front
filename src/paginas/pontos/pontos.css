@@ -75,15 +75,82 @@
   opacity: 0.9;
 }
 
-/* RESPONSIVO */
 @media (max-width: 1100px) {
   .pontos-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
+    padding: 0 24px;
   }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 900px) {
+  .pontos-grid {
+    grid-template-columns: repeat(2, 1fr);
+    padding: 0 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .pontos-titulo {
+    margin: 30px 0 24px;
+    padding: 0 16px;
+  }
+
+  .pontos-titulo h1 {
+    font-size: 26px;
+  }
+
+  .pontos-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    padding: 0 16px;
+    margin-bottom: 60px;
+  }
+
+  .ponto-card {
+    padding: 12px;
+    border-radius: 12px;
+  }
+
+  .ponto-card img {
+    height: 120px;
+    border-radius: 10px;
+    margin-bottom: 12px;
+  }
+
+  .ponto-card h3 {
+    font-size: 13px;
+    min-height: 36px;
+    margin-bottom: 12px;
+  }
+
+  .ponto-card button {
+    padding: 6px 14px;
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 480px) {
+  .pontos-titulo h1 {
+    font-size: 22px;
+  }
+
   .pontos-grid {
     grid-template-columns: 1fr;
+    gap: 20px;
+    max-width: 320px;
+  }
+
+  .ponto-card img {
+    height: 160px;
+  }
+
+  .ponto-card h3 {
+    font-size: 14px;
+    min-height: auto;
+  }
+
+  .ponto-card button {
+    padding: 8px 20px;
+    font-size: 12px;
   }
 }

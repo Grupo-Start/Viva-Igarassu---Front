@@ -26,7 +26,6 @@ export function ScanQRCode() {
     };
     const tryDirectUrl = async (url) => {
         try {
-            // usar axios (`api`) para manter interceptors (Authorization) e consistência
             try {
                 const res = await api.get(url);
                 return { ok: true, data: res.data };
@@ -68,7 +67,6 @@ export function ScanQRCode() {
         };
     }, []);
 
-    // Se a página receber ?token=... (QR que aponta para o front), tentar registrar a visita com POST autenticado
     useEffect(() => {
         (async () => {
             try {
@@ -78,11 +76,9 @@ export function ScanQRCode() {
                 setError(null);
                 setSuccess(null);
                 setDecodedPreview(tokenParam);
-                // tentar via dashboardService (prioriza POST /qr)
                     try {
                         setScanning(true);
                         const resp = await dashboardService.visitarViaQr(tokenParam);
-                        // tentar extrair ponto retornado
                         const resolvedPonto = resp?.ponto || resp?.pontoId || resp?.id_ponto || resp?.id || resp;
                         const serverMsg = resp?.message || resp?.msg || null;
                         if (resolvedPonto) {
@@ -99,7 +95,6 @@ export function ScanQRCode() {
                     setError('Falha ao registrar via token da URL: ' + (data?.message || data));
                 } finally {
                     setScanning(false);
-                    // remover token da URL para evitar reenvio acidental
                     try {
                         const u = new URL(window.location.href);
                         u.searchParams.delete('token');
@@ -117,7 +112,6 @@ export function ScanQRCode() {
         setError(null);
         setSuccess(null);
         setQrCodeData(null);
-        // verificar autenticação
         try {
             const t = localStorage.getItem('token');
             if (!t) {
@@ -126,7 +120,6 @@ export function ScanQRCode() {
             }
         } catch (e) {}
         try {
-            // evitar criar múltiplas instâncias se já existir uma
             if (html5QrcodeRef.current) {
                 console.debug('startScanner: scanner já iniciado, ignorando nova inicialização');
                 setScanning(true);
@@ -136,7 +129,6 @@ export function ScanQRCode() {
                 throw new Error('Câmera não suportada neste dispositivo.');
             }
             const elementId = "qr-reader";
-            // limpar container caso haja conteúdo residual
             const el = document.getElementById(elementId);
             if (el) el.innerHTML = '';
             html5QrcodeRef.current = new Html5Qrcode(elementId);
@@ -158,26 +150,21 @@ export function ScanQRCode() {
                         const pontos = await dashboardService.getPontosTuristicos();
                         const candidates = Array.isArray(pontos) ? pontos : [];
 
-                        // se o QR apontar para /visitas/qr?token=..., tentar resolver o token direto no backend
                         try {
                             const maybeUrl = new URL(text);
                             const isVisitQr = maybeUrl.pathname.includes('/visitas') && maybeUrl.pathname.includes('qr');
                             const tokenParam = maybeUrl.searchParams.get('token');
                             if (isVisitQr && tokenParam) {
-                                // Se a URL do QR aponta para o backend, apenas extrair o token e chamar visitarViaQr
                                 try {
                                     console.debug('QR aponta para visitas/qr — chamando visitarViaQr com token:', tokenParam);
                                     const resolved = await dashboardService.visitarViaQr(tokenParam);
-                                    // resolved pode retornar ponto direto ou { pontoId } ou { id_ponto }
                                     const resolvedPonto = resolved?.ponto || resolved?.pontoId || resolved?.id_ponto || resolved?.id || resolved;
                                     const serverMsg = resolved?.message || resolved?.msg || null;
                                     if (resolvedPonto) {
-                                        // se veio id
                                         let foundResolved = null;
                                         if (typeof resolvedPonto === 'string' || typeof resolvedPonto === 'number') {
                                             foundResolved = candidates.find(p => String(p.id_ponto || p.id || p._id) === String(resolvedPonto));
                                         } else if (typeof resolvedPonto === 'object') {
-                                            // recebeu o próprio ponto
                                             foundResolved = resolvedPonto;
                                         }
                                         if (foundResolved) {
@@ -185,19 +172,16 @@ export function ScanQRCode() {
                                             setQrCodeData(text);
                                             await stopScanner();
                                             setHandledByQrEndpoint(true);
-                                            // já registrado via endpoint /visitas/qr — não chamar registrarVisita para evitar múltiplos 404s
                                             setSuccess(serverMsg || 'Visita registrada com sucesso! Figurinha creditada.');
                                             return;
                                         }
                                     }
                                 } catch (e) {
                                     console.warn('visitarViaQr falhou', e);
-                                    // coletar detalhe para UI
                                     const status = e?.response?.status || null;
                                     const data = e?.response?.data || e?.message || String(e);
                                     setServerErrorDetail({ status, data, token: tokenParam });
 
-                                    // se o backend não aceita POST /qr (404), tentar postar diretamente na URL do QR
                                     const shouldTryPostDirect = status === 404 || String(data).includes('Cannot POST');
                                     if (shouldTryPostDirect) {
                                         try {
@@ -227,11 +211,9 @@ export function ScanQRCode() {
                                         }
                                     }
 
-                                    // falha ao resolver token — tentar chamar a URL completa do QR como fallback (GET)
                                     try {
                                         const direct = await tryDirectUrl(maybeUrl.href);
                                         if (direct && direct.ok) {
-                                            // sucesso direto no endpoint do QR
                                             const resolvedPonto = direct.data?.ponto || direct.data?.pontoId || direct.data?.id_ponto || direct.data?.id || null;
                                             const serverMsgDirect = direct.data?.message || direct.data?.msg || null;
                                             let foundResolved = null;
@@ -249,17 +231,14 @@ export function ScanQRCode() {
                                             setSuccess(serverMsgDirect || 'Visita registrada via endpoint do QR.');
                                             return;
                                         } else {
-                                            // guardar detalhe do fallback
                                             setServerErrorDetail(prev => ({ ...(prev||{}), fallback: direct }));
                                         }
                                     } catch (ee) {
                                         setServerErrorDetail(prev => ({ ...(prev||{}), fallbackError: ee?.message || String(ee) }));
                                     }
-                                    // seguir matching normal
                                 }
                             }
                         } catch (e) {
-                            // não é URL — prosseguir
                         }
 
                         const matchPonto = (p, t) => {
@@ -267,7 +246,6 @@ export function ScanQRCode() {
                             const v = (s) => (s == null ? '' : String(s)).toLowerCase();
                             const tv = v(t);
 
-                            // fields to check
                             const fields = [
                                 'id_ponto',
                                 'id',
@@ -295,7 +273,6 @@ export function ScanQRCode() {
                                 if (val.includes(tv)) return true;
                             }
 
-                            // check nested figurinhas array (could contain tokens or objects)
                             try {
                                 const figs = p.figurinhas || p.figura || p.figures || p.stickers || null;
                                 if (Array.isArray(figs)) {
@@ -310,8 +287,6 @@ export function ScanQRCode() {
                                 }
                             } catch (e) {}
 
-
-                            // also check if the token is embedded in a URL (path, filename, query params, fragment)
                             try {
                                 const u = new URL(t);
                                 const parts = u.pathname.split('/').filter(Boolean).map(x => x.toLowerCase());
@@ -323,7 +298,6 @@ export function ScanQRCode() {
                                     if (parts.includes(val)) return true;
                                     if (parts.some(pp => pp.includes(val))) return true;
                                     if (filename.includes(val)) return true;
-                                    // check query params
                                     for (const [k, vq] of u.searchParams) {
                                         if (!vq) continue;
                                         const vqL = String(vq).toLowerCase();
@@ -333,7 +307,6 @@ export function ScanQRCode() {
                                 }
                             } catch (e) {}
 
-                            // extract UUID-like tokens from the decoded text and compare
                             try {
                                 const uuidRegex = /[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/g;
                                 const foundUuids = (t.match(uuidRegex) || []).map(x => x.toLowerCase());
@@ -374,7 +347,6 @@ export function ScanQRCode() {
                                 await dashboardService.registrarVisita(resolvedId);
                                 setSuccess('Visita registrada com sucesso! Figurinha creditada.');
                             } else {
-                                // já registrado pelo endpoint do QR — mostrar mensagem de sucesso
                                 setSuccess('Visita registrada com sucesso! Figurinha creditada.');
                             }
                         } catch (regErr) {
@@ -401,21 +373,17 @@ export function ScanQRCode() {
 
     const extractPontoId = (text) => {
         if (!text) return null;
-        // tentar parsear como URL e extrair id após 'pontos-turisticos'
         try {
             const u = new URL(text);
             const parts = u.pathname.split('/').filter(Boolean);
             const idx = parts.findIndex(p => p === 'pontos-turisticos');
             if (idx >= 0 && parts.length > idx + 1) return parts[idx + 1];
         } catch (e) {
-            // não é URL
         }
-        // tentar JSON { pontoId: ... } ou { id: ... }
         try {
             const json = JSON.parse(text);
             return json?.pontoId || json?.id || json?.ponto_id || null;
         } catch (e) {}
-        // se for só um id (numérico ou uuid), retornar
         const simple = String(text).trim();
         if (/^[0-9a-fA-F\-]{3,}$/.test(simple)) return simple;
         return null;
@@ -431,8 +399,6 @@ export function ScanQRCode() {
         html5QrcodeRef.current = null;
         setScanning(false);
     };
-
-    // Função de cópia removida: o QR é usado para ganhar a figurinha, não para copiar
 
     return (
         <>
@@ -493,13 +459,11 @@ export function ScanQRCode() {
                     </div>
                 )}
 
-                {/* Debug UI removido em produção */}
                 {qrCodeData && (
                     <div className="qr-data">
                         <strong>Resultado:</strong>
                         <div className="qr-text">{qrCodeData}</div>
                         {success && <div className="scan-success">{success}</div>}
-                        {/* Ações de cópia removidas (QR não deve ser copiado) */}
                     </div>
                 )}
             </div>

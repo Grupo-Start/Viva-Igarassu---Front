@@ -1,69 +1,95 @@
-import Header from "../../components/header/header";
+import Header from "../../components/header/Header";
 import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { dashboardService } from "../../services/api";
 import "./Pontos.css";
 
-export function Pontos() {
-  const pontos = [
-    {
-      id: "matriz",
-      nome: "Igreja Matriz dos Santos Cosme e Damião",
-      imagem: "igreja.jpg",
-    },
-    {
-      id: "sagrado-coracao",
-      nome: "Convento Sagrado Coração de Jesus",
-      imagem: "convento.png",
-    },
-    {
-      id: "convento",
-      nome: "Convento Franciscano de Santo Antônio e Pinacoteca",
-      imagem: "conventofranciscano.jpeg",
-    },
-    {
-      id: "sobrado",
-      nome: "Sobrado do Imperador",
-      imagem: "sobrado.jpg",
-    },
-    {
-      id: "biblioteca",
-      nome: "Biblioteca Municipal de Igarassu",
-      imagem: "biblioteca.png",
-    },
-    {
-      id: "museu",
-      nome: "Museu Histórico de Igarassu",
-      imagem: "museu.png",
-    },
-    {
-      id: "artesao",
-      nome: "Casa do Artesão e Centro de Informações Turísticas",
-      imagem: "casa.png",
-    },
+const imagensLocais = {
+  "biblioteca": "biblioteca.png",
+  "casa do artesão": "casa.png",
+  "convento do sagrado": "convento.png",
+  "convento franciscano": "conventofranciscano.jpeg",
+  "igreja matriz": "igreja.jpg",
+  "museu histórico": "museu.png",
+  "sobrado do imperador": "sobrado.jpg",
+};
 
-  ];
+const getImagemPorNome = (nome) => {
+  if (!nome) return '';
+  const nomeLower = nome.toLowerCase();
+  for (const [key, value] of Object.entries(imagensLocais)) {
+    if (nomeLower.includes(key)) return value;
+  }
+  return '';
+};
+
+export function Pontos() {
+  const [pontos, setPontos] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchPontos = async () => {
+      try {
+        setLoading(true);
+        const data = await dashboardService.getPontosTuristicos();
+        const lista = Array.isArray(data) ? data : (data?.data || data?.pontos || []);
+        const ordenado = lista.sort((a, b) => {
+          const nomeA = (a.nome || a.name || '').toLowerCase();
+          const nomeB = (b.nome || b.name || '').toLowerCase();
+          return nomeA.localeCompare(nomeB, 'pt-BR');
+        });
+        setPontos(ordenado);
+      } catch (error) {
+        console.error("Erro ao buscar pontos turísticos:", error);
+        setPontos([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPontos();
+  }, []);
 
   return (
     <main className="pontos-container">
       <Header />
 
       <section className="pontos-titulo">
-        <h1>Pontos turísticos</h1>
+        <h1>Pontos Turísticos</h1>
       </section>
 
-      <section className="pontos-grid">
-        {pontos.map((ponto) => (
-          <div key={ponto.id} className="ponto-card">
-            <img src={ponto.imagem} alt={ponto.nome} />
-            <h3>{ponto.nome}</h3>
+      {loading ? (
+        <section className="pontos-grid">
+          <p>Carregando pontos turísticos...</p>
+        </section>
+      ) : (
+        <section className="pontos-grid">
+          {pontos.map((ponto, index) => {
+            const id = ponto.id || ponto.id_ponto || ponto._id;
+            const nome = ponto.nome || ponto.name;
+            let imagem = ponto.imagem || ponto.foto || ponto.image || ponto.url_imagem || '';
+            if (!imagem) {
+              imagem = getImagemPorNome(nome);
+            }
+            
+            return (
+              <div key={id} className="ponto-card">
+                {imagem && (
+                  <img 
+                    src={imagem.startsWith('http') ? imagem : `/${imagem}`} 
+                    alt={nome} 
+                  />
+                )}
+                <h3>{nome}</h3>
 
-            <Link to={`/pontos/${ponto.id}`}>
-              <button>saiba mais</button>
-            </Link>
-          </div>
-        ))}
-      </section>
-
-     
+                <Link to={`/pontos-turisticos/${id}`}>
+                  <button>saiba mais</button>
+                </Link>
+              </div>
+            );
+          })}
+        </section>
+      )}
     </main>
   );
 }

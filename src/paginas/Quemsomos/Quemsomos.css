@@ -104,8 +104,6 @@
   line-height: 1.52;
 }
 
-
-/* Mobile improvements for Quem Somos */
 @media (max-width: 900px) {
   .conteudo { padding: 32px 12px 44px; }
   .blocos { gap: 24px; width: 96vw; }
@@ -116,7 +114,6 @@
   .valor-card { padding-left: 18px; }
 }
 
-/* Narrow mobile: preserve layout and components, only scale/stack to fit <= 375px */
 @media (max-width: 375px) {
   .conteudo { padding: 20px 10px 32px; }
   .blocos { width: 100%; max-width: 360px; gap: 18px; }
@@ -151,7 +148,6 @@
 
   .valor-card strong { font-size: 15px; }
 
-  /* ensure footer and header specific adjustments apply cleanly */
   .conteudo .header { position: relative; z-index: 30; }
   .conteudo .footer { margin-top: 24px; }
 }

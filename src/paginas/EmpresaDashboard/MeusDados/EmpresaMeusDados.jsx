@@ -33,7 +33,6 @@ export function EmpresaMeusDados() {
         if (empresaId) {
           try {
             const res = await dashboardService.getEmpresaById(empresaId);
-            // normalize possible shapes: array, { empresa: {...} }, object
             if (Array.isArray(res)) empresaObj = res[0] || null;
             else if (res?.empresa) empresaObj = res.empresa;
             else empresaObj = res || null;
@@ -43,7 +42,6 @@ export function EmpresaMeusDados() {
             empresaObj = null;
           }
         }
-        // only fall back to list-search if id lookup failed
         if (!empresaObj) {
           try {
             const list = await dashboardService.getEmpresas();

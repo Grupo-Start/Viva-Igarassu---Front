@@ -174,7 +174,7 @@ export function EmpresaEventos() {
       const computedISO = (() => {
         try {
           if (formData.data && formData.horario) return new Date(`${formData.data}T${formData.horario}`).toISOString();
-        } catch (e) { /**/ }
+        } catch (e) { }
         return null;
       })();
 
@@ -276,7 +276,7 @@ export function EmpresaEventos() {
       return match[0];
     }
     if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(horaStr)) {
-      return horaStr.substring(11, 16); // pega HH:mm
+      return horaStr.substring(11, 16);
     }
     return horaStr;
   }

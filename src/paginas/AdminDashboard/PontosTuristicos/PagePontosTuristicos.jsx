@@ -146,7 +146,6 @@ export function PagePontosTuristicos() {
           dadosBackend.empresa_id = dadosBackend.empresa_id || empresaId;
         }
       } catch (e) {
-        // ignore
       }
 
       if (formData.endereco) {

@@ -1,13 +1,11 @@
 import axios from 'axios';
 
-// Resolve API base URL from environment (Vite: import.meta.env.VITE_API_URL, CRA: REACT_APP_API_URL)
 let API_BASE_URL = 'http://localhost:3001';
 try {
   if (typeof import.meta !== 'undefined' && import.meta && import.meta.env && import.meta.env.VITE_API_URL) {
     API_BASE_URL = import.meta.env.VITE_API_URL;
   }
 } catch (e) {
-  // import.meta may not be available in some bundlers; fall back to process.env check
   try {
     if (typeof process !== 'undefined' && process && process.env && process.env.REACT_APP_API_URL) {
       API_BASE_URL = process.env.REACT_APP_API_URL;
@@ -35,7 +33,6 @@ api.interceptors.response.use(
     try {
       const cfg = error?.config || {};
       const headers = cfg.headers || {};
-      // merge possible nested header containers (axios sometimes uses headers.common)
       const combined = { ...(headers.common || {}), ...headers };
       let skipHeader = false;
       for (const k of Object.keys(combined)) {
@@ -54,7 +51,6 @@ api.interceptors.response.use(
         window.location.href = '/login';
       }
     } catch (e) {
-      // ignore
     }
     return Promise.reject(error);
   }
@@ -429,11 +425,9 @@ export const dashboardService = {
           const resp = await api.get(p);
           return resp.data;
         } catch (e) {
-          // tentar próximo
         }
       }
     } catch (error) {
-      // tentar outros caminhos comuns
       try {
         const resp2 = await api.get(`/qrcodes/resolve?token=${encodeURIComponent(token)}`);
         return resp2.data;
@@ -446,7 +440,6 @@ export const dashboardService = {
   visitarViaQr: async (token) => {
     try {
       if (!token) throw new Error('visitarViaQr: token ausente');
-      // Primeiro tentar o endpoint que o backend tem: POST /visitas/qr?token=...
       try {
         console.debug('visitarViaQr: tentando primeiro POST /visitas/qr?token=...');
         const respDirect = await api.post(`/visitas/qr?token=${encodeURIComponent(token)}`, {});
@@ -454,15 +447,12 @@ export const dashboardService = {
         return respDirect.data;
       } catch (firstErr) {
         const statusFirst = firstErr?.response?.status || null;
-        // se já possui figurinha (409), retornar a resposta do servidor como sucesso sem lançar
         if (statusFirst === 409) {
-          try { return firstErr.response.data; } catch (e) { /* fallthrough */ }
+          try { return firstErr.response.data; } catch (e) { }
         }
         console.warn('visitarViaQr: POST /visitas/qr inicial falhou, seguindo para outros endpoints', statusFirst, firstErr?.response?.data || firstErr?.message || firstErr);
-        // continuar com tentativas alternativas
       }
 
-      // Priorizar POST /qr com payload { token } (ou chaves similares). Depois tentar GET /qr?token=...
       const endpoint = '/qr';
       const payloadKeys = ['token', 'id_qr_code', 'id_qrcode', 'id', 'codigo', 'code', 'qr'];
       const headersJson = { 'Content-Type': 'application/json' };
@@ -475,7 +465,6 @@ export const dashboardService = {
         if (t) authHeader.Authorization = `Bearer ${t}`;
       } catch (e) {}
 
-      // tentar POST /qr com várias chaves (JSON e form)
       for (const key of payloadKeys) {
         const body = { [key]: token };
         try {
@@ -500,7 +489,6 @@ export const dashboardService = {
         }
       }
 
-      // tentar GET /qr?token=...
       try {
         const resg = await api.get(`${endpoint}?token=${encodeURIComponent(token)}`, { headers: { ...authHeader } });
         return resg.data;
@@ -508,7 +496,6 @@ export const dashboardService = {
         lastErr = eg;
       }
 
-      // Fallback: algumas versões do backend expõem POST em /visitas/qr?token=... (sem corpo)
       try {
         console.debug('visitarViaQr: tentando fallback POST /visitas/qr?token=...');
         const respFallback = await api.post(`/visitas/qr?token=${encodeURIComponent(token)}`, {}, { headers: { ...authHeader } });
@@ -519,7 +506,6 @@ export const dashboardService = {
         console.warn('visitarViaQr: fallback POST /visitas/qr falhou', efb?.response?.status, efb?.response?.data || efb?.message || efb);
       }
 
-      // Último recurso: tentar com chamada absoluta (algumas configurações do axios/baseURL conflitantes)
       try {
         const jwt = (typeof localStorage !== 'undefined') ? localStorage.getItem('token') : null;
         const headersAbs = jwt ? { Authorization: `Bearer ${jwt}` } : {};
@@ -572,8 +558,6 @@ export const dashboardService = {
         }
       } catch (e) {}
 
-      console.log('createPontoTuristico: payload final (antes de filtrar) ->', jsonPayload);
-
       if (!jsonPayload.nome || String(jsonPayload.nome).trim() === '') {
         throw new Error('createPontoTuristico: campo "nome" é obrigatório');
       }
@@ -594,15 +578,12 @@ export const dashboardService = {
         if (allowed.has(k)) finalPayload[k] = jsonPayload[k];
       }
 
-      console.log('createPontoTuristico: payload enviado ->', finalPayload);
-
       const endpoints = ['/pontos-turisticos'];
       const config = { headers: { 'Content-Type': 'application/json' } };
       let lastErr = null;
       for (const ep of endpoints) {
         try {
           const res = await api.post(ep, finalPayload, config);
-          console.log('createPontoTuristico: resposta OK', ep, res.status, res.data);
           return res.data;
         } catch (err) {
           lastErr = err;
@@ -845,13 +826,11 @@ export const authService = {
   register: async (user) => {
     try {
       if (!user) throw new Error('register: payload ausente');
-      // Try the canonical public registration endpoint first and only
       const nome = user.nome || user.name || user.nome_completo || user.nomeCompleto;
       const email = user.email || user.usuario || user.emailAddress;
       const senha = user.senha || user.password || user.pwd;
       const role = user.role || user.tipo || user.type || 'comum';
 
-      // backend expects exactly: nome_completo, email, senha
       const body = {
         ...(nome ? { nome_completo: nome } : {}),
         ...(email ? { email } : {}),
@@ -864,7 +843,6 @@ export const authService = {
         console.debug('authService.register: /usuarios/cadastrar sucesso', res?.data);
         return res.data;
       } catch (err) {
-        // If backend returns 401 with message 'Token não fornecido', surface a clearer error
         const status = err?.response?.status;
         const respData = err?.response?.data;
         console.warn('authService.register: /usuarios/cadastrar falhou', status, respData);
@@ -899,7 +877,6 @@ export const authService = {
         lastErr = error;
       }
     }
-    // if we have an axios error with response, throw it so callers can inspect status/data
     if (lastErr) throw lastErr;
     throw new Error('Todas as tentativas falharam. Verifique email/senha ou backend.');
   },
@@ -907,7 +884,6 @@ export const authService = {
     try {
       if (!emailOrPayload) throw new Error('requestPasswordReset: email ausente');
       const email = typeof emailOrPayload === 'string' ? emailOrPayload : (emailOrPayload.email || emailOrPayload.usuario || emailOrPayload.emailAddress);
-      // Backend esperado: forgotPassword(email) com body { email }
       const payloads = [ { email } ];
       const endpoints = [
         '/auth/forgot-password',
@@ -934,7 +910,6 @@ export const authService = {
   verifyResetToken: async (token) => {
     try {
       if (!token) throw new Error('verifyResetToken: token ausente');
-      // Se o backend não expõe validação separada, apenas retorna sucesso direto.
       const tryPaths = [
         `/auth/validate-reset-token?token=${encodeURIComponent(token)}`,
       ];
@@ -943,7 +918,6 @@ export const authService = {
           const resp = await api.get(p, { headers: { 'X-Skip-Auth-Redirect': '1' } });
           return resp.data;
         } catch (e) {
-          // se não existir, seguimos para reset direto
         }
       }
       return { ok: true };
@@ -1011,7 +985,6 @@ export const authService = {
             const res = await api.put(ep, b);
             return res.data;
           } catch (err) {
-            // se for 404/405, tenta POST
             if (err?.response?.status === 404 || err?.response?.status === 405) {
               try {
                 const resPost = await api.post(ep, b);

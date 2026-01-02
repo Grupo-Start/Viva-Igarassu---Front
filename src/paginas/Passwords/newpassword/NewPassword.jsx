@@ -15,7 +15,6 @@ export function NewPassword() {
     const [confirmSenha, setConfirmSenha] = useState("");
     const [loading, setLoading] = useState(false);
 
-    // se o usuário veio do link com token na URL, armazenar para usar no reset
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
         const urlToken = params.get('token');
