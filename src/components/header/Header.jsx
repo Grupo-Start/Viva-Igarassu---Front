@@ -133,13 +133,13 @@ export function Header() {
       </div>
 
       <nav className="header-nav">
-        <Link to="/home">Home</Link>
+        <Link to="/">Home</Link>
         <p>|</p>
         <Link to="/quem-somos">Quem somos</Link>
         <p>|</p>
         <Link to="/cidade">A cidade</Link>
         <p>|</p>
-        <Link to="/contato">Contato</Link>
+        <a href="#contato" onClick={(e) => { e.preventDefault(); document.getElementById('contato')?.scrollIntoView({ behavior: 'smooth' }); }}>Contato</a>
       </nav>
 
       <div className="header-actions">

@@ -124,48 +124,50 @@ export function Login() {
                 <h1 className="text-global">Login</h1>
                 <p className="subtitle-p">Entre na sua conta</p>
 
-                <div className="form-login-container">
-                    <input
-                        className="login-input"
-                        type="email"
-                        placeholder="E-mail"
-                        required
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                    />
-                    <FaUser className="img-cadeado" />
-                </div>
-
-                <div className="container-input-person">
-                    <input
-                        className="input-person"
-                        type={mostrarSenha ? "text" : "password"}
-                        placeholder="Senha"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                    />
-
-                    {mostrarSenha ? (
-                        <IoIosUnlock
-                        className="img-cadeado"
-                        onClick={toggleSenha}
+                <form onSubmit={handleSubmit}>
+                    <div className="form-login-container">
+                        <input
+                            className="login-input"
+                            type="email"
+                            placeholder="E-mail"
+                            required
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
                         />
-                    ) : (
-                        <IoIosLock
-                        className="img-cadeado"
-                        onClick={toggleSenha}
+                        <FaUser className="img-cadeado" />
+                    </div>
+
+                    <div className="container-input-person">
+                        <input
+                            className="input-person"
+                            type={mostrarSenha ? "text" : "password"}
+                            placeholder="Senha"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
                         />
+
+                        {mostrarSenha ? (
+                            <IoIosUnlock
+                            className="img-cadeado"
+                            onClick={toggleSenha}
+                            />
+                        ) : (
+                            <IoIosLock
+                            className="img-cadeado"
+                            onClick={toggleSenha}
+                            />
+                        )}
+                    </div>
+
+                    {error && (
+                        <p className="login-error" style={{ color: 'red', marginTop: 8 }}>{error}</p>
                     )}
-                </div>
 
-                {error && (
-                    <p className="login-error" style={{ color: 'red', marginTop: 8 }}>{error}</p>
-                )}
-
-                <Button text="Entrar" onClick={handleSubmit} disabled={loading} />
+                    <Button text="Entrar" disabled={loading} type="submit" />
+                </form>
 
                 <div className="form-login-request">
-                    <p><strong className="underline-login" onClick={() => navigate('/passwordreset')}>Esqueceu sua senha ?</strong></p>
+                    <p><strong className="underline-login" onClick={() => navigate('/password-reset')}>Esqueceu sua senha ?</strong></p>
                 <p>Não tem conta ? <strong className="underline-login" onClick={() => navigate('/register')}>Cadastre-se</strong></p>
                 </div>
                 {debugInfo && (

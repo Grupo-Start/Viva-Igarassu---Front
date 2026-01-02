@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "../../components/button/Button";
-import "./TokenReset.css"; // reaproveitando o mesmo CSS
-import Img from "../../assets/Logoimg.jpeg";
+import { Button } from "../../../components/button/Button";
+import "./TokenReset.css";
+import Img from "../../../assets/Logoimg.jpeg";
 import { IoIosLock } from "react-icons/io";
-import { authService } from "../../services/api";
+import { authService } from "../../../services/api";
 
 // TokenReset.jsx
 
@@ -23,7 +23,7 @@ export function TokenReset() {
         setLoading(true);
         await authService.verifyResetToken(urlToken);
         localStorage.setItem('resetToken', urlToken);
-        navigate('/newpassword');
+        navigate('/reset-password');
       } catch (err) {
         console.error('verifyResetToken via URL erro', err);
         const msg = err?.response?.data?.message || err?.message || 'Token inválido';
@@ -40,7 +40,7 @@ export function TokenReset() {
       setLoading(true);
       // Backend não tem endpoint dedicado de validação; seguimos direto para próxima etapa
       localStorage.setItem('resetToken', token);
-      navigate('/newpassword');
+      navigate('/reset-password');
     } catch (err) {
       console.error('token flow erro', err);
       const msg = err?.response?.data?.message || err?.message || 'Erro ao processar token';
@@ -59,19 +59,22 @@ export function TokenReset() {
 
       <div className="form-tokenreset">
         <h2 className="text-global">Confirmação de Token</h2>
-        <p className="subtitle-token">Digite o código enviado ao seu E-mail</p>
+        <p className="subtitle-token">Digite o código enviado ao seu
+          <br/> 
+          E-mail</p>
 
-        <form className="form-tokenreset-container" onSubmit={handleValidate}>
-          <input
-            className="tokenreset-input"
-            type="text"
-            placeholder="Token (6 dígitos)"
-            maxLength={6}
-            value={token}
-            onChange={(e) => setToken(e.target.value)}
-            required
-          />
-          <IoIosLock className="icon-lock" />
+        <form onSubmit={handleValidate}>
+          <div className="form-tokenreset-container">
+            <input
+              className="tokenreset-input"
+              type="text"
+              placeholder="Digite o token"
+              value={token}
+              onChange={(e) => setToken(e.target.value)}
+              required
+            />
+            <IoIosLock className="icon-lock" />
+          </div>
           <Button text={loading ? 'Verificando...' : 'Enviar'} disabled={loading} type="submit" />
         </form>
       </div>

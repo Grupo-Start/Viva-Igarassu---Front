@@ -989,6 +989,48 @@ export const authService = {
       throw error;
     }
   },
+  changePassword: async (senhaAtual, novaSenha) => {
+    try {
+      if (!senhaAtual || !novaSenha) throw new Error('changePassword: senhas ausentes');
+      const endpoints = [
+        '/usuarios/me/senha',
+        '/auth/change-password',
+        '/usuarios/change-password',
+        '/usuarios/alterar-senha',
+        '/auth/alterar-senha',
+      ];
+      const bodies = [
+        { senhaAtual, novaSenha },
+        { senha_atual: senhaAtual, nova_senha: novaSenha },
+        { currentPassword: senhaAtual, newPassword: novaSenha },
+      ];
+      let lastErr = null;
+      for (const ep of endpoints) {
+        for (const b of bodies) {
+          try {
+            const res = await api.put(ep, b);
+            return res.data;
+          } catch (err) {
+            // se for 404/405, tenta POST
+            if (err?.response?.status === 404 || err?.response?.status === 405) {
+              try {
+                const resPost = await api.post(ep, b);
+                return resPost.data;
+              } catch (errPost) {
+                lastErr = errPost;
+              }
+            } else {
+              lastErr = err;
+            }
+          }
+        }
+      }
+      if (lastErr) throw lastErr;
+      throw new Error('changePassword: nenhum endpoint respondeu');
+    } catch (error) {
+      throw error;
+    }
+  },
   logout: () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');

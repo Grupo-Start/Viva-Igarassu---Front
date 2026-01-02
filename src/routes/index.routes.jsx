@@ -14,9 +14,10 @@ import { PageEmpresas } from "../paginas/AdminDashboard/Empresas/PageEmpresas";
 import { PagePontosTuristicos } from "../paginas/AdminDashboard/PontosTuristicos/PagePontosTuristicos";
 import { PageEventos } from "../paginas/AdminDashboard/Eventos/PageEventos";
 import { PageRecompensas } from "../paginas/AdminDashboard/Recompensas/PageRecompensas";
-import { PasswordReset } from "../paginas/passwordreset/PasswordReset";
-import { TokenReset } from "../paginas/tokenreset/TokenReset";
-import { NewPassword } from "../paginas/newpassword/NewPassword";
+import { PasswordReset } from "../paginas/Passwords/passwordreset/PasswordReset";
+import { TokenReset } from "../paginas/Passwords/tokenreset/TokenReset";
+import { NewPassword } from "../paginas/Passwords/newpassword/NewPassword";
+import { AlterarSenha } from "../paginas/Passwords/passwordlogged/passwordlogged";
 import { EmpresaDashboard } from "../paginas/EmpresaDashboard/Dashboard/EmpresaDashboard";
 import EmpresaRoute from "../components/guards/EmpresaRoute";
 import AdminRoute from "../components/guards/AdminRoute";
@@ -24,6 +25,7 @@ import { EmpresaRecompensas } from "../paginas/EmpresaDashboard/Recompensas/Empr
 import { EmpresaEventos } from "../paginas/EmpresaDashboard/Eventos/EmpresaEventos";
 import { EmpresaMeusDados} from "../paginas/EmpresaDashboard/MeusDados/EmpresaMeusDados";
 import { ScanQRCode } from "../paginas/ScanQRCode/scanqrcode";
+import { NotFound } from "../paginas/NotFound/NotFound";
 
 export const paginas = createBrowserRouter([
     {
@@ -141,6 +143,14 @@ export const paginas = createBrowserRouter([
                         <EmpresaEventos />
                     </EmpresaRoute>
                 )
+            },
+            {
+                path: '/alterar-senha',
+                element: (
+                    <EmpresaRoute>
+                        <AlterarSenha />
+                    </EmpresaRoute>
+                )
             }
             ,
             {
@@ -162,6 +172,10 @@ export const paginas = createBrowserRouter([
         {
             path: "/tela-figurinha",
             element: <Telafigurinha />
+        },
+        {
+            path: "*",
+            element: <NotFound />
         },
         
 ])
