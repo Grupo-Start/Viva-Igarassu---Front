@@ -15,9 +15,9 @@ export function CarnivalPage() {
         <section className="event-details">
           <EventInfo />
           <EventMap />
-          <Footer />
         </section>
       </main>
+      <Footer />
     </div>
   );
 }

@@ -4,13 +4,22 @@
   background-color: #e0f7fa;
   padding: 20px;
   border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
 .event-map h3 {
   font-size: 20px;
   margin-bottom: 10px;
   color: #006064;
+}
+
+.event-map-image {
+  width: 100%;
+  height: auto;
+  max-height: 250px;
+  object-fit: cover;
+  border-radius: 4px;
+  margin-bottom: 15px;
 }
 
 .event-map iframe {
