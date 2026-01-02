@@ -1,4 +1,4 @@
-/* Layout Geral (Sidebar ao lado do Conteúdo) */
+
 .dashboard-layout-container {
   display: flex;
   min-height: 100vh;
@@ -7,11 +7,11 @@
 h1,hr{
     color:#2C5782;
 }
-/* Estilo do conteúdo principal */
+
 .usuario-dashboard-main {
   flex: 1;
   padding: 30px;
-  background-color: #f8f9fa; /* Cor de fundo geral da página */
+  background-color: #f8f9fa; 
   color: #333;
 }
 
@@ -34,12 +34,9 @@ h1,hr{
   flex-wrap: wrap;
 }
 
-/* Aplicando o degradê dentro dos cards */
+
 .conquista-card, .conquista-card2 {
-  /* O 135deg define a direção diagonal. Você pode usar 'to right' para horizontal. */
   background: linear-gradient(135deg, #4BBFBF 0%, #2C5782 94%);
-  
-  /* Mantendo os outros estilos para visibilidade */
   color: white;
   padding: 25px;
   border-radius: 12px;
@@ -48,7 +45,7 @@ h1,hr{
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border: none; /* Remove bordas se houver */
+  border: none; 
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
@@ -62,7 +59,7 @@ h1,hr{
   line-height: 1.4;
 }
 
-/* Estilização da imagem da moeda */
+
 .moeda {
   width: 150px;
   height: 150px;
@@ -77,5 +74,3 @@ h1,hr{
     display: flex;
     gap: 20px;
  }
-
- 

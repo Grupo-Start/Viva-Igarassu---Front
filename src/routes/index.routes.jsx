@@ -6,6 +6,7 @@ import { RegisterPerson } from "../paginas/RegisterPerson/RegisterPerson";
 import { AdminDashboard } from "../paginas/AdminDashboard/AdminDashboard";
 import { DashboardEmpresa } from "../paginas/dashboardEmpresa/dashboardEmpresa";
 import { UsuarioDashboard } from "../paginas/UsuarioDashboard/UsuarioDashboard";
+import { UsuarioDados } from "../paginas/UsuarioDados/Usuariodados";
 
 export const paginas = createBrowserRouter([
     {
@@ -35,5 +36,9 @@ export const paginas = createBrowserRouter([
     {
         path: '/usuarioDashboard',
         element: <UsuarioDashboard />
+    },
+    {
+        path: '/usuarioDados',
+        element: <UsuarioDados />
     }
 ])
