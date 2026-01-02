@@ -8,8 +8,13 @@
   margin: 0 auto;
   display: flex;
   flex-direction: column;
+<<<<<<< HEAD
+  gap: 50px;
+  text-align: justify;
+=======
   gap: 28px;
   align-items: center;
+>>>>>>> 9cc9644e981278c643f79631815314d9b217a750
 }
 
 
