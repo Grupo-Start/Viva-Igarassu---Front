@@ -1,0 +1,141 @@
+.figurinhas-container {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    width: 100%;
+    padding: 30px;
+    box-sizing: border-box;
+}
+
+
+.titulo-album {
+    font-size: 28px;
+    font-weight: bold;
+    color: #2c4a6e;
+    margin-bottom: 10px;
+}
+
+
+.titulo-album + hr,
+.figurinhas-container hr {
+    border: none;
+    height: 3px;
+    width: 100%;
+    margin: 12px 0 20px;
+    background-color: #2c4a6e; 
+    border-radius: 3px;
+    box-shadow: 0 2px 0 rgba(0,0,0,0.08) inset;
+}
+
+
+
+.album-box {
+    margin-top: 20px;
+    padding: 30px;
+    min-height: 420px;
+    border-radius: 30px;
+    background: linear-gradient(180deg, #49c5c1, #3c5f86);
+    display: flex;
+    gap: 40px;
+    align-items: flex-start;
+    flex: 1;
+    width: 100%;
+}
+
+
+.figurinha {
+    width: 160px;
+    text-align: center;
+}
+
+.figurinha img {
+    width: 120px;
+    height: auto;
+    opacity: 1;
+    filter: none;
+    -webkit-filter: none;
+}
+
+
+
+.figurinha span {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 6px 12px;
+    font-size: 12px;
+    color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.25);
+    border-radius: 20px;
+}
+
+
+@media (max-width: 1024px) {
+    .figurinhas-container {
+        padding: 24px;
+    }
+
+    .album-box {
+        gap: 28px;
+        padding: 24px;
+        min-height: 360px;
+    }
+
+    .figurinha {
+        width: 140px;
+    }
+
+    .figurinha img {
+        width: 100%;
+        max-width: 140px;
+    }
+}
+
+@media (max-width: 600px) {
+   
+    
+    .dashboard-layout-container {
+        flex-direction: column;
+    }
+
+    .dashboard-layout-container nav {
+        display: none;
+    }
+
+    .figurinhas-container {
+        padding: 16px;
+    }
+
+    .titulo-album {
+        font-size: 20px;
+        text-align: center;
+    }
+
+    .titulo-album + hr {
+        margin: 10px 0 16px;
+    }
+
+    .album-box {
+        flex-direction: column;
+        align-items: center;
+        gap: 18px;
+        padding: 18px;
+        min-height: auto;
+    }
+
+    .figurinha {
+        width: 100%;
+        max-width: 320px;
+        text-align: center;
+    }
+
+    .figurinha img {
+        width: 70%;
+        max-width: 220px;
+        height: auto;
+    }
+
+    .figurinha span {
+        font-size: 13px;
+        padding: 8px 14px;
+    }
+}
