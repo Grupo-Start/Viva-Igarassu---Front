@@ -47,3 +47,10 @@
   border-top: 1px solid #333;
   padding-top: 15px;
 }
+
+/* Ocultar footer em telas pequenas para melhorar a responsividade */
+@media (max-width: 520px) {
+  .footer {
+    display: none !important;
+  }
+}

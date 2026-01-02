@@ -1,9 +1,19 @@
-// Sidebar.jsx
 import { useState } from "react";
+import { NavLink, useNavigate } from "react-router-dom";
 import "./sidebar.css";
+import { LuMenu } from "react-icons/lu";
 
 export function Sidebar() {
   const [open, setOpen] = useState(true);
+  const navigate = useNavigate();
+  // Sidebar will display a static greeting; header shows company/user name
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    navigate('/login');
+  };
+
+  // no dynamic company name in sidebar; keep static greeting
 
   return (
     <div className="layout">
@@ -11,25 +21,38 @@ export function Sidebar() {
         <div className="sidebar-header">
           <h2>{open ? "Olá!" : ""}</h2>
           <button className="toggle" onClick={() => setOpen(!open)}>
-            ☰
+            <LuMenu />
           </button>
         </div>
 
         <ul className="menu">
-          <li>{open && "Dashboard"}</li>
-          <li>{open && "Meus dados"}</li>
-          <li>{open && "Redefinir senha"}</li>
-          <li>{open && "Recompensas"}</li>
-          <li>{open && "Eventos"}</li>
-          <li>{open && "Sair"}</li>
+          <li>
+            <NavLink end to="/Empresa-Dashboard" className={({isActive}) => isActive ? 'menu-item menu-active' : 'menu-item'}>
+              {open ? ' Dashboard' : 'D'}
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="/Empresa-Dashboard/MeusDados" className={({isActive}) => isActive ? 'menu-item menu-active' : 'menu-item'}>
+              {open ? ' Meus dados' : 'M'}
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="/Empresa-Dashboard/RedefinirSenha" className={({isActive}) => isActive ? 'menu-item menu-active' : 'menu-item'}>
+              {open ? ' Redefinir senha' : 'R'}
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="/Empresa-Dashboard/Recompensas" className={({isActive}) => isActive ? 'menu-item menu-active' : 'menu-item'}>
+              {open ? ' Recompensas' : 'Re'}
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="/Empresa-Dashboard/Eventos" className={({isActive}) => isActive ? 'menu-item menu-active' : 'menu-item'}>
+              {open ? ' Eventos' : 'E'}
+            </NavLink>
+          </li>
         </ul>
       </aside>
-
-      <main className="content">
-        <h1>Livraria Igarassu</h1>
-        <p>Sidebar funcionando com CSS + JSX</p>
-      </main>
     </div>
   );
 }
-
