@@ -19,7 +19,10 @@ export function Home() {
 
         <div className="faixa-info">
           <span className="faixa-texto">
-            Agenda | <span className="faixa-link" onClick={() => navigate('/pontos-turisticos')}>Pontos Turísticos</span> | Trilha Sítio Histórico | Recompensas
+            Agenda | <span className="faixa-link" onClick={() => navigate('/pontos-turisticos')}>Pontos Turísticos</span> | <span className="faixa-link" onClick={() => {
+              const target = document.getElementById('trilha-historico');
+              if (target) target.scrollIntoView({ behavior: 'smooth' });
+            }}>Trilha Sítio Histórico</span> | Recompensas
           </span>
         </div>
       </section>
@@ -81,7 +84,7 @@ export function Home() {
         <button className="cta-btn" onClick={() => navigate('/register')}>CADASTRE-SE</button>
       </section>
 
-      <div className="faixa-topo-historico">
+      <div className="faixa-topo-historico" id="trilha-historico">
         <h2>Trilha Sítio Histórico</h2>
         <span className="tag-historico">#vivanossahistoria</span>
       </div>

@@ -5,7 +5,7 @@ import Header from "../../components/header/Header";
 
 export function Quemsomos() {
   return (
-   <div>
+   <div className="quemsomos-page">
    <Header/>
    
 
@@ -15,8 +15,8 @@ export function Quemsomos() {
         <div className="bloco-secao">
           <h2 className="titulo">
         
+            <FaStar className="estrela" />
             O VIVA IGARASSU
-              <FaStar className="estrela" />
           </h2>
 
           <div className="bloco">
@@ -37,8 +37,8 @@ export function Quemsomos() {
 
         <div className="bloco-secao">
           <h2 className="titulo">
+          <FaStar className="estrela" />
             NOSSA MISSÃO
-              <FaStar className="estrela" />
           </h2>
 
           <div className="bloco">
@@ -56,9 +56,8 @@ export function Quemsomos() {
  
         <div className="bloco-secao">
           <h2 className="titulo">
-          
+            <FaStar className="estrela" />
             NOSSOS VALORES
-              <FaStar className="estrela" />
           </h2>
 
           <div className="valores-container">
@@ -87,8 +86,8 @@ export function Quemsomos() {
           </div>
         </div>
       </section>
-      <Footer />
     </main>
+    <Footer />
     </div>
   );
 }
