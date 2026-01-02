@@ -1,4 +1,5 @@
 import "./footer.css";
+import { Link } from "react-router-dom";
 
 export default function Footer() {
   return (
@@ -11,9 +12,9 @@ export default function Footer() {
 
         <div className="footer-links">
           <h4>Links úteis</h4>
-          <a href="#">Home</a>
-          <a href="#">Quem somos</a>
-          <a href="#">A cidade</a>
+          <Link to="/home">Home</Link>
+          <Link to="/quem-somos">Quem somos</Link>
+          <Link to="/cidade">A cidade</Link>
         </div>
 
         <div className="footer-contato">

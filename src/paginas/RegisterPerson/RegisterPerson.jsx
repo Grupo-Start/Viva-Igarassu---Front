@@ -1,20 +1,142 @@
+import { useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { api, authService } from "../../services/api";
+
 import { Button } from "../../components/button/Button"
 import "./RegisterPerson.css"
-import Img from "../../assets/WhatsApp Image 2025-12-07 at 10.19.02 (1).jpeg"
+
+import Img from "../../assets/Logoimg.jpeg"
+
 import { FaUser } from "react-icons/fa";
-import { IoIosLock } from "react-icons/io";
+import { IoIosLock, IoIosUnlock } from "react-icons/io";
 
 export function RegisterPerson() {
+    const [mostrarSenha, setMostrarSenha] = useState(false);
+    const [nome, setNome] = useState('');
+    const [email, setEmail] = useState('');
+    const [senha, setSenha] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+    const [debugInfo, setDebugInfo] = useState(null);
+    const navigate = useNavigate();
+    const location = useLocation();
+
+  function toggleSenha() {
+    setMostrarSenha(!mostrarSenha);
+  }
+
     return (
-        <div>
-            <div>
-                <img src={Img} alt="img-RegisterPerson" />
+
+        <div className="container-person">
+
+            <div className="container-imagem-person">
+                <img className="img-person" src={Img} alt="Viva-Igarassu" />
             </div>
 
-            <div>
-                <h1></h1>
+            <div className="form-person">
+                <h1 className="text-global">Cadastre-se</h1>
+
+
+                <div className="container-input-person">
+                    <input className="input-person" type="text" placeholder="Nome completo" value={nome} onChange={e => setNome(e.target.value)} required />
+                    <FaUser className="img-cadeado" />
+                </div>
+
+                <div className="container-input-person">
+                    <input className="input-person" type="email" placeholder="E-mail" value={email} onChange={e => setEmail(e.target.value)} required />
+                    <FaUser className="img-cadeado" />
+                </div>
+
+               <div className="container-input-person">
+                    <input
+                        className="input-person"
+                        type={mostrarSenha ? "text" : "password"}
+                        placeholder="Senha"
+                        value={senha}
+                        onChange={e => setSenha(e.target.value)}
+                        required
+                    />
+
+                    {mostrarSenha ? (
+                        <IoIosUnlock
+                        className="img-cadeado"
+                        onClick={toggleSenha}
+                        />
+                    ) : (
+                        <IoIosLock
+                        className="img-cadeado"
+                        onClick={toggleSenha}
+                        />
+                    )}
+                </div>
+
+                {error && <p style={{ color: 'crimson' }}>{error}</p>}
+                {debugInfo && (
+                    <details style={{ marginTop: 12, background: '#fff7f7', padding: 10, borderRadius: 6 }}>
+                        <summary style={{ cursor: 'pointer', color: '#b00' }}>Mostrar detalhes do erro</summary>
+                        <pre style={{ whiteSpace: 'pre-wrap', marginTop: 8 }}>{JSON.stringify(debugInfo, null, 2)}</pre>
+                    </details>
+                )}
+
+                <Button disabled={loading} text={loading ? 'Enviando...' : 'Enviar'} onClick={async (e) => {
+                    e.preventDefault();
+                    setError(null);
+                    setLoading(true);
+                    try {
+                        const role = location?.state?.role || 'comum';
+                        const payload = { nome_completo: nome || undefined, email, senha, role };
+                        // tentar registrar via authService.register (tenta múltiplos formatos/endpoints)
+                        const created = await authService.register(payload);
+                        console.debug('Registro criado:', created);
+                        // tentar logar automaticamente para obter token (necessário para /empresa)
+                        let tokenObtained = null;
+                        try {
+                            const authResp = await authService.login({ email, password: senha });
+                            // aceitar vários formatos de token retornado
+                            const maybeToken = authResp?.token || authResp?.accessToken || authResp?.jwt || authResp?.data?.token;
+                            if (maybeToken) {
+                                tokenObtained = maybeToken;
+                                localStorage.setItem('token', maybeToken);
+                                // aplicar no axios instance imediatamente (configurar common Authorization)
+                                try {
+                                  if (!api.defaults.headers) api.defaults.headers = {};
+                                  if (!api.defaults.headers.common) api.defaults.headers.common = {};
+                                  api.defaults.headers.common.Authorization = `Bearer ${maybeToken}`;
+                                } catch (e) { /* ignore */ }
+                            } else {
+                                console.warn('Login automático retornou sem token:', authResp);
+                            }
+                            const userObj = authResp?.user || authResp?.usuario || authResp?.data?.user || authResp?.data?.usuario || authResp?.data || null;
+                            if (userObj) localStorage.setItem('user', JSON.stringify(userObj));
+                        } catch (loginErr) {
+                            console.warn('Login automático falhou após cadastro:', loginErr, loginErr?.response?.data || loginErr?.message);
+                        }
+
+                        // após cadastro, prosseguir apenas se obtivemos token automático
+                        const next = location?.state?.next;
+                        if (tokenObtained) {
+                            if (next) navigate(next);
+                            else navigate('/');
+                        } else {
+                            setError('Cadastro concluído, mas login automático falhou. Por favor, efetue login.');
+                        }
+                    } catch (err) {
+                        const msg = err?.response?.data?.message || err?.message || 'Erro ao cadastrar';
+                        setError(String(msg));
+                        const info = {
+                            message: err?.message,
+                            status: err?.response?.status,
+                            responseData: err?.response?.data,
+                            stack: err?.stack
+                        };
+                        setDebugInfo(info);
+                    } finally {
+                        setLoading(false);
+                    }
+                }} />
+
             </div>
         </div>
-    )
+    );
 }
 

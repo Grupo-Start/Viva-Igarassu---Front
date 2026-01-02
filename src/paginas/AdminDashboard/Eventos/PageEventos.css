@@ -1,0 +1,273 @@
+.admin-eventos {
+	flex: 1;
+	padding: 32px;
+	background: #f7f7fa;
+}
+
+.eventos-header-top,
+.eventos-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 16px;
+	flex-wrap: wrap;
+	margin-bottom: 16px;
+}
+
+.eventos-header {
+	margin-bottom: 24px;
+}
+
+.eventos-header > div {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.admin-eventos h1 {
+	color: #003459;
+	font-size: 2.25rem;
+	font-weight: 700;
+	margin: 0;
+}
+
+.eventos-stats {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	font-size: 18px;
+	font-weight: 600;
+	color: #0A3D62;
+}
+
+.btn-add-evento {
+	background-color: #003459;
+	color: #fff;
+	padding: 10px 20px;
+	border: none;
+	border-radius: 8px;
+	cursor: pointer;
+	font-weight: 700;
+	font-size: 16px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	transition: background 0.2s;
+}
+
+.btn-add-evento:hover {
+	background: #00507a;
+}
+
+.filter-buttons {
+	display: flex;
+	gap: 8px;
+	flex-wrap: wrap;
+}
+
+.eventos-table-container {
+	background: #fff;
+	border-radius: 12px;
+	padding: 20px;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+	overflow-x: auto;
+}
+
+.eventos-table {
+	width: 100%;
+	border-collapse: collapse;
+	min-width: 800px;
+}
+
+.eventos-table thead {
+	background: #f9fafb;
+}
+
+.eventos-table th {
+	padding: 12px 16px;
+	text-align: left;
+	font-weight: 600;
+	color: #374151;
+	border-bottom: 2px solid #e5e7eb;
+}
+
+.eventos-table td {
+	padding: 12px 16px;
+	border-bottom: 1px solid #e5e7eb;
+	color: #111827;
+}
+
+.eventos-table tbody tr:hover {
+	background: #f9fafb;
+}
+
+.badge-ativo {
+	background: #d1fae5;
+	color: #065f46;
+}
+
+.badge-inativo {
+	background: #fee2e2;
+	color: #991b1b;
+}
+
+.action-buttons {
+	display: flex;
+	gap: 8px;
+}
+
+.btn-acao {
+	padding: 10px 20px;
+	border: none;
+	border-radius: 8px;
+	font-size: 14px;
+	font-weight: 600;
+	cursor: pointer;
+	background: #003459;
+	color: #fff;
+}
+
+.btn-acao:hover {
+	opacity: 0.95;
+}
+
+.loading {
+	text-align: center;
+	padding: 24px;
+	color: #6b7280;
+	font-size: 16px;
+}
+
+.error {
+	color: #d32f2f;
+	margin: 16px 0;
+}
+
+.modal {
+	background: #fff;
+	border-radius: 12px;
+	padding: 20px;
+	width: clamp(320px, 90%, 520px);
+	max-height: 90vh;
+	overflow: auto;
+}
+
+.modal h2 {
+	margin: 0 0 12px 0;
+	color: #0A3D62;
+}
+
+.modal form {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.modal label {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	font-weight: 500;
+	color: #374151;
+	font-size: 14px;
+}
+
+.modal .modal-actions {
+	display: flex;
+	gap: 10px;
+	justify-content: flex-end;
+	margin-top: 8px;
+}
+
+.modal input[type="text"],
+.modal input[type="date"],
+.modal input[type="time"],
+.modal input[type="file"],
+.modal textarea,
+.modal select {
+	padding: 10px 12px;
+	border: 1px solid #d1d5db;
+	border-radius: 6px;
+	font-size: 14px;
+	font-family: inherit;
+	background: #fff;
+}
+
+.modal input:focus,
+.modal textarea:focus,
+.modal select:focus {
+	outline: none;
+	border-color: #5FD6C3;
+	box-shadow: 0 0 0 3px rgba(95, 214, 195, 0.08);
+}
+
+.modal .btn-acao {
+	padding: 8px 16px;
+	font-size: 14px;
+}
+
+.modal .btn-acao.editar {
+	background: #00507a;
+}
+
+.modal .btn-acao.excluir {
+	background: #9ca3af;
+}
+
+.modal .btn-acao.excluir:hover {
+	background: #7f8b91;
+}
+
+.modal input[type="file"] {
+	padding: 6px;
+}
+
+@media (max-width: 768px) {
+	.eventos-header {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+
+	.btn-add-evento {
+		width: 100%;
+	}
+
+	.eventos-table {
+		min-width: 800px;
+	}
+}
+
+@media (max-width: 480px) {
+	.eventos-stats {
+		font-size: 16px;
+	}
+
+	.filter-btn {
+		padding: 6px 10px;
+		font-size: 13px;
+	}
+}
+
+/* Mobile: empilhar linhas da tabela de eventos */
+@media (max-width: 600px) {
+	.eventos-table-container { overflow-x: visible; }
+	.eventos-table thead { display: none; }
+	.eventos-table, .eventos-table tbody, .eventos-table tr, .eventos-table td {
+		display: block;
+		width: 100%;
+	}
+	.eventos-table tr { margin-bottom: 12px; border-bottom: 1px solid #e5e7eb; padding-bottom: 8px; }
+	.eventos-table td { padding: 8px 6px; border: none; white-space: normal; word-break: break-word; }
+	.eventos-table td::before { display: block; margin-bottom: 6px; font-weight: 700; color: #0b3b5b; }
+	.eventos-table td { display: flex; flex-direction: column; align-items: flex-start; overflow: visible; }
+	.eventos-table td:nth-child(1)::before { content: 'Nome'; }
+	.eventos-table td:nth-child(2)::before { content: 'Empresa'; }
+	.eventos-table td:nth-child(3)::before { content: 'Data'; }
+	.eventos-table td:nth-child(4)::before { content: 'Horário'; }
+	.eventos-table td:nth-child(5)::before { content: 'Endereço'; }
+	.eventos-table td:nth-child(6)::before { content: 'Ações'; }
+	.eventos-table td .action-buttons { margin-top: 6px; display:flex; gap:8px; flex-wrap:wrap; }
+	.eventos-table { min-width: 0 !important; }
+	.eventos-table-container { overflow-x: visible !important; }
+}
+

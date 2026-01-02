@@ -1,0 +1,87 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+*{
+  font-family:'Poppins', sans-serif;
+}
+
+.layout {
+  display: flex;
+  height: auto;
+}
+
+.sidebar {
+  background-color:#0A3D62;
+  color: #fff;
+  width: 80px;
+  transition: width 0.3s ease;
+  overflow: hidden;
+  min-height: 100vh;
+  height: auto;
+}
+
+.sidebar.open {
+  width: 280px;
+}
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 15px;
+}
+
+.sidebar.open .sidebar-header {
+  justify-content: space-between;
+}
+
+.toggle {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.menu {
+  list-style: none;
+  padding: 0;
+  margin-top: 20px;
+}
+
+.menu li {
+  padding: 15px;
+  cursor: pointer;
+  font-size: 18px;
+  transition: 0.2s;
+}
+
+.menu li:hover {
+  text-shadow: 1px 0 0 #fff;
+}
+
+.menu-active {
+  font-weight: 600;
+}
+
+.content {
+  flex: 1;
+  padding: 30px;
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    width: 60px;
+  }
+  
+  .sidebar.open {
+    width: 200px;
+  }
+  
+  .menu li {
+    font-size: 16px;
+    padding: 12px;
+  }
+}
