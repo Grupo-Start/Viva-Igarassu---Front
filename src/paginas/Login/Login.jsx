@@ -2,20 +2,27 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../../components/button/Button";
 import "./Login.css";
-import Img from "../../assets/WhatsApp Image 2025-12-07 at 10.19.02 (1).jpeg";
+import Img from "../../assets/Logoimg.jpeg";
 import { FaUser } from "react-icons/fa";
-import { IoIosLock } from "react-icons/io";
-import { authService } from "../../services/api";
+import { IoIosLock, IoIosUnlock } from "react-icons/io";
+import { authService, dashboardService } from "../../services/api";
 
 export function Login() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+    const [debugInfo, setDebugInfo] = useState(null);
+    const [mostrarSenha, setMostrarSenha] = useState(false);
+
+    function toggleSenha() {
+        setMostrarSenha(!mostrarSenha);
+    }
+
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
-        e.preventDefault();
+        if (e && typeof e.preventDefault === 'function') e.preventDefault();
 
         if (!email || !password) {
             setError("Preencha todos os campos");
@@ -29,52 +36,73 @@ export function Login() {
             localStorage.removeItem('token');
             localStorage.removeItem('user');
 
-            console.log('Tentando fazer login com:', { email });
             const response = await authService.login({ email, password });
-            console.log('Login bem-sucedido! Resposta completa:', response);
-            console.log('Token recebido?', !!response.token);
-            console.log('User recebido?', !!response.user);
 
             if (response.token) {
                 localStorage.setItem('token', response.token);
-                console.log('✓ Token salvo no localStorage');
             } else {
                 console.error('✗ Token não foi retornado pelo backend!');
             }
 
             if (response.user) {
                 localStorage.setItem('user', JSON.stringify(response.user));
-                console.log('✓ User salvo no localStorage');
+                (async () => {
+                    try {
+                        const u = response.user;
+                        const userId = u.id || u._id || u.id_usuario || u.usuario || null;
+                        const token = localStorage.getItem('token');
+                        if (!token) return;
+                        const list = await dashboardService.getEmpresas();
+                        const arr = Array.isArray(list) ? list : (list?.data || list?.empresas || []);
+                        if (!arr || !arr.length) return;
+                        let found = null;
+                        if (userId) {
+                            found = arr.find(e => {
+                                try {
+                                    if (e.id_usuario && String(e.id_usuario) === String(userId)) return true;
+                                    if (e.usuario && (String(e.usuario) === String(userId) || (typeof e.usuario === 'object' && (String(e.usuario.id) === String(userId) || String(e.usuario._id) === String(userId))))) return true;
+                                    if (Array.isArray(e.usuarios) && e.usuarios.some(x => String(x.id || x._id || x.usuario_id || x) === String(userId))) return true;
+                                } catch (err) {}
+                                return false;
+                            });
+                        }
+                        if (!found && u.email) {
+                            found = arr.find(e => String((e.email||e.contato||'')).toLowerCase() === String(u.email).toLowerCase());
+                        }
+                        if (!found && u.nome_empresa) {
+                            found = arr.find(e => String((e.nome_empresa||e.nome||e.razao_social||'')).toLowerCase() === String(u.nome_empresa).toLowerCase());
+                        }
+                        if (found) {
+                            try {
+                                const merged = { ...u, empresa: found.id || found._id || found.id_empresa || found.empresa_id || u.empresa, id_empresa: found.id || found._id || found.id_empresa || u.id_empresa, nome_empresa: found.nome_empresa || found.nome || found.razao_social || u.nome_empresa, empresa_obj: found };
+                                localStorage.setItem('user', JSON.stringify(merged));
+                                try { window.dispatchEvent(new Event('localUserChange')); } catch(e){}
+                            } catch(e){}
+                        }
+                    } catch (e) {}
+                })();
             }
 
             await new Promise(resolve => setTimeout(resolve, 100));
-            const emailDigitado = email.toLowerCase().trim();
-            const emailResponse = response.user?.email?.toLowerCase().trim();
-            const tipo = response.user?.tipo?.toLowerCase();
-            const role = response.user?.role?.toLowerCase();
+            const tipo = response.user?.tipo?.toString().toLowerCase() || '';
+            const role = response.user?.role?.toString().toLowerCase() || '';
             const isAdmin = response.user?.isAdmin || response.user?.is_admin;
+            const isEmpresa = response.user?.isEmpresa || response.user?.is_empresa || response.user?.isCompany;
 
-            console.log('=== VERIFICAÇÃO ADMIN ===');
-            console.log('Email digitado:', emailDigitado);
-            console.log('Email do response:', emailResponse);
-            console.log('Tipo:', tipo);
-            console.log('Role:', role);
-            console.log('isAdmin:', isAdmin);
+            const tipoIsAdmin = tipo === 'adm' || role === 'adm' || isAdmin === true;
+            const tipoIsEmpresa = isEmpresa === true || tipo.includes('empresa') || tipo.includes('empreendedor') || role.includes('empresa') || role.includes('empreendedor');
 
-            if (emailDigitado === 'admin@test' ||
-                emailResponse === 'admin@test' ||
-                tipo === 'admin' ||
-                role === 'admin' ||
-                isAdmin === true) {
-                console.log('✓✓✓ ADMIN CONFIRMADO! Redirecionando...');
-                navigate('/Admin-Dashboard', { replace: true });
+            if (tipoIsAdmin) {
+                navigate('/admin-dashboard', { replace: true });
+            } else if (tipoIsEmpresa) {
+                navigate('/empresa-dashboard', { replace: true });
             } else {
-                console.log('✗ Usuário comum, redirecionando para Home...');
                 navigate('/', { replace: true });
             }
         } catch (err) {
             console.error('Erro no login:', err);
-            setError(err.message || 'Erro ao fazer login. Verifique suas credenciais.');
+            setError('E-mail ou senha inválidos. Tente novamente.');
+            try { setDebugInfo({ status: err?.response?.status, data: err?.response?.data, message: err?.message }); } catch(e){}
         } finally {
             setLoading(false);
         }
@@ -91,25 +119,61 @@ export function Login() {
             </div>
 
             <div className="form-login">
-                <h1 className="login-h1">Login</h1>
+                <h1 className="text-global">Login</h1>
                 <p className="subtitle-p">Entre na sua conta</p>
 
-                <div className="form-login-container">
-                    <input className="login-input" type="email" placeholder="E-mail" required />
-                    <FaUser className="img-cadeado" />
-                </div>
+                <form onSubmit={handleSubmit}>
+                    <div className="form-login-container">
+                        <input
+                            className="login-input"
+                            type="email"
+                            placeholder="E-mail"
+                            required
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                        />
+                        <FaUser className="img-cadeado" />
+                    </div>
 
-                <div className="form-login-container">
-                    <input className="login-input" type="password" placeholder="Senha" required />
-                    <IoIosLock className="img-cadeado" />
-                </div>
+                    <div className="container-input-person">
+                        <input
+                            className="input-person"
+                            type={mostrarSenha ? "text" : "password"}
+                            placeholder="Senha"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                        />
 
-                <Button text="Entrar" />
+                        {mostrarSenha ? (
+                            <IoIosUnlock
+                            className="img-cadeado"
+                            onClick={toggleSenha}
+                            />
+                        ) : (
+                            <IoIosLock
+                            className="img-cadeado"
+                            onClick={toggleSenha}
+                            />
+                        )}
+                    </div>
+
+                    {error && (
+                        <p className="login-error" style={{ color: 'red', marginTop: 8 }}>{error}</p>
+                    )}
+
+                    <Button text="Entrar" disabled={loading} type="submit" />
+                </form>
 
                 <div className="form-login-request">
-                    <p><strong className="underline-login">Esqueceu sua senha ?</strong></p>
-                <p>Não tem conta ? <strong className="underline-login" onClick={() => navigation('/register')}>Cadastre-se</strong></p>
+                    <p><strong className="underline-login" onClick={() => navigate('/password-reset')}>Esqueceu sua senha ?</strong></p>
+                <p>Não tem conta ? <strong className="underline-login" onClick={() => navigate('/register')}>Cadastre-se</strong></p>
                 </div>
+                {debugInfo && (
+                    <details style={{ marginTop: 12, background: '#fff7f7', padding: 10, borderRadius: 6 }}>
+                        <summary style={{ cursor: 'pointer', color: '#b00' }}>Detalhes da falha (debug)</summary>
+                        <pre style={{ whiteSpace: 'pre-wrap', marginTop: 8 }}>{JSON.stringify(debugInfo, null, 2)}</pre>
+                    </details>
+                )}
             </div>
 
         </div>

@@ -1,0 +1,192 @@
+.recompensas-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.recompensas-header {
+  margin-bottom: 24px;
+}
+
+.recompensas-stats {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #0A3D62;
+}
+
+.btn-add-recompensa {
+  background: #5FD6C3;
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-add-recompensa:hover {
+  background: #4ac4b1;
+}
+
+.recompensas-table-container {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  overflow-x: auto;
+}
+
+.recompensas-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.recompensas-table thead {
+  background: #f9fafb;
+}
+
+.recompensas-table th {
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 600;
+  color: #374151;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.recompensas-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #e5e7eb;
+  color: #111827;
+}
+
+.recompensas-table tbody tr:hover {
+  background: #f9fafb;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-acao {
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  background: #003459;
+  color: #fff;
+  cursor: pointer;
+}
+
+.loading {
+  text-align: center;
+  padding: 24px;
+  color: #6b7280;
+}
+
+.error {
+  color: #d32f2f;
+  margin: 16px 0;
+}
+
+@media (max-width: 768px) {
+  .recompensas-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .recompensas-table {
+    min-width: 800px;
+  }
+}
+
+@media (max-width: 600px) {
+  .recompensas-table-container { overflow-x: visible; }
+  .recompensas-table thead { display: none; }
+  .recompensas-table, .recompensas-table tbody, .recompensas-table tr, .recompensas-table td {
+    display: block;
+    width: 100%;
+  }
+  .recompensas-table tr { margin-bottom: 12px; border-bottom: 1px solid #e5e7eb; padding-bottom: 8px; }
+  .recompensas-table td { padding: 8px 6px; border: none; white-space: normal; word-break: break-word; }
+  .recompensas-table td::before { display: block; margin-bottom: 6px; font-weight: 700; color: #0b3b5b; }
+  .recompensas-table td { display: flex; flex-direction: column; align-items: flex-start; overflow: visible; }
+  .recompensas-table td:nth-child(1)::before { content: 'Nome'; }
+  .recompensas-table td:nth-child(2)::before { content: 'Descrição'; }
+  .recompensas-table td:nth-child(3)::before { content: 'Empresa'; }
+  .recompensas-table td:nth-child(4)::before { content: 'Imagem'; }
+  .recompensas-table td:nth-child(5)::before { content: 'Quantidade'; }
+  .recompensas-table td:nth-child(6)::before { content: 'Valor'; }
+  .recompensas-table td:nth-child(7)::before { content: 'Ações'; }
+  .recompensas-table td img { max-width: 100%; height: auto; }
+  .recompensas-table { min-width: 0 !important; }
+  .recompensas-table-container { overflow-x: visible !important; }
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  font-weight: 500;
+  color: #374151;
+  font-size: 14px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #5FD6C3;
+}
+
+.modal-footer {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+.btn-cancel {
+  padding: 10px 20px;
+  border: 1px solid #d1d5db;
+  background-color: white;
+  color: #374151;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.btn-cancel:hover { background-color: #f3f4f6; }
+
+.btn-save {
+  padding: 10px 20px;
+  border: none;
+  background-color: #5FD6C3;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.btn-save:hover { 
+    background-color: #4ac4b1; 
+}

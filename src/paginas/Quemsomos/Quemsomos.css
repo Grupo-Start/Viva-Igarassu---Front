@@ -1,0 +1,174 @@
+.quemsomos-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.quemsomos-page .conteudo {
+  flex: 1;
+}
+
+.quemsomos-page .footer {
+  margin-top: auto;
+}
+
+.conteudo {
+  padding: 48px 16px 64px;
+  background-color: #f5f8fb;
+}
+
+.blocos {
+  width: min(1000px, 90vw);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 50px;
+  text-align: justify;
+  align-items: center;
+}
+
+
+.bloco-secao {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  align-items: center;
+  width: 100%;
+  max-width: 800px;
+}
+
+
+.quemsomos-page .titulo {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+  font-size: 22px;
+  font-weight: 800;
+  color: #0a3d62;
+  margin-top: 8px;
+  letter-spacing: 0.2px;
+}
+
+.quemsomos-page .estrela {
+  color: #ffd628;
+  font-size: 32px;
+}
+
+
+.bloco {
+  background-color: #0a3d62;
+  color: #fff;
+  padding: 24px 26px;
+  border-radius: 18px;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  width: 100%;
+  max-width: 800px;
+  box-sizing: border-box;
+}
+
+.bloco p {
+  font-size: 15.5px;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.valores-container {
+  background-color: #0a3d62;
+  color: #fff;
+  width: 100%;
+  max-width: 800px;
+  border-radius: 18px;
+  padding: 22px 26px;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-sizing: border-box;
+}
+
+.valor-card {
+  position: relative;
+  background: transparent;
+  color: #fff;
+  padding-left: 22px;
+  padding-right: 6px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  border-radius: 0;
+  text-align: left;
+}
+
+.valor-card::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 11px;
+  width: 10px;
+  height: 10px;
+  background: #27c498;
+  border-radius: 50%;
+}
+
+.valor-card strong {
+  margin: 0;
+  font-weight: 700;
+}
+
+.valor-card p {
+  display: inline;
+  margin-left: 6px;
+  font-size: 15px;
+  line-height: 1.52;
+}
+
+@media (max-width: 900px) {
+  .conteudo { padding: 32px 12px 44px; }
+  .blocos { gap: 24px; width: 96vw; }
+  .titulo { font-size: 20px; margin-top: 8px; }
+  .bloco { padding: 20px; border-radius: 16px; box-shadow: 0 6px 14px rgba(0,0,0,0.12); }
+  .bloco p { font-size: 15px; line-height: 1.55; }
+  .valores-container { padding: 18px; border-radius: 16px; box-shadow: 0 6px 14px rgba(0,0,0,0.12); }
+  .valor-card { padding-left: 18px; }
+}
+
+@media (max-width: 375px) {
+  .conteudo { padding: 20px 10px 32px; }
+  .blocos { width: 100%; max-width: 360px; gap: 18px; }
+
+  .titulo {
+    font-size: 16px;
+    margin-top: 8px;
+    padding: 0 6px;
+    line-height: 1.1;
+  }
+
+  .bloco {
+    padding: 12px;
+    border-radius: 12px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+  }
+
+  .bloco p {
+    font-size: 14px;
+    line-height: 1.45;
+  }
+
+  .valores-container {
+    padding: 12px;
+    border-radius: 12px;
+    gap: 10px;
+  }
+
+  .valor-card {
+    padding-left: 14px;
+  }
+
+  .valor-card strong { font-size: 15px; }
+
+  .conteudo .header { position: relative; z-index: 30; }
+  .conteudo .footer { margin-top: 24px; }
+}
