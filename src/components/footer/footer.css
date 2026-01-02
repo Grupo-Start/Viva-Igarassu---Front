@@ -5,14 +5,32 @@
    margin-top: 60px;
 }
 
+/* make footer full-bleed across viewport while keeping inner container centered */
+.footer {
+  width: 100vw;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  box-sizing: border-box;
+}
+
+/* prevent accidental horizontal scroll from children */
+html, body {
+  overflow-x: hidden;
+}
+
 .footer-container {
   display: flex;
-  justify-content: flex-start;
+  justify-content: space-between;
   align-items: center;
   max-width: 1200px;
-  margin: auto;
-    gap: 80px;
+  margin: 0 auto;
+  gap: 40px;
 }
+
+.footer-container { box-sizing: border-box; padding: 0 12px; }
 
 .footer-logo img {
   max-width: 210px; 
@@ -27,7 +45,7 @@
   display: block;
   color: #ccc;
   text-decoration: none;
-  margin-bottom: px;
+  margin-bottom: 8px;
 }
 
 .footer a:hover {
@@ -48,9 +66,58 @@
   padding-top: 15px;
 }
 
-/* Ocultar footer em telas pequenas para melhorar a responsividade */
+/* Ajuste do footer em telas pequenas: empilha conteúdo em vez de ocultar */
 @media (max-width: 520px) {
   .footer {
-    display: none !important;
+    padding: 24px 12px 16px;
   }
+
+  .footer-container {
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+  }
+
+  .footer-logo img { max-width: 160px; }
+
+  .footer-copy { margin-top: 18px; }
 }
+
+/* Narrow mobile adjustments (<=375px) — preserve layout but center and fit */
+@media (max-width: 375px) {
+  .footer-container {
+    justify-content: center;
+    gap: 12px;
+    padding: 0 10px;
+  }
+
+  .footer-logo img { max-width: 140px; }
+
+  .footer h4 { text-align: center; }
+  .footer a { text-align: center; }
+  .footer-contato p { text-align: center; }
+  .footer-copy { text-align: center; }
+}
+
+/* Page-specific adjustments when footer is inside the 'conteudo' wrapper (e.g., Quem somos) */
+.conteudo .footer {
+  margin-top: 24px;
+  padding: 20px 12px 16px;
+}
+
+.conteudo .footer-container {
+  max-width: 420px;
+  width: 100%;
+  margin: 0 auto;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 0 8px;
+}
+
+.conteudo .footer-logo img { max-width: 180px; }
+.conteudo .footer h4,
+.conteudo .footer a,
+.conteudo .footer-contato p { text-align: center; }
+
+.conteudo .footer-copy { margin-top: 12px; }

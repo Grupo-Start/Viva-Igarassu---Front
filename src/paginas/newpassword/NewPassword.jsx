@@ -1,16 +1,55 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../../components/button/Button";
 import "./NewPassword.css";
-import Img from "../../assets/WhatsApp Image 2025-12-07 at 10.19.02 (1).jpeg";
+import Img from "../../assets/Logoimg.jpeg";
 import { IoIosLock, IoIosUnlock } from "react-icons/io";
+import { authService } from "../../services/api";
 
 export function NewPassword() {
     const navigate = useNavigate();
 
-    /* Estados separados para cada campo */
     const [mostrarNovaSenha, setMostrarNovaSenha] = useState(false);
     const [mostrarConfirmSenha, setMostrarConfirmSenha] = useState(false);
+    const [novaSenha, setNovaSenha] = useState("");
+    const [confirmSenha, setConfirmSenha] = useState("");
+    const [loading, setLoading] = useState(false);
+
+    // se o usuário veio do link com token na URL, armazenar para usar no reset
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const urlToken = params.get('token');
+        if (urlToken) {
+            localStorage.setItem('resetToken', urlToken);
+        }
+    }, []);
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (novaSenha !== confirmSenha) {
+            alert('As senhas não coincidem');
+            return;
+        }
+        const token = localStorage.getItem('resetToken');
+        if (!token) {
+            alert('Token não encontrado. Solicite um novo email de recuperação.');
+            navigate('/passwordreset');
+            return;
+        }
+        try {
+            setLoading(true);
+            await authService.resetPassword({ token, novaSenha: novaSenha });
+            alert('Senha redefinida com sucesso. Faça login.');
+            localStorage.removeItem('resetToken');
+            navigate('/login');
+        } catch (err) {
+            console.error('resetPassword erro', err);
+            const msg = err?.response?.data?.message || err?.message || 'Erro ao redefinir senha';
+            alert(msg);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
         <div className="container-passwordreset">
@@ -22,62 +61,53 @@ export function NewPassword() {
                 <h2 className="text-global">Redefinição de Senha</h2>
                 <p className="subtitle-p">Digite sua nova senha</p>
 
-         
-                {/* <div className="form-passwordreset-container">
-                    <input
-                        className="passwordreset-input"
-                        type="text"
-                        placeholder="Informe o token de 6 dígitos"
-                        maxLength={6}
-                        pattern="[0-9]{6}"
-                        required
-                    />
-
-                </div> */}
-
-               
-                <div className="form-passwordreset-container">
-                    <input
-                        className="passwordreset-input"
-                        type={mostrarNovaSenha ? "text" : "password"}
-                        placeholder="Nova senha"
-                        required
-                    />
-                    {mostrarNovaSenha ? (
-                        <IoIosUnlock
-                            className="img-cadeado"
-                            onClick={() => setMostrarNovaSenha(false)}
+                <form className="form-passwordreset-container" onSubmit={handleSubmit}>
+                    <div className="form-passwordreset-container">
+                        <input
+                            className="passwordreset-input"
+                            type={mostrarNovaSenha ? "text" : "password"}
+                            placeholder="Nova senha"
+                            required
+                            value={novaSenha}
+                            onChange={(e) => setNovaSenha(e.target.value)}
                         />
-                    ) : (
-                        <IoIosLock
-                            className="img-cadeado"
-                            onClick={() => setMostrarNovaSenha(true)}
-                        />
-                    )}
-                </div>
+                        {mostrarNovaSenha ? (
+                            <IoIosUnlock
+                                className="img-cadeado"
+                                onClick={() => setMostrarNovaSenha(false)}
+                            />
+                        ) : (
+                            <IoIosLock
+                                className="img-cadeado"
+                                onClick={() => setMostrarNovaSenha(true)}
+                            />
+                        )}
+                    </div>
 
-              
-                <div className="form-passwordreset-container">
-                    <input
-                        className="passwordreset-input"
-                        type={mostrarConfirmSenha ? "text" : "password"}
-                        placeholder="Confirme sua senha"
-                        required
-                    />
-                    {mostrarConfirmSenha ? (
-                        <IoIosUnlock
-                            className="img-cadeado"
-                            onClick={() => setMostrarConfirmSenha(false)}
+                    <div className="form-passwordreset-container">
+                        <input
+                            className="passwordreset-input"
+                            type={mostrarConfirmSenha ? "text" : "password"}
+                            placeholder="Confirme sua senha"
+                            required
+                            value={confirmSenha}
+                            onChange={(e) => setConfirmSenha(e.target.value)}
                         />
-                    ) : (
-                        <IoIosLock
-                            className="img-cadeado"
-                            onClick={() => setMostrarConfirmSenha(true)}
-                        />
-                    )}
-                </div>
+                        {mostrarConfirmSenha ? (
+                            <IoIosUnlock
+                                className="img-cadeado"
+                                onClick={() => setMostrarConfirmSenha(false)}
+                            />
+                        ) : (
+                            <IoIosLock
+                                className="img-cadeado"
+                                onClick={() => setMostrarConfirmSenha(true)}
+                            />
+                        )}
+                    </div>
 
-                <Button text="Enviar nova senha" />
+                    <Button text={loading ? 'Enviando...' : 'Enviar nova senha'} disabled={loading} type="submit" />
+                </form>
             </div>
         </div>
     );

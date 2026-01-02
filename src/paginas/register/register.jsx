@@ -1,6 +1,6 @@
 import { Button } from "../../components/button/Button"
 import "./Register.css"
-import Img from "../../assets/WhatsApp Image 2025-12-07 at 10.19.02 (1).jpeg"
+import Img from "../../assets/Logoimg.jpeg"
 import { FaUser } from "react-icons/fa";
 import { IoIosLock } from "react-icons/io";
 import { useNavigate } from "react-router-dom";

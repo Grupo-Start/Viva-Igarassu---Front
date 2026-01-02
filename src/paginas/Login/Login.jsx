@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../../components/button/Button";
 import "./Login.css";
-import Img from "../../assets/WhatsApp Image 2025-12-07 at 10.19.02 (1).jpeg";
+import Img from "../../assets/Logoimg.jpeg";
 import { FaUser } from "react-icons/fa";
 import { IoIosLock, IoIosUnlock } from "react-icons/io";
 import { authService, dashboardService } from "../../services/api";
@@ -95,9 +95,9 @@ export function Login() {
             const tipoIsEmpresa = isEmpresa === true || tipo.includes('empresa') || tipo.includes('empreendedor') || role.includes('empresa') || role.includes('empreendedor');
 
             if (tipoIsAdmin) {
-                navigate('/Admin-Dashboard', { replace: true });
+                navigate('/admin-dashboard', { replace: true });
             } else if (tipoIsEmpresa) {
-                navigate('/Empresa-Dashboard', { replace: true });
+                navigate('/empresa-dashboard', { replace: true });
             } else {
                 navigate('/', { replace: true });
             }

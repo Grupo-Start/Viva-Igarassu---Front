@@ -5,7 +5,7 @@ import { api, authService } from "../../services/api";
 import { Button } from "../../components/button/Button"
 import "./RegisterPerson.css"
 
-import Img from "../../assets/WhatsApp Image 2025-12-07 at 10.19.02 (1).jpeg"
+import Img from "../../assets/Logoimg.jpeg"
 
 import { FaUser } from "react-icons/fa";
 import { IoIosLock, IoIosUnlock } from "react-icons/io";

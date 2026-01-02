@@ -20,54 +20,54 @@ export function SidebarAdmin() {
 
         <ul className="menu">
           <li 
-            className={location.pathname === '/Admin-Dashboard' ? 'menu-active' : ''} 
+            className={location.pathname === '/admin-dashboard' ? 'menu-active' : ''} 
             onClick={() => {
-              navigate('/Admin-Dashboard');
+              navigate('/admin-dashboard');
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
           >
             {open && "Dashboard"}
           </li>
           <li 
-            className={location.pathname === '/Admin-Dashboard/Users' ? 'menu-active' : ''} 
+            className={location.pathname === '/admin-dashboard/users' ? 'menu-active' : ''} 
             onClick={() => {
-              navigate('/Admin-Dashboard/Users');
+              navigate('/admin-dashboard/users');
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
           >
             {open && "Usuários"}
           </li>
           <li 
-            className={location.pathname === '/Admin-Dashboard/Empresas' ? 'menu-active' : ''} 
+            className={location.pathname === '/admin-dashboard/empresas' ? 'menu-active' : ''} 
             onClick={() => {
-              navigate('/Admin-Dashboard/Empresas');
+              navigate('/admin-dashboard/empresas');
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
           >
             {open && "Empresas"}
           </li>
           <li 
-            className={location.pathname === '/Admin-Dashboard/PontosTuristicos' ? 'menu-active' : ''} 
+            className={location.pathname === '/admin-dashboard/pontos-turisticos' ? 'menu-active' : ''} 
             onClick={() => {
-              navigate('/Admin-Dashboard/PontosTuristicos');
+              navigate('/admin-dashboard/pontos-turisticos');
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
           >
             {open && "Pontos Turísticos"}
           </li>
           <li 
-            className={location.pathname === '/Admin-Dashboard/Eventos' ? 'menu-active' : ''} 
+            className={location.pathname === '/admin-dashboard/eventos' ? 'menu-active' : ''} 
             onClick={() => {
-              navigate('/Admin-Dashboard/Eventos');
+              navigate('/admin-dashboard/eventos');
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
           >
             {open && "Eventos"}
           </li>
           <li 
-            className={location.pathname === '/Admin-Dashboard/Recompensas' ? 'menu-active' : ''}
+            className={location.pathname === '/admin-dashboard/recompensas' ? 'menu-active' : ''}
             onClick={() => {
-              navigate('/Admin-Dashboard/Recompensas');
+              navigate('/admin-dashboard/recompensas');
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
           >

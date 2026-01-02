@@ -4,7 +4,6 @@ import { Login } from "../paginas/Login/Login";
 import { Register } from "../paginas/register/register";
 import { RegisterPerson } from "../paginas/RegisterPerson/RegisterPerson";
 import { Quemsomos } from "../paginas/Quemsomos/Quemsomos";
-import { Telainicial } from "../paginas/Telainicial/Telainicial";
 import { Pontoturistico } from "../paginas/pontoturistico/Pontoturistico";
 import { Pontos } from "../paginas/pontos/pontos";
 import { Telafigurinha } from "../paginas/telafigurinha/telafigurinha";
@@ -17,7 +16,7 @@ import { PageEventos } from "../paginas/AdminDashboard/Eventos/PageEventos";
 import { PageRecompensas } from "../paginas/AdminDashboard/Recompensas/PageRecompensas";
 import { PasswordReset } from "../paginas/passwordreset/PasswordReset";
 import { TokenReset } from "../paginas/tokenreset/TokenReset";
-import { NewPassword } from "../paginas/newpassword/Newpassword";
+import { NewPassword } from "../paginas/newpassword/NewPassword";
 import { EmpresaDashboard } from "../paginas/EmpresaDashboard/Dashboard/EmpresaDashboard";
 import EmpresaRoute from "../components/guards/EmpresaRoute";
 import AdminRoute from "../components/guards/AdminRoute";
@@ -31,6 +30,10 @@ export const paginas = createBrowserRouter([
         path: '/',
         element: <Home />
     },
+    { 
+        path : '/quem-somos',
+        element: <Quemsomos />
+    },
     {
         path: '/login',
         element: <Login />
@@ -39,84 +42,36 @@ export const paginas = createBrowserRouter([
         path: '/register',
         element: <Register />
     },
-    { 
-        path : '/quem-somos',
-        element: <Quemsomos />
-    },
-     { 
-        path : '/tela-inicial',
-        element: <Telainicial />
-    },
-    {
-  path: "/pontos",
-  element: <Pontos />
-},
-     { 
-        path : '/ponto/:id',
-        element: <Pontoturistico />
-    },
-    {
-        path: "/tela-figurinha",
-        element: <Telafigurinha />
-    }
-
     {
         path: '/register-person',
         element: <RegisterPerson />
     },
-    {
-        path: '/admin-dashboard',
-        element: <AdminDashboard />
-    },
-    {
-
+    {  
         path: '/company-registration',
         element: <CompanyRegistration />
     },
     {
-        path: '/Admin-Dashboard/Users',
-        element: <PageUsers />
-    },
-    {
-        path: '/Admin-Dashboard/Empresas',
-        element: <PageEmpresas />
-    },
-    {
-        path: '/Admin-Dashboard/PontosTuristicos',
-        element: <PagePontosTuristicos />
-    },
-    {
-        path: '/Admin-Dashboard/Eventos',
-        element: <PageEventos />
-    },
-    {
-        path: '/Admin-Dashboard/Recompensas',
-        element: <PageRecompensas />
-
-    },
-    {
-        path: '/passwordreset',
+        path: '/password-reset',
         element: <PasswordReset />
     },
     {
-        path: '/tokenreset',
+        path: '/token-reset',
         element: <TokenReset />
-
     },
     {
-       path: '/newpassword',
-       element: <NewPassword/>
+        path: '/reset-password',
+        element: <NewPassword/>
     },
-        {
-                path: '/Admin-Dashboard',
-                element: (
-                    <AdminRoute>
-                        <AdminDashboard />
-                    </AdminRoute>
-                )
-        },
-        {
-                path: '/Admin-Dashboard/Users',
+    {
+        path: '/admin-dashboard',
+        element: (
+            <AdminRoute>
+                <AdminDashboard />
+            </AdminRoute>
+        )
+            },
+            {
+                path: '/admin-dashboard/users',
                 element: (
                     <AdminRoute>
                         <PageUsers />
@@ -124,76 +79,89 @@ export const paginas = createBrowserRouter([
                 )
         },
         {
-                path: '/Admin-Dashboard/Empresas',
-                element: (
-                    <AdminRoute>
+            path: '/admin-dashboard/empresas',
+            element: (
+                <AdminRoute>
                         <PageEmpresas />
                     </AdminRoute>
                 )
-        },
-        {
-                path: '/Admin-Dashboard/PontosTuristicos',
+            },
+            {
+                path: '/admin-dashboard/pontos-turisticos',
                 element: (
                     <AdminRoute>
                         <PagePontosTuristicos />
                     </AdminRoute>
                 )
-        },
-        {
-                path: '/Admin-Dashboard/Eventos',
+            },
+            {
+                path: '/admin-dashboard/eventos',
                 element: (
                     <AdminRoute>
                         <PageEventos />
                     </AdminRoute>
                 )
-        },
-        {
-                path: '/Admin-Dashboard/Recompensas',
+            },
+            {
+                path: '/admin-dashboard/recompensas',
                 element: (
                     <AdminRoute>
                         <PageRecompensas />
                     </AdminRoute>
                 )
-        },
+            },
         {
-                path: '/Empresa-Dashboard',
-                element: (
-                    <EmpresaRoute>
+            path: '/empresa-dashboard',
+            element: (
+                <EmpresaRoute>
                         <EmpresaDashboard />
                     </EmpresaRoute>
                 )
         },
         {
-                path: '/Empresa-Dashboard/MeusDados',
+                path: '/empresa-dashboard/meus-dados',
                 element: (
                     <EmpresaRoute>
                         <EmpresaMeusDados />
                     </EmpresaRoute>
                 )
-        },
-        {
-                path: '/Empresa-Dashboard/Recompensas',
+            },
+            {
+                path: '/empresa-dashboard/recompensas',
                 element: (
                     <EmpresaRoute>
                         <EmpresaRecompensas />
                     </EmpresaRoute>
                 )
-        },
-        {
-                path: '/Empresa-Dashboard/Eventos',
+            },
+            {
+                path: '/empresa-dashboard/eventos',
                 element: (
                     <EmpresaRoute>
                         <EmpresaEventos />
                     </EmpresaRoute>
                 )
-        }
-        ,
-        {
-            path: '/scan',
+            }
+            ,
+            {
+                path: '/scan',
             element: <ScanQRCode />
+        },
+        {
+            path: "/pontos",
+            element: <Pontos />
+        },
+        { 
+            path : '/ponto/:id',
+            element: <Pontoturistico />
         },
         {
             path: '/scan/:pointId',
             element: <ScanQRCode />
-        }
+        },
+        {
+            path: "/tela-figurinha",
+            element: <Telafigurinha />
+        },
+        
 ])

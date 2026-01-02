@@ -1,7 +1,7 @@
 import "./Quemsomos.css";
 import { FaStar } from "react-icons/fa";
-import Footer from "../../components/footer/footer";
-import Header from "../../components/header/header";
+import Footer from "../../components/footer/Footer";
+import Header from "../../components/header/Header";
 
 export function Quemsomos() {
   return (
@@ -10,9 +10,6 @@ export function Quemsomos() {
     <main className="conteudo">
             <Header/>
       <section className="blocos">
-
-    
-
         <div className="bloco-secao">
           <h2 className="titulo">
         
@@ -87,12 +84,7 @@ export function Quemsomos() {
             </div>
           </div>
         </div>
-    
-
       </section>
-      <br />
-      <br />
-      <br />
       <Footer />
     </main>
   );

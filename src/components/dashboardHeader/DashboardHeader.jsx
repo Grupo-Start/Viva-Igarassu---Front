@@ -66,7 +66,7 @@ export function DashboardHeader() {
           </div>
         )}
         {isAdminUser && (
-          <Link to="/Admin-Dashboard" className="Admin">
+          <Link to="/admin-dashboard" className="Admin">
             <span>Admin</span>
           </Link>
         )}

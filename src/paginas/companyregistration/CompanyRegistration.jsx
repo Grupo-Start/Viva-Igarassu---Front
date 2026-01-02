@@ -1,7 +1,7 @@
 
 import { Button } from "../../components/button/Button";
 import "./CompanyRegistration.css";
-import Img from "../../assets/WhatsApp Image 2025-12-07 at 10.19.02 (1).jpeg";
+import Img from "../../assets/Logoimg.jpeg";
 import { FaUser } from "react-icons/fa";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -204,7 +204,7 @@ export function CompanyRegistration() {
                             // fallback: force full reload to ensure all components read updated localStorage
                             try { setTimeout(() => { window.location.reload(); }, 150); } catch(e) {}
                         } catch (e) {}
-                        navigate('/Empresa-Dashboard');
+                        navigate('/empresa-dashboard');
                         } catch (err) {
                             const msg = err?.response?.data?.message || err?.message || 'Erro ao cadastrar empresa';
                             const info = { status: err?.response?.status, responseData: err?.response?.data };

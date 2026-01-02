@@ -903,6 +903,92 @@ export const authService = {
     if (lastErr) throw lastErr;
     throw new Error('Todas as tentativas falharam. Verifique email/senha ou backend.');
   },
+  requestPasswordReset: async (emailOrPayload) => {
+    try {
+      if (!emailOrPayload) throw new Error('requestPasswordReset: email ausente');
+      const email = typeof emailOrPayload === 'string' ? emailOrPayload : (emailOrPayload.email || emailOrPayload.usuario || emailOrPayload.emailAddress);
+      // Backend esperado: forgotPassword(email) com body { email }
+      const payloads = [ { email } ];
+      const endpoints = [
+        '/auth/forgot-password',
+        '/usuarios/forgot-password',
+        '/usuarios/forgot',
+      ];
+      let lastErr = null;
+      for (const ep of endpoints) {
+        for (const body of payloads) {
+          try {
+            const res = await api.post(ep, body, { headers: { 'X-Skip-Auth-Redirect': '1' } });
+            return res.data;
+          } catch (err) {
+            lastErr = err;
+          }
+        }
+      }
+      if (lastErr) throw lastErr;
+      throw new Error('requestPasswordReset: nenhum endpoint respondeu');
+    } catch (error) {
+      throw error;
+    }
+  },
+  verifyResetToken: async (token) => {
+    try {
+      if (!token) throw new Error('verifyResetToken: token ausente');
+      // Se o backend não expõe validação separada, apenas retorna sucesso direto.
+      const tryPaths = [
+        `/auth/validate-reset-token?token=${encodeURIComponent(token)}`,
+      ];
+      for (const p of tryPaths) {
+        try {
+          const resp = await api.get(p, { headers: { 'X-Skip-Auth-Redirect': '1' } });
+          return resp.data;
+        } catch (e) {
+          // se não existir, seguimos para reset direto
+        }
+      }
+      return { ok: true };
+    } catch (error) {
+      throw error;
+    }
+  },
+  resetPassword: async (payload) => {
+    try {
+      if (!payload) throw new Error('resetPassword: payload ausente');
+      const token = payload.token || payload.token_reset || payload.code || payload.codigo;
+      const senha = payload.senha || payload.password || payload.newPassword || payload.new_password || payload.novaSenha;
+      if (!senha) throw new Error('resetPassword: nova senha ausente');
+      const bodies = [
+        { token, novaSenha: senha },
+        { token, senha },
+        { token, password: senha },
+        { code: token, senha },
+        { codigo: token, senha },
+      ];
+      const endpoints = [
+        '/auth/reset-password',
+        '/usuarios/reset-password',
+        '/usuarios/redefinir-senha',
+        '/auth/reset',
+        '/password/reset',
+        '/usuarios/reset'
+      ];
+      let lastErr = null;
+      for (const ep of endpoints) {
+        for (const b of bodies) {
+          try {
+            const res = await api.post(ep, b, { headers: { 'X-Skip-Auth-Redirect': '1' } });
+            return res.data;
+          } catch (err) {
+            lastErr = err;
+          }
+        }
+      }
+      if (lastErr) throw lastErr;
+      throw new Error('resetPassword: nenhum endpoint respondeu');
+    } catch (error) {
+      throw error;
+    }
+  },
   logout: () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');

@@ -1,6 +1,3 @@
-/* ===============================
-   IMAGEM TOPO
-================================ */
 .imagem-topo {
   position: relative;
 }
@@ -12,26 +9,19 @@
   object-position: center;
 }
 
-/* ===============================
-   FAIXA SOBRE A IMAGEM
-================================ */
 .faixa-info {
   position: absolute;
   bottom: -28px;
   left: 50%;
   transform: translateX(-50%);
-
   width: 750px;
   height: 50px;
-
   background: #083b5c;
   color: #ffffff;
   border-radius: 28px;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   padding: 0;
 }
 
@@ -42,18 +32,15 @@
   line-height: 1.4;
 }
 
-/* ===============================
-   HERO
-================================ */
 .hero {
   margin-top: 140px;
   text-align: center;
-   margin-bottom: 80px;
+  margin-bottom: 80px;
 }
 
 .hero h1 {
   font-size: 60px;
-  font-weight: 800; /* ExtraBold */
+  font-weight: 800;
   line-height: 1.1;
   color: #083b5c;
   margin: 0;
@@ -63,41 +50,29 @@
 .hero h1 span {
   display: block;
   font-size: 60px;
-  font-weight: 800; /* ExtraBold */
+  font-weight: 800;
   color: #46c7c2;
 }
 
-/* ===============================
-   DESCRIÇÃO (BOX)
-================================ */
 .descricao-box {
-  max-width: 720px;
+  max-width: 1040px;
   margin: 32px auto 0;
-  padding: 20px 24px;
-
+  padding: 20px 32px;
   background: #ffffff;
-
-  /* Stroke */
   border: 1px solid #4BBFBF;
   border-radius: 8px;
-
-  /* Drop Shadow 20% - cor 625F0A */
   box-shadow: 0px 4px 12px rgba(98, 95, 10, 0.2);
-
   font-family: "Poppins", sans-serif;
   font-size: 20px;
   line-height: 1.6;
   color: #0A3D62;
-  font-weight: 400; /* Regular */
+  font-weight: 400;
 }
 
 .descricao-box strong {
-  font-weight: 600; /* Mixed (destaque) */
+  font-weight: 600;
 }
 
-/* ===============================
-   COMO FUNCIONA
-================================ */
 .como-funciona {
   text-align: center;
   margin: 80px auto 40px;
@@ -107,55 +82,118 @@
 
 .como-funciona h2 {
   font-size: 60px;
-  font-weight: 800; /* ExtraBold */
+  font-weight: 800;
   margin: 0;
-   margin-bottom: 80px;
+  margin-bottom: 80px;
 }
 
-/* ===============================
-   CARDS
-================================ */
+
 .cards {
   display: grid;
-  grid-template-columns: repeat(2, 520px); /* 👈 tamanho exato Figma */
-  gap: 42px;
+  grid-template-columns: repeat(2, minmax(280px, 520px));
+  gap: 28px 32px;
   justify-content: center;
+  align-items: stretch;
+}
+
+/* Ensure desktop layout shows 2 columns x 2 rows for the Como funciona cards */
+@media (min-width: 900px) {
+  .cards {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    grid-auto-rows: auto;
+    gap: 28px 32px;
+    max-width: 1040px;
+    margin: 0 auto 20px;
+    align-items: stretch;
+  }
+
+  .card {
+    max-width: none;
+    width: 100%;
+  }
+}
+
+/* Desktop card appearance: icon above title, centered (2x2 layout) */
+@media (min-width: 900px) {
+  .card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 22px 20px;
+    gap: 12px;
+    min-height: 160px;
+    border-radius: 16px;
+  }
+
+  .card-icon {
+    flex: 0 0 auto;
+    width: 72px;
+    height: 72px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 34px;
+    margin: 0 0 6px 0;
+  }
+
+  .card h3 {
+    font-size: 18px;
+    text-align: center;
+    margin-bottom: 0;
+  }
+
+  .card p {
+    font-size: 14px;
+    max-width: 100%;
+  }
 }
 
 .card {
-  width: 420px;
-  height: 300px;
-
-  background: #EDF4FA;
-
-  /* Stroke */
-  border: 1px solid #4BBFBF;
-
-  /* Drop Shadow 25% preto */
-  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.25);
-
-  border-radius: 6px;
-  padding: 32px;
-
+  width: 100%;
+  max-width: 520px;
+  min-height: 160px;
+  background: #ffffff;
+  border: 1px solid rgba(9, 98, 140, 0.10);
+  box-shadow: none;
+  border-radius: 22px;
+  padding: 28px 32px;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  justify-content: center;
-
-  text-align: center;
+  justify-content: flex-start;
+  text-align: left;
+  gap: 32px;
 }
 
-.card span {
-  font-size: 36px;
-  margin-bottom: 16px;
+.card-icon {
+  flex: 0 0 88px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 88px;
+  height: 88px;
+  background: transparent;
+  border-radius: 12px;
+  font-size: 44px;
+  color: #0A3D62;
+  margin: 0;
 }
 
 .card h3 {
- margin-top: 16px;
+  margin: 0;
   font-family: "Poppins", sans-serif;
-  font-size: 25px;
-  font-weight: 600;
+  font-size: 26px;
+  font-weight: 700;
   color: #083b5c;
+  flex: 1 1 auto;
+  text-align: center;
+}
+
+.card p {
+  margin: 0;
 }
 
 .card p {
@@ -166,50 +204,39 @@
   max-width: 360px;
 }
 
-/* ===============================
-   CTA
-================================ */
 .cta {
   max-width: 1100px;
-  margin: 120px auto;
-  padding: 80px 20px;
-
+  margin: 80px auto;
+  padding: 48px 20px;
   text-align: center;
-
-  background: #ffffff;              /* fundo branco */
-  border: 2px solid #2c5d8f;         /* borda azul */
-  border-radius: 20px;               /* cantos arredondados */
+  background: #ffffff;
+  border: 1px solid rgba(44,93,143,0.12);
+  border-radius: 16px;
 }
 
-/* TÍTULO */
 .cta h2 {
-  font-size: 70px;
+  font-size: 36px;
   font-weight: 800;
   color: #2c5d8f;
+  margin-bottom: 12px;
+}
+
+.cta p {
+  font-size: 18px;
+  font-weight: 600;
+  color: #4ec3bf;
   margin-bottom: 24px;
 }
 
-/* SUBTÍTULO */
-.cta p {
-  font-size: 70px;
-  font-weight: 700;
-  color: #4ec3bf;
-  margin-bottom: 48px;
-}
-
-/* BOTÃO */
 .cta-btn {
   background: #4ec3bf;
   color: #ffffff;
-
   border: none;
   padding: 14px 36px;
-
   font-size: 16px;
   font-weight: 700;
   letter-spacing: 0.5px;
-
-  border-radius: 999px; /* pill */
+  border-radius: 999px;
   cursor: pointer;
   transition: opacity 0.2s ease;
 }
@@ -218,114 +245,293 @@
   opacity: 0.9;
 }
 
+/* Hero CTAs */
+.hero-ctas{display:flex;gap:12px;justify-content:center;margin-top:20px}
+.btn-primary{background:#4ec3bf;color:#ffffff;border:none;padding:12px 20px;border-radius:8px;font-weight:700;cursor:pointer}
+.btn-primary:hover{opacity:0.95;transform:translateY(-2px)}
+.btn-secondary{background:transparent;color:#083b5c;border:2px solid #083b5c;padding:10px 18px;border-radius:8px;font-weight:700;cursor:pointer}
+.btn-secondary:hover{background:#083b5c;color:#fff}
 
-/* ===============================
-   RESPONSIVO
-================================ */
-@media (max-width: 1200px) {
-  .faixa-info {
-    width: calc(100% - 32px);
+
+
+
+
+@media (max-width: 520px) {
+  .hero h1,
+  .hero h1 span {
+    font-size: 30px;
+    line-height: 1.12;
   }
-}
 
-@media (max-width: 1100px) {
+  .descricao-box {
+    margin: 18px auto 0;
+    padding: 12px 14px;
+    font-size: 15px;
+  }
+
   .cards {
     grid-template-columns: 1fr;
+    gap: 18px;
+    padding: 0 12px;
   }
 
   .card {
-    width: 100%;
-    max-width: 520px;
-    height: auto;
-    padding: 24px;
+    padding: 18px;
+    min-height: 120px;
+    border-radius: 12px;
   }
+
+  .faixa-topo-historico h2 { font-size: 28px; }
+
+  .trail-timeline { padding: 0 12px; max-width: 100%; }
+  /* Keep the vertical timeline line visible on mobile as well */
+  .trail-timeline::before { display: block; }
+  .timeline-row { display: grid; grid-template-columns: 1fr; gap: 12px; min-height: auto; padding: 8px 0; }
+  .timeline-circle { width: 72px; height: 72px; margin: 0 auto 12px; }
+  .timeline-circle__img { width: 64px; height: 64px; border-width: 4px; }
+  .timeline-badge { width: 24px; height: 24px; right: -6px; top: -6px; font-size: 12px; }
+  .timeline-label__text { text-align: center; padding-left: 0; font-size: 16px; }
+
+  .imagem-trilha { width: 100%; max-width: 100%; margin-bottom: 12px; }
+  .lista-locais { width: 100%; }
 }
 
-@media (max-width: 768px) {
-  .imagem-topo img {
-    height: 260px;
-  }
-
-  .faixa-info {
-    height: 64px;
-    bottom: -20px;
-  }
-
-  .faixa-texto {
-    font-size: 16px;
-    white-space: normal;
-    text-align: center;
-  }
-
-  .hero {
-    margin-top: 80px;
-  }
-
-  .hero h1,
-  .hero h1 span {
-    font-size: 34px;
-    line-height: 1.15;
-  }
-
-  .cta {
-    padding: 60px 16px;
-  }
-}
-
-.card-icon {
-  font-size: 80px;     /* tamanho do ícone */
-  color: #0A3D62;      /* cor (ajuste se quiser) */
-  margin-bottom: 16px; /* espaço entre ícone e título */
-}
-/* ===============================
-   FAIXA FINAL - TRILHA HISTÓRICA
-================================ */
+/* .card-icon — configured above with explicit sizing for card layout */
 
 .faixa-topo-historico {
   position: static;
-  width: 100%;                 /* 👈 ocupa a tela toda */
+  width: 100%;
   height: 62px;
-
-  margin: 40px 0 80px;         /* remove centralização */
-
+  margin: 40px 0 80px;
   background: #2c5d8f;
-  border-radius: 0;            /* 👈 bordas retas na tela */
-
+  border-radius: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
-
-  padding: 0 32px;             /* respiro interno */
+  padding: 0 32px;
 }
 
-
-
- .faixa-topo-historico h2 {
+.faixa-topo-historico h2 {
   font-family: "Poppins", sans-serif;
   font-size: 40px;
-  font-weight: 900;     /* 👈 BLACK */
-  color: #ffffff;       /* mantém branco */
+  font-weight: 900;
+  color: #ffffff;
 }
 
+/* ensure faixa-topo-historico stays visible and above other content */
+.faixa-topo-historico {
+  position: relative;
+  z-index: 6;
+  overflow: visible;
+}
 
-
-/* TAG À DIREITA */
 .tag-historico {
   background: #1fa9a6;
   color: #ffffff;
-
   font-family: "Poppins", sans-serif;
   font-size: 14px;
   font-weight: 600;
-
   padding: 6px 14px;
   border-radius: 999px;
   position: relative;
-  top: -5px
+  top: -5px;
 }
 
 .imagem-trilha {
-  width: 25%;
-  transform: translateX(340px); /* 👈 agora funciona */
+  width: 48%;
+  max-width: 640px;
+  transform: none;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+/* Trilha: pontos em formato de cards alinhados horizontalmente com estado locked/unlocked */
+
+
+.trail-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 28px; /* vertical spacing between points */
+  align-items: stretch;
+  margin: 24px auto;
+  max-width: 920px;
+  position: relative;
+}
+
+.timeline-column {
+  position: relative;
+  padding-left: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.trail-timeline::before {
+  content: '';
+  position: absolute;
+  left: 60px; /* center of circle column */
+  top: 12px;
+  bottom: 12px;
+  width: 2px;
+  background-image: linear-gradient(#cfe8ee 33%, rgba(255,255,255,0) 0%);
+  background-size: 2px 12px;
+  background-repeat: repeat-y;
+  z-index: 0; /* behind masking */
+}
+
+.timeline-row { display: grid; grid-template-columns: 120px 1fr; align-items: center; gap: 28px; padding: 12px 0; min-height: 120px; }
+.timeline-node { display: block; }
+
+.timeline-circle {
+  position: relative;
+  width: 96px;
+  justify-self: center;
+  height: 96px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #4ec3bf;
+  color: #fff;
+  box-shadow: 0 6px 14px rgba(2,6,23,0.06);
+  transition: transform 140ms ease;
+  z-index: 3; /* above the vertical line */
+}
+
+/* removed mask so circles remain fully visible */
+
+.timeline-circle.unlocked { background: #ffd454; color: #083b5c; }
+.timeline-circle.locked { background: #2fa9a6; color: #fff; opacity: 0.98 }
+
+.timeline-circle__icon { font-size: 34px; }
+
+.timeline-circle__img {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+  border: 6px solid #ffffff;
+  position: relative;
+  z-index: 4; /* ensure image is above the mask */
+}
+
+.timeline-badge {
+  position: absolute;
+  right: -8px;
+  top: -8px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;
+  background: #ffffff; color: #083b5c; box-shadow: 0 2px 6px rgba(2,6,23,0.08);
+  z-index: 5;
+}
+.timeline-badge.check { border: 3px solid #ffd454; }
+.timeline-badge.lock { border: 3px solid #2fa9a6; }
+
+.timeline-labels { display: block; }
+.timeline-label__text { font-family: 'Poppins', sans-serif; font-size:18px; color:#083b5c; padding-left: 12px; text-align: left; max-width:520px; }
+
+/* Mobile narrow: preserve layout, scale and stack to fit <= 375px */
+@media (max-width: 375px) {
+  .imagem-topo img {
+    height: 160px;
+  }
+
+  .faixa-info {
+    position: relative;
+    bottom: auto;
+    left: auto;
+    transform: none;
+    width: calc(100% - 24px);
+    margin: -20px auto 0;
+    height: auto;
+    padding: 8px 12px;
+    border-radius: 20px;
+    text-align: center;
+  }
+
+  .faixa-texto { font-size: 13px; line-height: 1.3; }
+
+  .hero { margin-top: 16px; margin-bottom: 24px; padding: 0 16px; text-align: center; }
+  .hero h1, .hero h1 span { font-size: 22px; line-height: 1.15; }
+
+  .descricao-box { max-width: 100%; padding: 12px 14px; font-size: 14px; margin: 16px auto 0; text-align: center; }
+
+  .como-funciona { margin: 32px auto 24px; }
+  .como-funciona h2 { font-size: 22px; margin-bottom: 24px; }
+
+  /* Stack cards vertically and center */
+  .cards {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 0 16px;
+  }
+  .card {
+    padding: 14px 16px;
+    gap: 10px;
+    border-radius: 12px;
+    min-height: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    width: 100%;
+    max-width: 300px;
+  }
+  .card-icon { width: 56px; height: 56px; font-size: 32px; flex: 0 0 56px; margin-bottom: 6px; }
+  .card h3 { text-align: center; font-size: 16px; }
+  .card p { max-width: 100%; font-size: 13px; text-align: center; }
+
+  .cta { padding: 20px 16px; margin: 32px 16px; border-radius: 12px; }
+  .cta h2 { font-size: 18px; }
+  .cta p { font-size: 13px; }
+  .cta-btn { padding: 12px 24px; font-size: 14px; }
+
+  .hero-ctas { flex-direction: column; gap: 10px; align-items: center; }
+  .btn-primary, .btn-secondary { width: 100%; max-width: 260px; padding: 12px 16px; font-size: 14px; }
+
+  /* Timeline centered */
+  .trail-timeline { padding: 0 16px; max-width: 100%; align-items: center; }
+  .trail-timeline::before { left: 50%; transform: translateX(-50%); }
+  .timeline-row { 
+    grid-template-columns: 1fr; 
+    gap: 8px; 
+    padding: 12px 0; 
+    min-height: auto; 
+    justify-items: center;
+    text-align: center;
+  }
+  .timeline-circle { width: 72px; height: 72px; margin: 0 auto; }
+  .timeline-circle__img { width: 64px; height: 64px; border-width: 4px; }
+  .timeline-badge { width: 24px; height: 24px; font-size: 12px; right: -4px; top: -4px; }
+  .timeline-label__text { font-size: 14px; padding-left: 0; text-align: center; }
+
+  .imagem-trilha { width: 100%; max-width: 100%; margin-bottom: 16px; border-radius: 8px; }
+
+  /* center the list and timeline column on narrow screens */
+  .lista-locais { display: flex; flex-direction: column; align-items: center; padding: 0 16px; }
+
+  /* keep spacing compact but visible */
+  .faixa-topo-historico {
+    margin: 24px 16px;
+    padding: 14px 16px;
+    height: auto;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: #2c5d8f;
+    border-radius: 12px;
+    z-index: 20;
+    position: relative;
+    width: calc(100% - 32px);
+  }
+
+  .faixa-topo-historico h2 { font-size: 18px; text-align: center; color: #fff; margin: 0; }
+  /* hide the hash/tag on very narrow screens to save vertical space */
+  .tag-historico { display: none; }
 }
 

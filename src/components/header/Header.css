@@ -12,6 +12,9 @@
   
 }
 
+/* make header a positioning context so we can center the nav */
+.header { position: relative; }
+
 
 
 .header-logo img {
@@ -29,6 +32,15 @@
   display: flex;
   gap: 40px; 
   color: white;
+}
+
+/* center the nav horizontally in the header on wider screens */
+@media (min-width: 521px) {
+  .header-nav {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+  }
 }
 
 
@@ -83,18 +95,46 @@
 
 @media (max-width: 520px) {
   .header {
-    height: 64px;
-    padding: 0 12px;
+    height: 56px;
+    padding: 8px 12px;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .header-logo {
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
     justify-content: center;
   }
 
+  .header-logo img {
+    height: 44px;
+    width: auto;
+  }
+
+  /* Force hide nav and actions on mobile so only logo remains */
   .header-nav,
   .header-actions {
     display: none !important;
-  }
-
-  .header-logo img {
-    height: 56px;
+    visibility: hidden !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    padding: 0 !important;
+    margin: 0 !important;
   }
 }
+
+/* Specific tweak when header is inside the main `.conteudo` (Quem somos):
+   slightly smaller height and no overlap with top content */
+.conteudo .header {
+  height: 56px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  background-color: #0a3d62;
+  position: relative;
+  z-index: 30;
+}
+
+.conteudo { padding-top: 0; }
 
