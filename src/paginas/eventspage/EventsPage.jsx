@@ -5,7 +5,7 @@ import "./EventsPage.css";
 import Img from "../../assets/imagemevento.png";
 import { EventCard } from "../../components/eventcard/EventCard";
 import { FilterBar } from "../../components/filterbar/FilterBar";
-import { Pagination } from "../../components/pagination/Pagination";
+import { PaginationRewards } from "../../components/paginationRewards/PaginationRewards";
 import { Header } from "../../components/header/Header";
 import Footer from "../../components/footer/footer";
 
@@ -34,7 +34,7 @@ export function EventsPage() {
                     <EventCard image={Img} category="Tradicional" title="Carnaval 2025" date="2025-02-25" location="Igarassu" />
 
                 </div>
-                <Pagination currentPage={currentPage} totalPages={1} onPageChange={handlePageChange} />
+                <PaginationRewards />
             </main>
             <Footer />
         </div>
