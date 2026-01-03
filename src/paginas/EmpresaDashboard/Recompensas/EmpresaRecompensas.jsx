@@ -141,7 +141,6 @@ export function EmpresaRecompensas() {
     if (!window.confirm("Tem certeza que deseja excluir esta recompensa?")) return;
     setLoading(true);
     setError(null);
-    console.debug('Excluindo recompensa id:', id);
     dashboardService.deleteRecompensa(id)
       .then(() => loadRecompensas())
       .catch(err => setError("Erro ao excluir recompensa: " + (err.response?.data?.message || err.message)))

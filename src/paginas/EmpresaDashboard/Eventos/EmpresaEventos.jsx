@@ -245,7 +245,6 @@ export function EmpresaEventos() {
     (async () => {
       if (!window.confirm('Tem certeza que deseja excluir este evento?')) return;
       try {
-        console.debug('Deletando evento id (frontend):', id);
         await dashboardService.deleteEvento(id);
         await loadEventos();
       } catch (err) {
@@ -318,7 +317,6 @@ export function EmpresaEventos() {
                       <tr><td colSpan="6">Nenhum evento encontrado.</td></tr>
                     ) : (
                       eventos.map(evento => {
-                        console.debug('evento (debug):', evento);
                         return (
                           <tr key={evento.id_evento || evento.id}>
                             <td>{evento.nome}</td>

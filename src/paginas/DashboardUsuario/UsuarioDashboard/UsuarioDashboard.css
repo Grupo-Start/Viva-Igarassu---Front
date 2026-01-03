@@ -1,0 +1,226 @@
+
+.dashboard-layout-container {
+  display: flex;
+  min-height: calc(100vh - 70px);
+}
+
+.dashboard-layout-container nav {
+  flex-shrink: 0;
+  transition: width 0.3s ease;
+}
+
+h1,hr{
+    color:#2C5782;
+}
+
+.usuario-dashboard-main {
+  flex: 1;
+  padding: 30px;
+  background-color: #f8f9fa; 
+  color: #333;
+  overflow-x: hidden;
+  min-width: 0;
+  transition: all 0.3s ease;
+}
+
+.usuario-dashboard-main h1 {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.usuario-dashboard-main hr {
+  border: 0;
+  border-top: 1px solid #ddd;
+  margin-bottom: 30px;
+}
+
+/* Container dos Cards */
+.conquistas-container {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+
+.conquista-card, .conquista-card2 {
+  background: linear-gradient(135deg, #4BBFBF 0%, #2C5782 94%);
+  color: white;
+  padding: 25px;
+  border-radius: 12px;
+  flex: 1;
+  min-width: 280px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: none; 
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.conquista-card:hover, .conquista-card2:hover {
+  transform: scale(1.02);
+}
+
+.conquista-card h2, .conquista-card2 h2 {
+  font-size: 1.1rem;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Destacar o total de figurinhas resgatadas */
+.conquista-card2 {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.conquista-card2 h2 {
+  font-size: 2rem;
+  font-weight: 800;
+  margin: 0;
+  line-height: 1.1;
+}
+
+/* Layout do cartão de saldo: imagem maior à esquerda e texto centralizado verticalmente à direita */
+.conquista-card {
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  text-align: left;
+  gap: 20px;
+}
+
+.conquista-card .moeda {
+  width: 200px;
+  height: 200px;
+  object-fit: contain;
+  margin: 0;
+}
+
+.conquista-card h2 {
+  font-size: 2rem;
+  font-weight: 800;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.resgate-recompensa {
+    color:#2C5782
+ }
+
+ .giftcard-usuario-dashboard{
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+ }
+
+ .empty-resgates {
+    color: #6b7280;
+    font-style: italic;
+    padding: 20px;
+ }
+
+@media (max-width: 1024px) {
+    .usuario-dashboard-main {
+        padding: 24px;
+    }
+
+    .conquista-card, .conquista-card2 {
+        min-width: 240px;
+        padding: 20px;
+    }
+
+    .conquista-card .moeda {
+        width: 150px;
+        height: 150px;
+    }
+
+    .conquista-card h2, .conquista-card2 h2 {
+        font-size: 1.6rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .usuario-dashboard-main {
+        padding: 16px;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .usuario-dashboard-main h1 {
+        font-size: 20px;
+        text-align: left;
+    }
+
+    .conquistas-container {
+        flex-direction: column;
+        gap: 16px;
+        width: 100%;
+    }
+
+    .conquista-card, .conquista-card2 {
+        min-width: auto;
+        width: 100%;
+        flex-direction: column;
+        text-align: center;
+        padding: 20px;
+        box-sizing: border-box;
+    }
+
+    .conquista-card .moeda {
+        width: 100px;
+        height: 100px;
+        margin-bottom: 10px;
+    }
+
+    .conquista-card h2 {
+        font-size: 1.2rem;
+        text-align: center;
+    }
+
+    .conquista-card2 h2 {
+        font-size: 1.3rem;
+    }
+
+    .resgate-conrainer {
+        width: 100%;
+    }
+
+    .resgate-recompensa {
+        font-size: 16px;
+        text-align: left;
+    }
+
+    .giftcard-usuario-dashboard {
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .usuario-dashboard-main {
+        padding: 12px;
+    }
+
+    .usuario-dashboard-main h1 {
+        font-size: 16px;
+    }
+
+    .conquista-card .moeda {
+        width: 80px;
+        height: 80px;
+    }
+
+    .conquista-card h2, .conquista-card2 h2 {
+        font-size: 1rem;
+    }
+
+    .conquista-card, .conquista-card2 {
+        padding: 16px;
+        border-radius: 10px;
+    }
+}

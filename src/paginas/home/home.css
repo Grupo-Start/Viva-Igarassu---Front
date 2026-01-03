@@ -69,7 +69,7 @@
   margin: 32px auto 0;
   padding: 20px 32px;
   background: #ffffff;
-  border: 1px solid #4BBFBF;
+  border: 1px solid #4ec3bf;
   border-radius: 8px;
   box-shadow: 0px 4px 12px rgba(98, 95, 10, 0.2);
   font-family: "Poppins", sans-serif;
@@ -134,6 +134,7 @@
     gap: 12px;
     min-height: 160px;
     border-radius: 16px;
+    border: 1px solid #4ec3bf;
   }
 
   .card-icon {
@@ -164,7 +165,7 @@
   max-width: 520px;
   min-height: 160px;
   background: #ffffff;
-  border: 1px solid rgba(9, 98, 140, 0.10);
+  border: 1px solid #4ec3bf;
   box-shadow: none;
   border-radius: 22px;
   padding: 28px 32px;
@@ -202,9 +203,6 @@
 
 .card p {
   margin: 0;
-}
-
-.card p {
   font-family: "Poppins", sans-serif;
   font-size: 16px;
   line-height: 1.4;
@@ -218,7 +216,7 @@
   padding: 48px 20px;
   text-align: center;
   background: #ffffff;
-  border: 1px solid rgba(44,93,143,0.12);
+  border: 1px solid #4ec3bf;
   border-radius: 16px;
 }
 
@@ -236,32 +234,11 @@
   margin-bottom: 24px;
 }
 
-.cta-btn {
-  background: #4ec3bf;
-  color: #ffffff;
-  border: none;
-  padding: 14px 36px;
-  font-size: 16px;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  border-radius: 999px;
-  cursor: pointer;
-  transition: opacity 0.2s ease;
-}
-
-.cta-btn:hover {
-  opacity: 0.9;
-}
-
 .hero-ctas{display:flex;gap:12px;justify-content:center;margin-top:20px}
 .btn-primary{background:#4ec3bf;color:#ffffff;border:none;padding:12px 20px;border-radius:8px;font-weight:700;cursor:pointer}
 .btn-primary:hover{opacity:0.95;transform:translateY(-2px)}
 .btn-secondary{background:transparent;color:#083b5c;border:2px solid #083b5c;padding:10px 18px;border-radius:8px;font-weight:700;cursor:pointer}
 .btn-secondary:hover{background:#083b5c;color:#fff}
-
-
-
-
 
 @media (max-width: 520px) {
   .hero h1,
@@ -286,6 +263,7 @@
     padding: 18px;
     min-height: 120px;
     border-radius: 12px;
+    border: 1px solid #4ec3bf;
   }
 
   .faixa-topo-historico h2 { font-size: 28px; }
@@ -303,7 +281,9 @@
 }
 
 .faixa-topo-historico {
-  position: static;
+  position: relative;
+  z-index: 6;
+  overflow: visible;
   width: 100%;
   height: 62px;
   margin: 40px 0 80px;
@@ -320,12 +300,6 @@
   font-size: 40px;
   font-weight: 900;
   color: #ffffff;
-}
-
-.faixa-topo-historico {
-  position: relative;
-  z-index: 6;
-  overflow: visible;
 }
 
 .tag-historico {
@@ -526,4 +500,6 @@
   .faixa-topo-historico h2 { font-size: 18px; text-align: center; color: #fff; margin: 0; }
   .tag-historico { display: none; }
 }
+
+/* regra redundante removida; bordas padronizadas em definições principais */
 

@@ -106,9 +106,7 @@ export const dashboardService = {
         if (isFormData) {
           const entries = [];
           for (const p of body.entries()) entries.push([p[0], p[1]]);
-          console.debug('createRecompensa: enviando FormData entries ->', entries, 'config:', config);
         } else {
-          console.debug('createRecompensa: enviando JSON ->', body, 'config:', config);
         }
       } catch (e) {
         console.warn('createRecompensa: erro ao serializar payload para log', e);
@@ -165,7 +163,6 @@ export const dashboardService = {
       const resolvedId = (typeof id === 'object' && id !== null)
         ? (id.id || id._id || id.id_recompensas || id.idRecompensas || id.id_recompensa || id.recompensaId || id.uuid || id.toString && id.toString())
         : id;
-      console.debug('deleteRecompensa: resolved id ->', resolvedId);
       if (!resolvedId) throw new Error('deleteRecompensa: não foi possível extrair id da recompensa');
 
       try {
@@ -175,7 +172,6 @@ export const dashboardService = {
         const msg = err?.response?.data?.message || err?.message || '';
         console.warn('deleteRecompensa: primeira tentativa falhou', err?.response?.status, msg);
         if (msg && String(msg).includes('id_recompensas')) {
-          console.debug('deleteRecompensa: tentando fallback DELETE /recompensas com body { id_recompresas }');
           const response2 = await api.delete('/recompensas', { data: { id_recompresas: resolvedId } });
           return response2.data;
         }
@@ -227,6 +223,127 @@ export const dashboardService = {
       return Array.isArray(data) ? data.length : data.count || data.total || 0;
     } catch (error) {
       return 0;
+    }
+  },
+
+  getMinhasFigurinhas: async () => {
+    try {
+      const response = await api.get('/meu-album-de-figurinhas');
+      return response.data;
+    } catch (error) {
+      console.error("Erro ao buscar figurinhas:", error);
+      return [];
+    }
+  },
+
+  getDashboardUsuario: async () => {
+    try {
+      const response = await api.get('/dashboard/usuario');
+      return response.data;
+    } catch (error) {
+      console.error("Erro ao buscar dashboard:", error);
+      throw error;
+    }
+  },
+
+  getMinhasFigurinhasCount: async () => {
+    try {
+      const dashboard = await dashboardService.getDashboardUsuario();
+      return dashboard.totalFigurinhas || dashboard.figurinhas || dashboard.count || 0;
+    } catch (error) {
+      return 0;
+    }
+  },
+
+  getMeusResgates: async () => {
+    try {
+      const dashboard = await dashboardService.getDashboardUsuario();
+      return dashboard.resgates || dashboard.recompensas || [];
+    } catch (error) {
+      return [];
+    }
+  },
+
+  getSaldo: async () => {
+    try {
+      const dashboard = await dashboardService.getDashboardUsuario();
+      return dashboard.saldo || dashboard.estelitas || 0;
+    } catch (error) {
+      return 0;
+    }
+  },
+
+  getMeusDados: async () => {
+    try {
+      const endpoints = [
+        '/usuarios/me',
+        '/auth/me',
+        '/usuarios/perfil',
+      ];
+      for (const ep of endpoints) {
+        try {
+          const response = await api.get(ep);
+          return response.data;
+        } catch (e) {
+          if (e?.response?.status !== 404) throw e;
+        }
+      }
+      const stored = localStorage.getItem('user');
+      return stored ? JSON.parse(stored) : null;
+    } catch (error) {
+      const stored = localStorage.getItem('user');
+      return stored ? JSON.parse(stored) : null;
+    }
+  },
+
+  atualizarMeusDados: async (dados) => {
+    try {
+      const endpoints = [
+        '/usuarios/me',
+        '/auth/me',
+        '/usuarios/perfil',
+      ];
+      const body = {
+        nome: dados.nome || dados.nome_completo,
+        nome_completo: dados.nome || dados.nome_completo,
+      };
+      let lastErr = null;
+      for (const ep of endpoints) {
+        try {
+          const response = await api.put(ep, body);
+          const updatedUser = response.data;
+          const stored = localStorage.getItem('user');
+          if (stored) {
+            const user = JSON.parse(stored);
+            const merged = { ...user, ...updatedUser, nome: body.nome, nome_completo: body.nome_completo };
+            localStorage.setItem('user', JSON.stringify(merged));
+          }
+          return updatedUser;
+        } catch (e) {
+          lastErr = e;
+          if (e?.response?.status === 404 || e?.response?.status === 405) continue;
+          throw e;
+        }
+      }
+      for (const ep of endpoints) {
+        try {
+          const response = await api.patch(ep, body);
+          const updatedUser = response.data;
+          const stored = localStorage.getItem('user');
+          if (stored) {
+            const user = JSON.parse(stored);
+            const merged = { ...user, ...updatedUser, nome: body.nome, nome_completo: body.nome_completo };
+            localStorage.setItem('user', JSON.stringify(merged));
+          }
+          return updatedUser;
+        } catch (e) {
+          lastErr = e;
+        }
+      }
+      if (lastErr) throw lastErr;
+      throw new Error('atualizarMeusDados: nenhum endpoint respondeu');
+    } catch (error) {
+      throw error;
     }
   },
 
@@ -441,9 +558,7 @@ export const dashboardService = {
     try {
       if (!token) throw new Error('visitarViaQr: token ausente');
       try {
-        console.debug('visitarViaQr: tentando primeiro POST /visitas/qr?token=...');
         const respDirect = await api.post(`/visitas/qr?token=${encodeURIComponent(token)}`, {});
-        console.debug('visitarViaQr: POST /visitas/qr OK', respDirect?.status, respDirect?.data);
         return respDirect.data;
       } catch (firstErr) {
         const statusFirst = firstErr?.response?.status || null;
@@ -468,9 +583,7 @@ export const dashboardService = {
       for (const key of payloadKeys) {
         const body = { [key]: token };
         try {
-          console.debug('visitarViaQr: tentando POST', endpoint, 'payloadKey:', key, 'body:', body);
           const res = await api.post(endpoint, body, { headers: { ...headersJson, ...authHeader } });
-          console.debug('visitarViaQr: resposta OK', endpoint, res?.status, res?.data);
           return res.data;
         } catch (e) {
           lastErr = e;
@@ -479,9 +592,7 @@ export const dashboardService = {
         try {
           const params = new URLSearchParams();
           params.append(key, token);
-          console.debug('visitarViaQr: tentando POST form', endpoint, 'field:', key, 'params:', params.toString());
           const res2 = await api.post(endpoint, params.toString(), { headers: { ...headersForm, ...authHeader } });
-          console.debug('visitarViaQr: resposta OK (form)', endpoint, res2?.status, res2?.data);
           return res2.data;
         } catch (e) {
           lastErr = e;
@@ -497,9 +608,7 @@ export const dashboardService = {
       }
 
       try {
-        console.debug('visitarViaQr: tentando fallback POST /visitas/qr?token=...');
         const respFallback = await api.post(`/visitas/qr?token=${encodeURIComponent(token)}`, {}, { headers: { ...authHeader } });
-        console.debug('visitarViaQr: fallback /visitas/qr OK', respFallback?.status, respFallback?.data);
         return respFallback.data;
       } catch (efb) {
         lastErr = efb;
@@ -509,9 +618,7 @@ export const dashboardService = {
       try {
         const jwt = (typeof localStorage !== 'undefined') ? localStorage.getItem('token') : null;
         const headersAbs = jwt ? { Authorization: `Bearer ${jwt}` } : {};
-        console.debug('visitarViaQr: tentando fallback absoluto', API_BASE_URL + `/visitas/qr?token=${encodeURIComponent(token)}`);
         const absResp = await axios.post(`${API_BASE_URL}/visitas/qr?token=${encodeURIComponent(token)}`, {}, { headers: headersAbs });
-        console.debug('visitarViaQr: fallback absoluto OK', absResp?.status, absResp?.data);
         return absResp.data;
       } catch (eabs) {
         lastErr = eabs;
@@ -732,12 +839,9 @@ export const dashboardService = {
           if (body instanceof FormData) {
             const entries = [];
             for (const p of body.entries()) entries.push([p[0], p[1]]);
-            console.debug('createEvento: tentando endpoint', ep, 'com FormData:', entries);
           } else {
-            console.debug('createEvento: tentando endpoint', ep, 'com JSON:', body);
           }
           const response = await api.post(ep, body, config);
-          console.debug('createEvento: resposta OK', ep, response?.status, response?.data);
           return response.data;
         } catch (err) {
           lastError = err;
@@ -752,9 +856,7 @@ export const dashboardService = {
           for (const w of wrappers) {
             try {
               const wrapped = { [w]: body };
-              console.debug('createEvento: tentando envelope', w, '->', wrapped);
               const res = await api.post('/eventos', wrapped, config);
-              console.debug('createEvento: resposta envelope OK', res?.status, res?.data);
               return res.data;
             } catch (e) {
               lastError = e;
@@ -840,7 +942,6 @@ export const authService = {
 
       try {
         const res = await api.post('/usuarios/cadastrar', body, { headers: { 'X-Skip-Auth-Redirect': '1' } });
-        console.debug('authService.register: /usuarios/cadastrar sucesso', res?.data);
         return res.data;
       } catch (err) {
         const status = err?.response?.status;

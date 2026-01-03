@@ -1,12 +1,65 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Button } from "../../components/button/Button";
+import { useNavigate } from "react-router-dom";
+import { Button } from "../../../components/button/Button";
 import { Html5Qrcode } from "html5-qrcode";
-import Header from "../../components/header/Header";
-import Footer from "../../components/footer/Footer";
-import { dashboardService, api } from "../../services/api";
+import Header from "../../../components/header/Header";
+import Footer from "../../../components/footer/Footer";
+import { dashboardService, api } from "../../../services/api";
 import "./ScanQRCode.css";
 
 export function ScanQRCode() {
+    const navigate = useNavigate();
+    const extractReward = (resp) => {
+        if (!resp) return null;
+        try {
+            const r = resp?.data ? resp.data : resp;
+            // shallow check common keys
+            const keys = ['valor','valor_figurinha','valor_estelitas','estelitas','valor_moedas','moedas','amount','credit','credit_value','valor_creditado','value','valorEmMoedas'];
+            for (const k of keys) {
+                if (r[k] != null) return r[k];
+            }
+            // nested common places
+            if (r.usuario && r.usuario.saldo != null) return r.usuario.saldo;
+            if (r.recompensa && (r.recompensa.valor != null)) return r.recompensa.valor;
+            if (r.premio && (r.premio.valor != null)) return r.premio.valor;
+
+            // deep search for numeric-like values in object (first match)
+            const findNumber = (obj, seen = new Set()) => {
+                if (!obj || typeof obj === 'string') return null;
+                if (seen.has(obj)) return null;
+                seen.add(obj);
+                if (typeof obj === 'number') return obj;
+                if (Array.isArray(obj)) {
+                    for (const it of obj) {
+                        const f = findNumber(it, seen);
+                        if (f != null) return f;
+                    }
+                    return null;
+                }
+                if (typeof obj === 'object') {
+                    for (const [k,v] of Object.entries(obj)) {
+                        if (k.toLowerCase().includes('valor') || k.toLowerCase().includes('estel') || k.toLowerCase().includes('amount') || k.toLowerCase().includes('moeda') || k.toLowerCase().includes('credit')) {
+                            if (v != null) return v;
+                        }
+                    }
+                    for (const v of Object.values(obj)) {
+                        const f = findNumber(v, seen);
+                        if (f != null) return f;
+                    }
+                }
+                return null;
+            };
+
+            const deep = findNumber(r);
+            if (deep != null) return deep;
+
+            // fallback: parse message for numeric
+            const msg = String(r.message || r.msg || r.result || '');
+            const m = msg.match(/\d+[\.,]?\d*/);
+            if (m) return m[0];
+        } catch (e) { console.warn('extractReward error', e); }
+        return null;
+    };
     const [qrCodeData, setQrCodeData] = useState(null);
     const [ponto, setPonto] = useState(null);
     const [error, setError] = useState(null);
@@ -84,9 +137,19 @@ export function ScanQRCode() {
                         if (resolvedPonto) {
                             setQrCodeData(window.location.href);
                             setSuccess(serverMsg || 'Visita registrada com sucesso!');
+                            const reward = extractReward(resp);
+                            setTimeout(() => {
+                                try { sessionStorage.setItem('lastReward', JSON.stringify({ reward, message: serverMsg, ponto: resolvedPonto, ts: Date.now() })); } catch(e) {}
+                                navigate('/tela-figurinha', { state: { reward, ponto: resolvedPonto, message: serverMsg } });
+                            }, 1500);
                         } else {
                             setQrCodeData(window.location.href);
                             setSuccess(serverMsg || 'Requisição enviada com sucesso.');
+                            const reward = extractReward(resp);
+                            setTimeout(() => {
+                                try { sessionStorage.setItem('lastReward', JSON.stringify({ reward, message: serverMsg, ts: Date.now() })); } catch(e) {}
+                                navigate('/tela-figurinha', { state: { reward, message: serverMsg } });
+                            }, 1500);
                         }
                 } catch (e) {
                     const status = e?.response?.status || null;
@@ -121,7 +184,6 @@ export function ScanQRCode() {
         } catch (e) {}
         try {
             if (html5QrcodeRef.current) {
-                console.debug('startScanner: scanner já iniciado, ignorando nova inicialização');
                 setScanning(true);
                 return;
             }
@@ -156,7 +218,6 @@ export function ScanQRCode() {
                             const tokenParam = maybeUrl.searchParams.get('token');
                             if (isVisitQr && tokenParam) {
                                 try {
-                                    console.debug('QR aponta para visitas/qr — chamando visitarViaQr com token:', tokenParam);
                                     const resolved = await dashboardService.visitarViaQr(tokenParam);
                                     const resolvedPonto = resolved?.ponto || resolved?.pontoId || resolved?.id_ponto || resolved?.id || resolved;
                                     const serverMsg = resolved?.message || resolved?.msg || null;
@@ -173,6 +234,11 @@ export function ScanQRCode() {
                                             await stopScanner();
                                             setHandledByQrEndpoint(true);
                                             setSuccess(serverMsg || 'Visita registrada com sucesso! Figurinha creditada.');
+                                            const reward = extractReward(resolved);
+                                            setTimeout(() => {
+                                                try { sessionStorage.setItem('lastReward', JSON.stringify({ reward, message: serverMsg, ponto: foundResolved, ts: Date.now() })); } catch(e) {}
+                                                navigate('/tela-figurinha', { state: { reward: reward, ponto: foundResolved, message: serverMsg } });
+                                            }, 1500);
                                             return;
                                         }
                                     }
@@ -202,6 +268,11 @@ export function ScanQRCode() {
                                                 await stopScanner();
                                                 setHandledByQrEndpoint(true);
                                                 setSuccess(serverMsgPost || 'Visita registrada via POST direto no endpoint do QR.');
+                                                const rewardPost = extractReward(postDirect?.data || postDirect);
+                                                setTimeout(() => {
+                                                    try { sessionStorage.setItem('lastReward', JSON.stringify({ reward: rewardPost, message: serverMsgPost, ponto: foundResolved, ts: Date.now() })); } catch(e) {}
+                                                    navigate('/tela-figurinha', { state: { reward: rewardPost, ponto: foundResolved, message: serverMsgPost } });
+                                                }, 1500);
                                                 return;
                                             } else {
                                                 setServerErrorDetail(prev => ({ ...(prev||{}), postDirect: postDirect }));
@@ -229,6 +300,11 @@ export function ScanQRCode() {
                                             await stopScanner();
                                             setHandledByQrEndpoint(true);
                                             setSuccess(serverMsgDirect || 'Visita registrada via endpoint do QR.');
+                                            const rewardDirect = extractReward(direct?.data || direct);
+                                            setTimeout(() => {
+                                                try { sessionStorage.setItem('lastReward', JSON.stringify({ reward: rewardDirect, message: serverMsgDirect, ponto: foundResolved, ts: Date.now() })); } catch(e) {}
+                                                navigate('/tela-figurinha', { state: { reward: rewardDirect, ponto: foundResolved, message: serverMsgDirect } });
+                                            }, 1500);
                                             return;
                                         } else {
                                             setServerErrorDetail(prev => ({ ...(prev||{}), fallback: direct }));
@@ -326,8 +402,6 @@ export function ScanQRCode() {
                         if (!found) {
                             setError('QR não corresponde a nenhum ponto turístico cadastrado.');
                             try {
-                                console.debug('Decoded QR text:', text);
-                                console.debug('Pontos (first 50):', candidates.slice(0,50));
                                 const extract = (p) => ({
                                     id: p.id || p.id_ponto || p._id || null,
                                     nome: p.nome || p.nome_ponto || p.name || null,
@@ -344,10 +418,19 @@ export function ScanQRCode() {
                         try {
                             if (!handledByQrEndpoint) {
                                 const resolvedId = found.id_ponto || found.id || found._id || found.idPonto || found.uuid || pontoId;
-                                await dashboardService.registrarVisita(resolvedId);
+                                const regResp = await dashboardService.registrarVisita(resolvedId);
                                 setSuccess('Visita registrada com sucesso! Figurinha creditada.');
+                                const rewardReg = extractReward(regResp);
+                                setTimeout(() => {
+                                    try { sessionStorage.setItem('lastReward', JSON.stringify({ reward: rewardReg, message: 'Visita registrada', ponto: found, ts: Date.now() })); } catch(e) {}
+                                    navigate('/tela-figurinha', { state: { reward: rewardReg, ponto: found, message: 'Visita registrada' } });
+                                }, 1500);
                             } else {
                                 setSuccess('Visita registrada com sucesso! Figurinha creditada.');
+                                setTimeout(() => {
+                                    try { sessionStorage.setItem('lastReward', JSON.stringify({ reward: null, message: 'Visita registrada', ponto: found, ts: Date.now() })); } catch(e) {}
+                                    navigate('/tela-figurinha', { state: { reward: null, ponto: found, message: 'Visita registrada' } });
+                                }, 1500);
                             }
                         } catch (regErr) {
                             setError('Falha ao registrar visita: ' + (regErr?.message || regErr));
@@ -429,43 +512,7 @@ export function ScanQRCode() {
 
             <div className="scan-result">
                 {error && <div className="scan-error">Erro: {error}</div>}
-                {decodedPreview && (
-                    <div className="scan-decoded">
-                        <strong>Texto decodificado:</strong>
-                        <div className="decoded-text">{decodedPreview}</div>
-                        {(() => {
-                            try {
-                                const u = new URL(decodedPreview);
-                                const isVisitQr = u.pathname.includes('/visitas') && u.pathname.includes('qr');
-                                const token = u.searchParams.get('token');
-                                if (isVisitQr && token) {
-                                    const frontLink = `${window.location.origin}/scan?token=${encodeURIComponent(token)}`;
-                                    return (
-                                        <div className="decoded-front-link">
-                                            <strong>Abrir via front (recomendado):</strong>
-                                            <div style={{wordBreak: 'break-all'}}>{frontLink}</div>
-                                        </div>
-                                    );
-                                }
-                            } catch (e) {}
-                            return null;
-                        })()}
-                        {extractUuids(decodedPreview).length > 0 && (
-                            <div className="decoded-uuids">
-                                <strong>UUIDs encontrados:</strong>
-                                <div>{extractUuids(decodedPreview).join(', ')}</div>
-                            </div>
-                        )}
-                    </div>
-                )}
-
-                {qrCodeData && (
-                    <div className="qr-data">
-                        <strong>Resultado:</strong>
-                        <div className="qr-text">{qrCodeData}</div>
-                        {success && <div className="scan-success">{success}</div>}
-                    </div>
-                )}
+                {success && <div className="scan-success">{success}</div>}
             </div>
 
             </main>

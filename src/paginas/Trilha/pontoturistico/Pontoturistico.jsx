@@ -1,11 +1,11 @@
-import Header from "../../components/header/Header";
+import Header from "../../../components/header/Header";
 import "./Pontoturistico.css";
 import { useParams, useNavigate } from "react-router-dom";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { useEffect, useState } from "react";
-import { dashboardService } from "../../services/api";
+import { dashboardService } from "../../../services/api";
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({

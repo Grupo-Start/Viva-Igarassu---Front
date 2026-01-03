@@ -5,8 +5,7 @@
 }
 
 .layout {
-  display: flex;
-  height: 100vh;
+  display: contents;
 }
 
 .sidebar {
@@ -15,6 +14,8 @@
   width: 70px;
   transition: width 0.3s ease;
   overflow: hidden;
+  min-height: calc(100vh - 70px);
+  flex-shrink: 0;
 }
 
 .sidebar.open {
@@ -56,4 +57,25 @@
 .content {
   flex: 1;
   padding: 30px;
+  overflow-x: hidden;
+  min-width: 0;
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    width: 60px;
+  }
+
+  .sidebar.open {
+    width: 200px;
+  }
+
+  .menu li {
+    padding: 12px;
+    font-size: 16px;
+  }
+
+  .content {
+    padding: 16px;
+  }
 }

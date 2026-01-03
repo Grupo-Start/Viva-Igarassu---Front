@@ -1,7 +1,7 @@
-import Header from "../../components/header/Header";
+import Header from "../../../components/header/Header";
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { dashboardService } from "../../services/api";
+import { dashboardService } from "../../../services/api";
 import "./Pontos.css";
 
 const imagensLocais = {
@@ -83,7 +83,7 @@ export function Pontos() {
                 <h3>{nome}</h3>
 
                 <Link to={`/pontos-turisticos/${id}`}>
-                  <button>saiba mais</button>
+                  <button>Saiba mais</button>
                 </Link>
               </div>
             );

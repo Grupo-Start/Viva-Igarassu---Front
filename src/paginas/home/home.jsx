@@ -45,7 +45,7 @@ export function Home() {
 
         <div className="hero-ctas">
           <button className="btn-primary" onClick={() => navigate('/register')}>Cadastre-se</button>
-          <button className="btn-secondary" onClick={() => navigate('/pontos')}>Explorar pontos</button>
+          <button className="btn-secondary" onClick={() => navigate('/pontos-turisticos')}>Explorar pontos</button>
         </div>
       </section>
 
@@ -81,7 +81,6 @@ export function Home() {
       <section className="cta">
         <h2>Conheça Igarassu de um jeito novo!</h2>
         <p>Cadastre-se e comece sua trilha histórica agora!</p>
-        <button className="cta-btn" onClick={() => navigate('/register')}>CADASTRE-SE</button>
       </section>
 
       <div className="faixa-topo-historico" id="trilha-historico">
@@ -110,11 +109,11 @@ export function Home() {
                   <div key={p.id} className="timeline-row">
                     <div
                       className={`timeline-circle ${p.unlocked ? 'unlocked' : 'locked'}`}
-                      onClick={() => p.unlocked && navigate('/pontos')}
+                      onClick={() => p.unlocked && navigate('/pontos-turisticos')}
                       aria-label={p.name}
                       role="button"
                       tabIndex={0}
-                      onKeyDown={(e) => { if (e.key === 'Enter' && p.unlocked) navigate('/pontos'); }}
+                      onKeyDown={(e) => { if (e.key === 'Enter' && p.unlocked) navigate('/pontos-turisticos'); }}
                     >
                       {p.image ? (
                         <img src={`/${p.image}`} alt={p.name} className="timeline-circle__img" />

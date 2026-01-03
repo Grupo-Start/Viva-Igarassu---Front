@@ -95,6 +95,24 @@ export function Header() {
     } catch (e) { return null; }
   };
 
+  const getUserRole = (u) => {
+    const userObj = u || getStoredUser();
+    if (!userObj) return 'comum';
+    const tipo = (userObj.tipo || userObj.role || '').toString().toLowerCase();
+    if (userObj.isAdmin || tipo.includes('admin')) return 'admin';
+    const isEmpresa = userObj.isEmpresa || userObj.is_empresa || userObj.isCompany || tipo.includes('empresa') || tipo.includes('empreendedor');
+    if (isEmpresa) return 'empresa';
+    return 'comum';
+  };
+
+  const goToProfile = () => {
+    const role = getUserRole(user);
+    if (role === 'admin') navigate('/admin-dashboard');
+    else if (role === 'empresa') navigate('/empresa-dashboard/meus-dados');
+    else navigate('/usuarioDashboard');
+    setOpen(false);
+  };
+
   const computeDisplayName = (u) => {
     if (!u) {
       u = getStoredUser();
@@ -168,6 +186,7 @@ export function Header() {
 
             {open && (
               <div className="admin-menu">
+                <button className="admin-menu-item" onClick={goToProfile}>Perfil</button>
                 <button className="admin-menu-item" onClick={handleLogout}>Sair</button>
               </div>
             )}

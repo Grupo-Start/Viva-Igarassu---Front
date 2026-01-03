@@ -86,7 +86,6 @@ export function RegisterPerson() {
                         const role = location?.state?.role || 'comum';
                         const payload = { nome_completo: nome || undefined, email, senha, role };
                         const created = await authService.register(payload);
-                        console.debug('Registro criado:', created);
                         let tokenObtained = null;
                         try {
                             const authResp = await authService.login({ email, password: senha });
