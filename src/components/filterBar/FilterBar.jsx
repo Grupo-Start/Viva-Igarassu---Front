@@ -4,7 +4,6 @@ import { Button } from "../button/Button";
 export function FilterBar({ filters, onChange, onFilter }) {
   return (
     <div className="filter-bar">
-      {/* Campo de busca centralizado */}
       <div className="search-container">
         <input
           type="text"
@@ -16,13 +15,11 @@ export function FilterBar({ filters, onChange, onFilter }) {
         />
       </div>
 
-      {/* Filtros alinhados com botão ao lado */}
       <div className="filters-container">
-        <select name="tipo" value={filters?.tipo} onChange={onChange}>
+        <select name="tipo" value={filters?.tipo || ''} onChange={onChange}>
           <option value="">Tipo</option>
-          <option value="Show">Show</option>
-          <option value="Carnaval">Carnaval</option>
-          <option value="São João">São João</option>
+          <option value="Gratuito">Gratuito</option>
+          <option value="Pago">Pago</option>
         </select>
 
         <select name="categoria" value={filters?.categoria} onChange={onChange}>

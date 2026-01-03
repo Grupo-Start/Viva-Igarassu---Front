@@ -247,11 +247,6 @@ export function PageEventos() {
         }
 
         try {
-          console.group('Evento payload');
-          if (body instanceof FormData) {
-          } else {
-          }
-          console.groupEnd();
         } catch (e) { console.warn('Falha ao logar payload', e); }
 
         try {

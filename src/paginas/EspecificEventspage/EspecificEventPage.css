@@ -1,5 +1,7 @@
 .carnival-page main {
     padding: 30px;
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
 .carnival-page h2 {
@@ -12,7 +14,8 @@
 .event-details {
     display: flex;
     flex-wrap: wrap;
-    gap: 20px;
+    gap: 24px;
+    margin-top: 28px;
 }
 
 
@@ -35,4 +38,8 @@
         font-size: 20px;
         text-align: center;
     }
+}
+
+.main-event {
+  margin-bottom: 32px;
 }

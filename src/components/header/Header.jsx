@@ -157,6 +157,10 @@ export function Header() {
       <nav className="header-nav">
         <Link to="/">Home</Link>
         <p>|</p>
+        <Link to="/eventspage">Agenda</Link>
+        <p>|</p>
+        <Link to="/rewardspage">Recompensas</Link>
+        <p>|</p>
         <Link to="/quem-somos">Quem somos</Link>
         <p>|</p>
         <Link to="/cidade">A cidade</Link>

@@ -4,7 +4,7 @@ import "./PageRecompensas.css";
 import { DashboardHeader } from "../../../components/dashboardHeader/DashboardHeader";
 import { SidebarAdmin } from "../../../components/sidebarAdmin/SidebarAdmin";
 import { FaGift } from "react-icons/fa";
-import { dashboardService } from "../../../services/api";
+import { dashboardService, API_BASE_URL } from "../../../services/api";
 
 export function PageRecompensas() {
   const usuario = JSON.parse(localStorage.getItem('user') || '{}');
@@ -22,6 +22,7 @@ export function PageRecompensas() {
     valor: "",
     quantidade: "",
     imagem: "",
+    imagemPreview: null,
     empresa: ""
   });
 
@@ -53,12 +54,13 @@ export function PageRecompensas() {
         valor: recompensa.preco_moedas ?? recompensa.valor ?? "",
         quantidade: recompensa.quantidade_disponivel ?? recompensa.quantidade ?? "",
         imagem: "",
+        imagemPreview: recompensa.imagem_path ? ( (typeof recompensa.imagem_path === 'string' && (recompensa.imagem_path.startsWith('http') || recompensa.imagem_path.startsWith('/'))) ? recompensa.imagem_path : `${String(API_BASE_URL).replace(/\/$/, '')}/${String(recompensa.imagem_path).replace(/^\/+/, '')}` ) : (recompensa.imagem || null),
         empresa: recompensa?.empresa?.id_empresa || recompensa?.empresa || empresaPerfil || ""
       });
     } else {
       setIsEditing(false);
       setEditingId(null);
-      setFormData({ nome: "", descricao: "", valor: "", quantidade: "" });
+      setFormData({ nome: "", descricao: "", valor: "", quantidade: "", imagem: "", imagemPreview: null });
     }
     setShowModal(true);
   };
@@ -81,22 +83,30 @@ export function PageRecompensas() {
     fd.append('quantidade', formData.quantidade);
     if (formData.imagem instanceof File) {
       fd.append('imagem', formData.imagem);
+      fd.append('image', formData.imagem);
+      fd.append('file', formData.imagem);
     }
     if (isEditing) {
       dashboardService.updateRecompensa(editingId, fd)
-        .then(() => {
+        .then((res) => {
           loadRecompensas();
           handleCloseModal();
         })
-        .catch(err => setError("Erro ao editar recompensa: " + (err.response?.data?.message || err.message)))
+        .catch(err => {
+          console.error('updateRecompensa erro', err);
+          setError("Erro ao editar recompensa: " + (err.response?.data?.message || err.message));
+        })
         .finally(() => setLoading(false));
     } else {
       dashboardService.createRecompensa(fd)
-        .then(() => {
+        .then((res) => {
           loadRecompensas();
           handleCloseModal();
         })
-        .catch(err => setError("Erro ao criar recompensa: " + (err.response?.data?.message || err.message)))
+        .catch(err => {
+          console.error('createRecompensa erro', err);
+          setError("Erro ao criar recompensa: " + (err.response?.data?.message || err.message));
+        })
         .finally(() => setLoading(false));
     }
   };
@@ -145,6 +155,7 @@ export function PageRecompensas() {
                       <th>Descrição</th>
                       <th>Empresa</th>
                       <th>Imagem</th>
+                      <th>Imagem Path</th>
                       <th>Quantidade Disponível</th>
                       <th>Valor em Moedas</th>
                       <th>Ações</th>
@@ -160,22 +171,24 @@ export function PageRecompensas() {
                           <td>{recompensa.descricao || recompensa.titulo || recompensa.nome}</td>
                           <td>{recompensa.empresa?.nome_empresa || recompensa.empresa || ''}</td>
                           <td>
-                            {recompensa.imagem ? (
-                              <img src={recompensa.imagem} alt="Imagem da recompensa" style={{ maxWidth: 60, maxHeight: 60, objectFit: 'cover' }} />
-                            ) : (
-                              <span style={{ color: '#aaa' }}>Sem imagem</span>
-                            )}
+                            {(() => {
+                              const imgField = recompensa.imagem_path ?? recompensa.imagem ?? null;
+                              if (!imgField) return <span style={{ color: '#aaa' }}>Sem imagem</span>;
+                              const src = (typeof imgField === 'string' && (imgField.startsWith('http') || imgField.startsWith('/')))
+                                ? imgField
+                                : `${String(API_BASE_URL).replace(/\/$/, '')}/${String(imgField).replace(/^\/+/, '')}`;
+                              return <img src={src} alt="Imagem da recompensa" style={{ maxWidth: 60, maxHeight: 60, objectFit: 'cover' }} />;
+                            })()}
                           </td>
+                          <td style={{ maxWidth: 200, wordBreak: 'break-word', color: '#666' }}>{recompensa.imagem_path ?? recompensa.imagem ?? ''}</td>
                           <td>{recompensa.quantidade_disponivel ?? recompensa.quantidade ?? ''}</td>
                           <td>{recompensa.preco_moedas ?? recompensa.valor ?? ''}</td>
-                              <td>
-                                <div className="action-buttons">
-                                  <>
-                                    <button className="btn-acao editar" onClick={() => handleOpenModal(recompensa)}>Editar</button>
-                                    <button className="btn-acao excluir" onClick={() => handleDelete(recompensa.id ?? recompensa._id ?? recompensa.id_recompensas ?? recompensa.id_recompensa ?? recompensa.idRecompensa ?? recompensa.codigo ?? recompensa.cod)}>Excluir</button>
-                                  </>
-                                </div>
-                              </td>
+                          <td>
+                            <div className="action-buttons">
+                              <button className="btn-acao editar" onClick={() => handleOpenModal(recompensa)}>Editar</button>
+                              <button className="btn-acao excluir" onClick={() => handleDelete(recompensa.id ?? recompensa._id ?? recompensa.id_recompensas ?? recompensa.id_recompensa ?? recompensa.idRecompensa ?? recompensa.codigo ?? recompensa.cod)}>Excluir</button>
+                            </div>
+                          </td>
                         </tr>
                       ))
                     )}
@@ -202,7 +215,20 @@ export function PageRecompensas() {
                     <input type="number" value={formData.valor} onChange={e => setFormData({ ...formData, valor: e.target.value })} required />
                   </label>
                   <label>Imagem:
-                    <input type="file" accept="image/*" onChange={e => setFormData({ ...formData, imagem: e.target.files[0] })} />
+                    <input type="file" accept="image/*" onChange={e => {
+                      const f = e.target.files[0];
+                      try {
+                        const preview = f ? URL.createObjectURL(f) : null;
+                        setFormData({ ...formData, imagem: f, imagemPreview: preview });
+                      } catch (err) {
+                        setFormData({ ...formData, imagem: f });
+                      }
+                    }} />
+                    {formData.imagemPreview && (
+                      <div style={{ marginTop: 8 }}>
+                        <img src={formData.imagemPreview} alt="preview" style={{ maxWidth: 120, maxHeight: 80, objectFit: 'cover', borderRadius: 6 }} />
+                      </div>
+                    )}
                   </label>
                   <div className="modal-actions">
                     <button type="submit" className="btn-acao editar">{isEditing ? "Salvar" : "Adicionar"}</button>

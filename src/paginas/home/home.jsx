@@ -19,10 +19,10 @@ export function Home() {
 
         <div className="faixa-info">
           <span className="faixa-texto">
-            Agenda | <span className="faixa-link" onClick={() => navigate('/pontos-turisticos')}>Pontos Turísticos</span> | <span className="faixa-link" onClick={() => {
+            <span className="faixa-link" onClick={() => navigate('/eventspage')}>Agenda</span> | <span className="faixa-link" onClick={() => navigate('/pontos-turisticos')}>Pontos Turísticos</span> | <span className="faixa-link" onClick={() => {
               const target = document.getElementById('trilha-historico');
               if (target) target.scrollIntoView({ behavior: 'smooth' });
-            }}>Trilha Sítio Histórico</span> | Recompensas
+            }}>Trilha Sítio Histórico</span> | <span className="faixa-link" onClick={() => navigate('/rewardspage')}>Recompensas</span>
           </span>
         </div>
       </section>

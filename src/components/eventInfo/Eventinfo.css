@@ -1,30 +1,36 @@
 .event-info {
   flex: 1;
   min-width: 300px;
-  background-color: #fff3e0;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  background-color: #ffffff;
+  border: 2px solid #0a3d62;
+  border-radius: 12px;
+  overflow: hidden;
 }
 
 .event-info h3 {
-  font-size: 20px;
-  margin-bottom: 10px;
-  color: #e65100;
+  font-size: 18px;
+  margin: 0;
+  padding: 10px 14px;
+  background-color: #0a3d62;
+  color: #ffffff;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.event-info > :not(h3) {
+  padding: 14px;
 }
 
 .event-info p {
   margin-bottom: 10px;
 }
 
-/* Responsividade */
 @media (max-width: 768px) {
   .event-info {
-    padding: 15px;
+    border-radius: 10px;
   }
 
   .event-info h3 {
-    font-size: 18px;
+    font-size: 16px;
   }
 
   .event-info p {

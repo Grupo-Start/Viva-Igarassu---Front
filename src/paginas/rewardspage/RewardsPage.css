@@ -7,7 +7,6 @@
 
 .rewards-main {
   flex: 1;
-  /* ocupa espaço e empurra o footer para baixo */
   padding: 30px;
 }
 
@@ -31,7 +30,6 @@
   justify-content: center;
 }
 
-/* Responsividade para tablets */
 @media (max-width: 1024px) {
   .rewards-main {
     padding: 20px;
@@ -46,7 +44,6 @@
   }
 }
 
-/* Responsividade para celulares */
 @media (max-width: 768px) {
   .rewards-title {
     font-size: 22px;

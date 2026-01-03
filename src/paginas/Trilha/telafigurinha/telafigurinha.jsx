@@ -110,7 +110,6 @@ export function Telafigurinha() {
         const v = obj[k];
         if (v && typeof v === 'string') return v;
       }
-      // nested common shapes
       if (obj.recompensa && (obj.recompensa.nome || obj.recompensa.title)) return obj.recompensa.nome || obj.recompensa.title;
       if (obj.figurinha && (obj.figurinha.nome || obj.figurinha.name)) return obj.figurinha.nome || obj.figurinha.name;
       if (obj.Figurinha && (obj.Figurinha.nome || obj.Figurinha.name)) return obj.Figurinha.nome || obj.Figurinha.name;
@@ -156,7 +155,6 @@ export function Telafigurinha() {
       }
     }
 
-    // deep scan for any string that matches our known figurinha keywords
     for (const src of trySources) {
       const foundStr = deepSearchForKeyword(src);
       if (foundStr) {

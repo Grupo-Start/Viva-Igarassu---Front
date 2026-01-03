@@ -60,7 +60,6 @@ export function UsuarioFigurinhas() {
             try {
                 setLoading(true);
                 const data = await dashboardService.getMinhasFigurinhas();
-                console.log("Resposta da API:", data);
                 
                 let lista = [];
                 if (data?.figurinhas && Array.isArray(data.figurinhas)) {
@@ -78,9 +77,7 @@ export function UsuarioFigurinhas() {
                     lista = data;
                 }
                 
-                console.log("Figurinhas conquistadas:", lista);
                 if (lista.length > 0) {
-                    console.log("Campos disponíveis:", Object.keys(lista[0]));
                 }
                 setFigurinhas(lista);
             } catch (err) {

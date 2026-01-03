@@ -19,7 +19,6 @@ export function UsuarioDashboard() {
                 setLoading(true);
                 
                 const dashboard = await dashboardService.getDashboardUsuario();
-                console.log("Dashboard response:", dashboard);
                 
                 const count = dashboard.figurinhas?.total_conquistadas 
                     || dashboard.totalFigurinhas 

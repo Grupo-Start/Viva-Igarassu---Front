@@ -7,34 +7,50 @@
 
 
 .events-page {
-  padding: 0px;
-  /* max-width: 1200px; */
+  padding: 0;
+  max-width: 1400px;
   width: 100%;
   min-height: 100vh;
   margin: 0 auto;
 }
 
 .events-page main {
-  padding-top: 24px;
+  padding: 24px;
+}
+
+.events-page > .header {
+  width: 100vw;
+  box-sizing: border-box;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  left: 0;
+  right: 0;
+  z-index: 1000;
+}
+
+@media (max-width: 600px) {
+  .events-page > .header {
+    width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+  }
 }
 
 .events-page h2 {
   text-align: center;
   font-size: 28px;
-  margin-bottom: 32px; /* mais espaço abaixo do título */
+  margin-bottom: 32px;
   color: #0A3D62;
 }
 
-/* Grid dos cards */
 .events-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr); /* 4 colunas no desktop */
-  gap: 3px; /* espaçamento maior entre os cards */
-  justify-items: center; /* centraliza os cards dentro das colunas */
-  margin-top: 80px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  justify-items: stretch;
+  margin-top: 48px;
 }
 
-/* Mensagem quando não há eventos */
 .empty {
   text-align: center;
   color: #777;
@@ -42,11 +58,10 @@
   margin-top: 20px;
 }
 
-/* Responsividade para tablets */
 @media (max-width: 1024px) {
   .events-grid {
-    grid-template-columns: repeat(2, 1fr); /* 2 colunas no tablet */
-    gap: 24px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
   }
 
   .events-page h2 {
@@ -54,15 +69,14 @@
   }
 }
 
-/* Responsividade para celulares */
 @media (max-width: 600px) {
   .events-grid {
-    grid-template-columns: 1fr; /* 1 coluna no celular */
-    gap: 20px;
+    grid-template-columns: 1fr; 
+    gap: 18px;
   }
 
   .events-page {
-    padding: 16px;
+    padding: 12px;
   }
 
   .events-page h2 {

@@ -3,19 +3,15 @@
   justify-content: center;
   align-items: center;
   gap: 6px;
-  /* diminui o espaço entre botões */
   margin-top: 10px;
-  /* mais próximo dos cards */
 }
 
 .pagination .btn {
   min-width: 28px;
-  /* tamanho mínimo */
   height: 28px;
   padding: 0 8px;
   font-size: 13px;
   border-radius: 6px;
-  /* CORRIGIDO */
 
   color: #333;
   background-color: #eaeaea;
@@ -33,7 +29,6 @@
   color: #fff;
 }
 
-/* 📱 Mobile */
 @media (max-width: 480px) {
   .pagination {
     gap: 4px;

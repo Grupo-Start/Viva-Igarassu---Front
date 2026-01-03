@@ -16,3 +16,15 @@
 .pagination-rewards button:hover {
   background-color: #cccccc;
 }
+
+.pagination-rewards button.active {
+  background-color: #2aa79b;
+  color: #fff;
+  font-weight: 700;
+  border-radius: 12px;
+}
+
+.pagination-rewards button[disabled] {
+  opacity: 0.5;
+  cursor: default;
+}

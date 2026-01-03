@@ -6,7 +6,6 @@
   margin-bottom: 20px;
 }
 
-/* Campo de busca centralizado */
 .search-container {
   width: 100%;
   display: flex;
@@ -21,7 +20,6 @@
   font-size: 15px;
 }
 
-/* Filtros alinhados no meio */
 .filters-container {
   display: flex;
   flex-wrap: wrap;
@@ -40,7 +38,6 @@
   font-size: 14px;
 }
 
-/* Botão pequeno ao lado dos filtros */
 .filter-button {
   padding: 6px 14px;
   font-size: 14px;
@@ -60,8 +57,6 @@
 }
 
 
-
-/* Responsividade */
 @media (max-width: 768px) {
   .search-input {
     width: 90%;

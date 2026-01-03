@@ -500,6 +500,3 @@
   .faixa-topo-historico h2 { font-size: 18px; text-align: center; color: #fff; margin: 0; }
   .tag-historico { display: none; }
 }
-
-/* regra redundante removida; bordas padronizadas em definições principais */
-

@@ -5,7 +5,7 @@ import { Html5Qrcode } from "html5-qrcode";
 import Header from "../../../components/header/Header";
 import Footer from "../../../components/footer/Footer";
 import { dashboardService, api } from "../../../services/api";
-import "./ScanQRCode.css";
+import "./scanQRCode.css";
 
 export function ScanQRCode() {
     const navigate = useNavigate();
@@ -13,17 +13,14 @@ export function ScanQRCode() {
         if (!resp) return null;
         try {
             const r = resp?.data ? resp.data : resp;
-            // shallow check common keys
             const keys = ['valor','valor_figurinha','valor_estelitas','estelitas','valor_moedas','moedas','amount','credit','credit_value','valor_creditado','value','valorEmMoedas'];
             for (const k of keys) {
                 if (r[k] != null) return r[k];
             }
-            // nested common places
             if (r.usuario && r.usuario.saldo != null) return r.usuario.saldo;
             if (r.recompensa && (r.recompensa.valor != null)) return r.recompensa.valor;
             if (r.premio && (r.premio.valor != null)) return r.premio.valor;
 
-            // deep search for numeric-like values in object (first match)
             const findNumber = (obj, seen = new Set()) => {
                 if (!obj || typeof obj === 'string') return null;
                 if (seen.has(obj)) return null;
@@ -53,7 +50,6 @@ export function ScanQRCode() {
             const deep = findNumber(r);
             if (deep != null) return deep;
 
-            // fallback: parse message for numeric
             const msg = String(r.message || r.msg || r.result || '');
             const m = msg.match(/\d+[\.,]?\d*/);
             if (m) return m[0];

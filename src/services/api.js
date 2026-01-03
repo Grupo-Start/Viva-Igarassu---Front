@@ -59,7 +59,7 @@ api.interceptors.response.use(
 export const dashboardService = {
   getRecompensas: async () => {
     try {
-      const response = await api.get('/recompensas');
+      const response = await api.get('/recompensas', { headers: { 'X-Skip-Auth-Redirect': '1' } });
       return response.data;
     } catch (error) {
       throw error;
@@ -98,9 +98,16 @@ export const dashboardService = {
           ensure('valor', 'valor_em_moedas');
           ensure('empresa', 'id_empresa');
           ensure('empresa', 'empresa_id');
+          const imgFile = body.get('imagem') || body.get('image') || body.get('file');
+          if (imgFile instanceof File) {
+            if (!body.get('image')) body.append('image', imgFile);
+            if (!body.get('file')) body.append('file', imgFile);
+          }
         } catch (e) {
           console.warn('createRecompensa: falha ao normalizar FormData', e);
         }
+        config.headers = config.headers || {};
+        if (Object.prototype.hasOwnProperty.call(config.headers, 'Content-Type')) delete config.headers['Content-Type'];
       }
       try {
         if (isFormData) {
@@ -112,6 +119,12 @@ export const dashboardService = {
         console.warn('createRecompensa: erro ao serializar payload para log', e);
       }
 
+      if (isFormData) {
+          try {
+            const entries = [];
+            for (const p of body.entries()) entries.push([p[0], p[1]]);
+          } catch (e) {}
+      }
       const response = await api.post('/recompensas', body, config);
       return response.data;
     } catch (error) {
@@ -136,9 +149,16 @@ export const dashboardService = {
           ensure('valor', 'preco_moedas');
           ensure('valor', 'valor_em_moedas');
           ensure('empresa', 'id_empresa');
+          const imgFile = body.get('imagem') || body.get('image') || body.get('file');
+          if (imgFile instanceof File) {
+            if (!body.get('image')) body.append('image', imgFile);
+            if (!body.get('file')) body.append('file', imgFile);
+          }
         } catch (e) {
           console.warn('updateRecompensa: falha ao normalizar FormData', e);
         }
+        config.headers = config.headers || {};
+        if (Object.prototype.hasOwnProperty.call(config.headers, 'Content-Type')) delete config.headers['Content-Type'];
       } else {
         body = {
           nome: dados.nome,
@@ -150,6 +170,12 @@ export const dashboardService = {
           valor_em_moedas: dados.valor || dados.preco_moedas,
           empresa: dados.empresa || dados.id_empresa || dados.empresa_id,
         };
+      }
+      if (isFormData) {
+        try {
+          const entries = [];
+          for (const p of body.entries()) entries.push([p[0], p[1]]);
+        } catch (e) {}
       }
       const response = await api.put(`/recompensas/${id}`, body, config);
       return response.data;
@@ -774,7 +800,7 @@ export const dashboardService = {
 
   getEventos: async () => {
     try {
-      const response = await api.get('/eventos');
+      const response = await api.get('/eventos', { headers: { 'X-Skip-Auth-Redirect': '1' } });
       return response.data;
     } catch (error) {
       throw error;
