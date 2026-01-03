@@ -1,0 +1,38 @@
+.carnival-page main {
+    padding: 30px;
+}
+
+.carnival-page h2 {
+    font-size: 40px;
+    margin-bottom: 20px;
+    color: #0a3d62;
+    text-align: center;
+}
+
+.event-details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+
+@media (max-width: 1024px) {
+    .carnival-page main {
+        padding: 20px;
+    }
+
+    .carnival-page h2 {
+        font-size: 24px;
+    }
+}
+
+@media (max-width: 768px) {
+    .event-details {
+        flex-direction: column;
+    }
+
+    .carnival-page h2 {
+        font-size: 20px;
+        text-align: center;
+    }
+}

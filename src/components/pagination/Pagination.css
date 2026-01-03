@@ -1,0 +1,48 @@
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  /* diminui o espaço entre botões */
+  margin-top: 10px;
+  /* mais próximo dos cards */
+}
+
+.pagination .btn {
+  min-width: 28px;
+  /* tamanho mínimo */
+  height: 28px;
+  padding: 0 8px;
+  font-size: 13px;
+  border-radius: 6px;
+  /* CORRIGIDO */
+
+  color: #333;
+  background-color: #eaeaea;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.pagination .btn:hover {
+  background-color: #d5d5d5;
+}
+
+.pagination .btn.active {
+  background-color: #5b3df5;
+  color: #fff;
+}
+
+/* 📱 Mobile */
+@media (max-width: 480px) {
+  .pagination {
+    gap: 4px;
+  }
+
+  .pagination .btn {
+    min-width: 24px;
+    height: 24px;
+    padding: 0 6px;
+    font-size: 12px;
+  }
+}
