@@ -78,7 +78,7 @@ export function Sidebar() {
             </NavLink>
           </li>
           <li>
-            <NavLink to="/passwordreset" className={({isActive}) => isActive ? 'menu-item menu-active' : 'menu-item'}>
+            <NavLink to="/alterar-senha" className={({isActive}) => isActive ? 'menu-item menu-active' : 'menu-item'}>
               {open ? ' Redefinir senha' : 'R'}
             </NavLink>
           </li>

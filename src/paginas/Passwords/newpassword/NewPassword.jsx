@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "../../components/button/Button";
+import { Button } from "../../../components/button/Button";
 import "./NewPassword.css";
-import Img from "../../assets/Logoimg.jpeg";
+import Img from "../../../assets/Logoimg.jpeg";
 import { IoIosLock, IoIosUnlock } from "react-icons/io";
-import { authService } from "../../services/api";
+import { authService } from "../../../services/api";
 
 export function NewPassword() {
     const navigate = useNavigate();
@@ -15,7 +15,6 @@ export function NewPassword() {
     const [confirmSenha, setConfirmSenha] = useState("");
     const [loading, setLoading] = useState(false);
 
-    // se o usuário veio do link com token na URL, armazenar para usar no reset
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
         const urlToken = params.get('token');
@@ -61,7 +60,7 @@ export function NewPassword() {
                 <h2 className="text-global">Redefinição de Senha</h2>
                 <p className="subtitle-p">Digite sua nova senha</p>
 
-                <form className="form-passwordreset-container" onSubmit={handleSubmit}>
+                <form onSubmit={handleSubmit}>
                     <div className="form-passwordreset-container">
                         <input
                             className="passwordreset-input"

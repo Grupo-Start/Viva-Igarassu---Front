@@ -19,7 +19,10 @@ export function Home() {
 
         <div className="faixa-info">
           <span className="faixa-texto">
-            Agenda | Pontos Turísticos | Trilha Sítio Histórico | Recompensas
+            Agenda | <span className="faixa-link" onClick={() => navigate('/pontos-turisticos')}>Pontos Turísticos</span> | <span className="faixa-link" onClick={() => {
+              const target = document.getElementById('trilha-historico');
+              if (target) target.scrollIntoView({ behavior: 'smooth' });
+            }}>Trilha Sítio Histórico</span> | Recompensas
           </span>
         </div>
       </section>
@@ -42,7 +45,7 @@ export function Home() {
 
         <div className="hero-ctas">
           <button className="btn-primary" onClick={() => navigate('/register')}>Cadastre-se</button>
-          <button className="btn-secondary" onClick={() => navigate('/pontos')}>Explorar pontos</button>
+          <button className="btn-secondary" onClick={() => navigate('/pontos-turisticos')}>Explorar pontos</button>
         </div>
       </section>
 
@@ -78,10 +81,9 @@ export function Home() {
       <section className="cta">
         <h2>Conheça Igarassu de um jeito novo!</h2>
         <p>Cadastre-se e comece sua trilha histórica agora!</p>
-        <button className="cta-btn" onClick={() => navigate('/register')}>CADASTRE-SE</button>
       </section>
 
-      <div className="faixa-topo-historico">
+      <div className="faixa-topo-historico" id="trilha-historico">
         <h2>Trilha Sítio Histórico</h2>
         <span className="tag-historico">#vivanossahistoria</span>
       </div>
@@ -90,8 +92,6 @@ export function Home() {
         
 
         <div className="lista-locais">
-          {/* Exemplo de pontos da trilha com estado bloqueado/desbloqueado. */}
-          {/* Em produção, substituir por dados vindos da API com estado do usuário. */}
           {(() => {
             const initialPoints = [
               { id: 1, name: "Igreja Matriz dos Santos Cosme e Damião", unlocked: true, image: "igreja.jpg" },
@@ -109,11 +109,11 @@ export function Home() {
                   <div key={p.id} className="timeline-row">
                     <div
                       className={`timeline-circle ${p.unlocked ? 'unlocked' : 'locked'}`}
-                      onClick={() => p.unlocked && navigate('/pontos')}
+                      onClick={() => p.unlocked && navigate('/pontos-turisticos')}
                       aria-label={p.name}
                       role="button"
                       tabIndex={0}
-                      onKeyDown={(e) => { if (e.key === 'Enter' && p.unlocked) navigate('/pontos'); }}
+                      onKeyDown={(e) => { if (e.key === 'Enter' && p.unlocked) navigate('/pontos-turisticos'); }}
                     >
                       {p.image ? (
                         <img src={`/${p.image}`} alt={p.name} className="timeline-circle__img" />

@@ -14,12 +14,17 @@ export function Header() {
     } catch (e) {
       setUser(null);
     }
-    // if the stored user lacks empresa info, try to resolve it from API and merge
     const tryAttachCompany = async () => {
       try {
         const r = localStorage.getItem('user');
         if (!r) return;
         const u = JSON.parse(r);
+        
+        const tipo = (u.tipo || u.role || '').toString().toLowerCase();
+        const isEmpresa = u.isEmpresa || u.is_empresa || u.isCompany || 
+                          tipo.includes('empresa') || tipo.includes('empreendedor');
+        if (!isEmpresa) return;
+        
         const hasCompany = u && (u.nome_empresa || u.empresa || u.id_empresa || u.empresa_id || (u.empresa && (u.empresa.nome_empresa || u.empresa.nome)));
         if (hasCompany) return;
         const token = localStorage.getItem('token');
@@ -90,12 +95,29 @@ export function Header() {
     } catch (e) { return null; }
   };
 
+  const getUserRole = (u) => {
+    const userObj = u || getStoredUser();
+    if (!userObj) return 'comum';
+    const tipo = (userObj.tipo || userObj.role || '').toString().toLowerCase();
+    if (userObj.isAdmin || tipo.includes('admin')) return 'admin';
+    const isEmpresa = userObj.isEmpresa || userObj.is_empresa || userObj.isCompany || tipo.includes('empresa') || tipo.includes('empreendedor');
+    if (isEmpresa) return 'empresa';
+    return 'comum';
+  };
+
+  const goToProfile = () => {
+    const role = getUserRole(user);
+    if (role === 'admin') navigate('/admin-dashboard');
+    else if (role === 'empresa') navigate('/empresa-dashboard/meus-dados');
+    else navigate('/usuarioDashboard');
+    setOpen(false);
+  };
+
   const computeDisplayName = (u) => {
     if (!u) {
       u = getStoredUser();
     }
     if (!u) return null;
-    // Prefer company fields when available, regardless of role
     try {
       const companyName = u.nome_empresa
         || (u.empresa_obj && (u.empresa_obj.nome_empresa || u.empresa_obj.nome || u.empresa_obj.razao_social))
@@ -129,17 +151,17 @@ export function Header() {
   return (
     <header className="header">
       <div className="header-logo">
-       <img src="header-logo.png" alt="logo viva igarassu" />
+       <img src="/header-logo.png" alt="logo viva igarassu" />
       </div>
 
       <nav className="header-nav">
-        <Link to="/home">Home</Link>
+        <Link to="/">Home</Link>
         <p>|</p>
         <Link to="/quem-somos">Quem somos</Link>
         <p>|</p>
         <Link to="/cidade">A cidade</Link>
         <p>|</p>
-        <Link to="/contato">Contato</Link>
+        <a href="#contato" onClick={(e) => { e.preventDefault(); document.getElementById('contato')?.scrollIntoView({ behavior: 'smooth' }); }}>Contato</a>
       </nav>
 
       <div className="header-actions">
@@ -164,6 +186,7 @@ export function Header() {
 
             {open && (
               <div className="admin-menu">
+                <button className="admin-menu-item" onClick={goToProfile}>Perfil</button>
                 <button className="admin-menu-item" onClick={handleLogout}>Sair</button>
               </div>
             )}

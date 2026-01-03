@@ -146,7 +146,6 @@ export function PagePontosTuristicos() {
           dadosBackend.empresa_id = dadosBackend.empresa_id || empresaId;
         }
       } catch (e) {
-        // ignore
       }
 
       if (formData.endereco) {
@@ -160,7 +159,6 @@ export function PagePontosTuristicos() {
         dadosBackend.categoria = dadosBackend.categoria || formData.tipo;
       }
 
-      try { console.debug('PontoTuristico payload:', dadosBackend); } catch (e) {}
 
       const minimalPayload = {
         nome: dadosBackend.nome || formData.nome || 'Sem nome',

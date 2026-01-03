@@ -123,7 +123,6 @@
   .recompensas-table td:nth-child(6)::before { content: 'Valor'; }
   .recompensas-table td:nth-child(7)::before { content: 'Ações'; }
   .recompensas-table td img { max-width: 100%; height: auto; }
-  /* override para garantir que não haja largura mínima que force scroll */
   .recompensas-table { min-width: 0 !important; }
   .recompensas-table-container { overflow-x: visible !important; }
 }

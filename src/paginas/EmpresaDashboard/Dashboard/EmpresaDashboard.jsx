@@ -22,7 +22,6 @@ export function EmpresaDashboard() {
     async function load() {
       setLoading(true);
       try {
-        // determine empresa id from session (user saved on login/registration)
         let sessionUser = null;
         try { sessionUser = JSON.parse(localStorage.getItem('user') || 'null'); } catch (e) { sessionUser = null; }
         const empresaId = sessionUser?.empresa || sessionUser?.empresa_id || sessionUser?.id_empresa || sessionUser?.empresaId || sessionUser?.id || sessionUser?._id || null;
@@ -49,11 +48,9 @@ export function EmpresaDashboard() {
                   };
                   return arr.filter(pertence).length;
                 }
-                // fallback to count field if provided
                 return (data && (data.count || data.total)) || 0;
               }
             } catch (e) {
-              // fallback to global count
             }
             try { return await dashboardService.getRecompensasCount(); } catch (e) { return 0; }
           })(),

@@ -12,7 +12,6 @@
   
 }
 
-/* make header a positioning context so we can center the nav */
 .header { position: relative; }
 
 
@@ -34,7 +33,6 @@
   color: white;
 }
 
-/* center the nav horizontally in the header on wider screens */
 @media (min-width: 521px) {
   .header-nav {
     position: absolute;
@@ -113,7 +111,6 @@
     width: auto;
   }
 
-  /* Force hide nav and actions on mobile so only logo remains */
   .header-nav,
   .header-actions {
     display: none !important;
@@ -125,8 +122,6 @@
   }
 }
 
-/* Specific tweak when header is inside the main `.conteudo` (Quem somos):
-   slightly smaller height and no overlap with top content */
 .conteudo .header {
   height: 56px;
   padding-top: 8px;

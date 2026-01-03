@@ -1,13 +1,11 @@
 import axios from 'axios';
 
-// Resolve API base URL from environment (Vite: import.meta.env.VITE_API_URL, CRA: REACT_APP_API_URL)
 let API_BASE_URL = 'http://localhost:3001';
 try {
   if (typeof import.meta !== 'undefined' && import.meta && import.meta.env && import.meta.env.VITE_API_URL) {
     API_BASE_URL = import.meta.env.VITE_API_URL;
   }
 } catch (e) {
-  // import.meta may not be available in some bundlers; fall back to process.env check
   try {
     if (typeof process !== 'undefined' && process && process.env && process.env.REACT_APP_API_URL) {
       API_BASE_URL = process.env.REACT_APP_API_URL;
@@ -35,7 +33,6 @@ api.interceptors.response.use(
     try {
       const cfg = error?.config || {};
       const headers = cfg.headers || {};
-      // merge possible nested header containers (axios sometimes uses headers.common)
       const combined = { ...(headers.common || {}), ...headers };
       let skipHeader = false;
       for (const k of Object.keys(combined)) {
@@ -54,7 +51,6 @@ api.interceptors.response.use(
         window.location.href = '/login';
       }
     } catch (e) {
-      // ignore
     }
     return Promise.reject(error);
   }
@@ -110,9 +106,7 @@ export const dashboardService = {
         if (isFormData) {
           const entries = [];
           for (const p of body.entries()) entries.push([p[0], p[1]]);
-          console.debug('createRecompensa: enviando FormData entries ->', entries, 'config:', config);
         } else {
-          console.debug('createRecompensa: enviando JSON ->', body, 'config:', config);
         }
       } catch (e) {
         console.warn('createRecompensa: erro ao serializar payload para log', e);
@@ -169,7 +163,6 @@ export const dashboardService = {
       const resolvedId = (typeof id === 'object' && id !== null)
         ? (id.id || id._id || id.id_recompensas || id.idRecompensas || id.id_recompensa || id.recompensaId || id.uuid || id.toString && id.toString())
         : id;
-      console.debug('deleteRecompensa: resolved id ->', resolvedId);
       if (!resolvedId) throw new Error('deleteRecompensa: não foi possível extrair id da recompensa');
 
       try {
@@ -179,7 +172,6 @@ export const dashboardService = {
         const msg = err?.response?.data?.message || err?.message || '';
         console.warn('deleteRecompensa: primeira tentativa falhou', err?.response?.status, msg);
         if (msg && String(msg).includes('id_recompensas')) {
-          console.debug('deleteRecompensa: tentando fallback DELETE /recompensas com body { id_recompresas }');
           const response2 = await api.delete('/recompensas', { data: { id_recompresas: resolvedId } });
           return response2.data;
         }
@@ -231,6 +223,127 @@ export const dashboardService = {
       return Array.isArray(data) ? data.length : data.count || data.total || 0;
     } catch (error) {
       return 0;
+    }
+  },
+
+  getMinhasFigurinhas: async () => {
+    try {
+      const response = await api.get('/meu-album-de-figurinhas');
+      return response.data;
+    } catch (error) {
+      console.error("Erro ao buscar figurinhas:", error);
+      return [];
+    }
+  },
+
+  getDashboardUsuario: async () => {
+    try {
+      const response = await api.get('/dashboard/usuario');
+      return response.data;
+    } catch (error) {
+      console.error("Erro ao buscar dashboard:", error);
+      throw error;
+    }
+  },
+
+  getMinhasFigurinhasCount: async () => {
+    try {
+      const dashboard = await dashboardService.getDashboardUsuario();
+      return dashboard.totalFigurinhas || dashboard.figurinhas || dashboard.count || 0;
+    } catch (error) {
+      return 0;
+    }
+  },
+
+  getMeusResgates: async () => {
+    try {
+      const dashboard = await dashboardService.getDashboardUsuario();
+      return dashboard.resgates || dashboard.recompensas || [];
+    } catch (error) {
+      return [];
+    }
+  },
+
+  getSaldo: async () => {
+    try {
+      const dashboard = await dashboardService.getDashboardUsuario();
+      return dashboard.saldo || dashboard.estelitas || 0;
+    } catch (error) {
+      return 0;
+    }
+  },
+
+  getMeusDados: async () => {
+    try {
+      const endpoints = [
+        '/usuarios/me',
+        '/auth/me',
+        '/usuarios/perfil',
+      ];
+      for (const ep of endpoints) {
+        try {
+          const response = await api.get(ep);
+          return response.data;
+        } catch (e) {
+          if (e?.response?.status !== 404) throw e;
+        }
+      }
+      const stored = localStorage.getItem('user');
+      return stored ? JSON.parse(stored) : null;
+    } catch (error) {
+      const stored = localStorage.getItem('user');
+      return stored ? JSON.parse(stored) : null;
+    }
+  },
+
+  atualizarMeusDados: async (dados) => {
+    try {
+      const endpoints = [
+        '/usuarios/me',
+        '/auth/me',
+        '/usuarios/perfil',
+      ];
+      const body = {
+        nome: dados.nome || dados.nome_completo,
+        nome_completo: dados.nome || dados.nome_completo,
+      };
+      let lastErr = null;
+      for (const ep of endpoints) {
+        try {
+          const response = await api.put(ep, body);
+          const updatedUser = response.data;
+          const stored = localStorage.getItem('user');
+          if (stored) {
+            const user = JSON.parse(stored);
+            const merged = { ...user, ...updatedUser, nome: body.nome, nome_completo: body.nome_completo };
+            localStorage.setItem('user', JSON.stringify(merged));
+          }
+          return updatedUser;
+        } catch (e) {
+          lastErr = e;
+          if (e?.response?.status === 404 || e?.response?.status === 405) continue;
+          throw e;
+        }
+      }
+      for (const ep of endpoints) {
+        try {
+          const response = await api.patch(ep, body);
+          const updatedUser = response.data;
+          const stored = localStorage.getItem('user');
+          if (stored) {
+            const user = JSON.parse(stored);
+            const merged = { ...user, ...updatedUser, nome: body.nome, nome_completo: body.nome_completo };
+            localStorage.setItem('user', JSON.stringify(merged));
+          }
+          return updatedUser;
+        } catch (e) {
+          lastErr = e;
+        }
+      }
+      if (lastErr) throw lastErr;
+      throw new Error('atualizarMeusDados: nenhum endpoint respondeu');
+    } catch (error) {
+      throw error;
     }
   },
 
@@ -429,11 +542,9 @@ export const dashboardService = {
           const resp = await api.get(p);
           return resp.data;
         } catch (e) {
-          // tentar próximo
         }
       }
     } catch (error) {
-      // tentar outros caminhos comuns
       try {
         const resp2 = await api.get(`/qrcodes/resolve?token=${encodeURIComponent(token)}`);
         return resp2.data;
@@ -446,23 +557,17 @@ export const dashboardService = {
   visitarViaQr: async (token) => {
     try {
       if (!token) throw new Error('visitarViaQr: token ausente');
-      // Primeiro tentar o endpoint que o backend tem: POST /visitas/qr?token=...
       try {
-        console.debug('visitarViaQr: tentando primeiro POST /visitas/qr?token=...');
         const respDirect = await api.post(`/visitas/qr?token=${encodeURIComponent(token)}`, {});
-        console.debug('visitarViaQr: POST /visitas/qr OK', respDirect?.status, respDirect?.data);
         return respDirect.data;
       } catch (firstErr) {
         const statusFirst = firstErr?.response?.status || null;
-        // se já possui figurinha (409), retornar a resposta do servidor como sucesso sem lançar
         if (statusFirst === 409) {
-          try { return firstErr.response.data; } catch (e) { /* fallthrough */ }
+          try { return firstErr.response.data; } catch (e) { }
         }
         console.warn('visitarViaQr: POST /visitas/qr inicial falhou, seguindo para outros endpoints', statusFirst, firstErr?.response?.data || firstErr?.message || firstErr);
-        // continuar com tentativas alternativas
       }
 
-      // Priorizar POST /qr com payload { token } (ou chaves similares). Depois tentar GET /qr?token=...
       const endpoint = '/qr';
       const payloadKeys = ['token', 'id_qr_code', 'id_qrcode', 'id', 'codigo', 'code', 'qr'];
       const headersJson = { 'Content-Type': 'application/json' };
@@ -475,13 +580,10 @@ export const dashboardService = {
         if (t) authHeader.Authorization = `Bearer ${t}`;
       } catch (e) {}
 
-      // tentar POST /qr com várias chaves (JSON e form)
       for (const key of payloadKeys) {
         const body = { [key]: token };
         try {
-          console.debug('visitarViaQr: tentando POST', endpoint, 'payloadKey:', key, 'body:', body);
           const res = await api.post(endpoint, body, { headers: { ...headersJson, ...authHeader } });
-          console.debug('visitarViaQr: resposta OK', endpoint, res?.status, res?.data);
           return res.data;
         } catch (e) {
           lastErr = e;
@@ -490,9 +592,7 @@ export const dashboardService = {
         try {
           const params = new URLSearchParams();
           params.append(key, token);
-          console.debug('visitarViaQr: tentando POST form', endpoint, 'field:', key, 'params:', params.toString());
           const res2 = await api.post(endpoint, params.toString(), { headers: { ...headersForm, ...authHeader } });
-          console.debug('visitarViaQr: resposta OK (form)', endpoint, res2?.status, res2?.data);
           return res2.data;
         } catch (e) {
           lastErr = e;
@@ -500,7 +600,6 @@ export const dashboardService = {
         }
       }
 
-      // tentar GET /qr?token=...
       try {
         const resg = await api.get(`${endpoint}?token=${encodeURIComponent(token)}`, { headers: { ...authHeader } });
         return resg.data;
@@ -508,24 +607,18 @@ export const dashboardService = {
         lastErr = eg;
       }
 
-      // Fallback: algumas versões do backend expõem POST em /visitas/qr?token=... (sem corpo)
       try {
-        console.debug('visitarViaQr: tentando fallback POST /visitas/qr?token=...');
         const respFallback = await api.post(`/visitas/qr?token=${encodeURIComponent(token)}`, {}, { headers: { ...authHeader } });
-        console.debug('visitarViaQr: fallback /visitas/qr OK', respFallback?.status, respFallback?.data);
         return respFallback.data;
       } catch (efb) {
         lastErr = efb;
         console.warn('visitarViaQr: fallback POST /visitas/qr falhou', efb?.response?.status, efb?.response?.data || efb?.message || efb);
       }
 
-      // Último recurso: tentar com chamada absoluta (algumas configurações do axios/baseURL conflitantes)
       try {
         const jwt = (typeof localStorage !== 'undefined') ? localStorage.getItem('token') : null;
         const headersAbs = jwt ? { Authorization: `Bearer ${jwt}` } : {};
-        console.debug('visitarViaQr: tentando fallback absoluto', API_BASE_URL + `/visitas/qr?token=${encodeURIComponent(token)}`);
         const absResp = await axios.post(`${API_BASE_URL}/visitas/qr?token=${encodeURIComponent(token)}`, {}, { headers: headersAbs });
-        console.debug('visitarViaQr: fallback absoluto OK', absResp?.status, absResp?.data);
         return absResp.data;
       } catch (eabs) {
         lastErr = eabs;
@@ -572,8 +665,6 @@ export const dashboardService = {
         }
       } catch (e) {}
 
-      console.log('createPontoTuristico: payload final (antes de filtrar) ->', jsonPayload);
-
       if (!jsonPayload.nome || String(jsonPayload.nome).trim() === '') {
         throw new Error('createPontoTuristico: campo "nome" é obrigatório');
       }
@@ -594,15 +685,12 @@ export const dashboardService = {
         if (allowed.has(k)) finalPayload[k] = jsonPayload[k];
       }
 
-      console.log('createPontoTuristico: payload enviado ->', finalPayload);
-
       const endpoints = ['/pontos-turisticos'];
       const config = { headers: { 'Content-Type': 'application/json' } };
       let lastErr = null;
       for (const ep of endpoints) {
         try {
           const res = await api.post(ep, finalPayload, config);
-          console.log('createPontoTuristico: resposta OK', ep, res.status, res.data);
           return res.data;
         } catch (err) {
           lastErr = err;
@@ -751,12 +839,9 @@ export const dashboardService = {
           if (body instanceof FormData) {
             const entries = [];
             for (const p of body.entries()) entries.push([p[0], p[1]]);
-            console.debug('createEvento: tentando endpoint', ep, 'com FormData:', entries);
           } else {
-            console.debug('createEvento: tentando endpoint', ep, 'com JSON:', body);
           }
           const response = await api.post(ep, body, config);
-          console.debug('createEvento: resposta OK', ep, response?.status, response?.data);
           return response.data;
         } catch (err) {
           lastError = err;
@@ -771,9 +856,7 @@ export const dashboardService = {
           for (const w of wrappers) {
             try {
               const wrapped = { [w]: body };
-              console.debug('createEvento: tentando envelope', w, '->', wrapped);
               const res = await api.post('/eventos', wrapped, config);
-              console.debug('createEvento: resposta envelope OK', res?.status, res?.data);
               return res.data;
             } catch (e) {
               lastError = e;
@@ -845,13 +928,11 @@ export const authService = {
   register: async (user) => {
     try {
       if (!user) throw new Error('register: payload ausente');
-      // Try the canonical public registration endpoint first and only
       const nome = user.nome || user.name || user.nome_completo || user.nomeCompleto;
       const email = user.email || user.usuario || user.emailAddress;
       const senha = user.senha || user.password || user.pwd;
       const role = user.role || user.tipo || user.type || 'comum';
 
-      // backend expects exactly: nome_completo, email, senha
       const body = {
         ...(nome ? { nome_completo: nome } : {}),
         ...(email ? { email } : {}),
@@ -861,10 +942,8 @@ export const authService = {
 
       try {
         const res = await api.post('/usuarios/cadastrar', body, { headers: { 'X-Skip-Auth-Redirect': '1' } });
-        console.debug('authService.register: /usuarios/cadastrar sucesso', res?.data);
         return res.data;
       } catch (err) {
-        // If backend returns 401 with message 'Token não fornecido', surface a clearer error
         const status = err?.response?.status;
         const respData = err?.response?.data;
         console.warn('authService.register: /usuarios/cadastrar falhou', status, respData);
@@ -899,7 +978,6 @@ export const authService = {
         lastErr = error;
       }
     }
-    // if we have an axios error with response, throw it so callers can inspect status/data
     if (lastErr) throw lastErr;
     throw new Error('Todas as tentativas falharam. Verifique email/senha ou backend.');
   },
@@ -907,7 +985,6 @@ export const authService = {
     try {
       if (!emailOrPayload) throw new Error('requestPasswordReset: email ausente');
       const email = typeof emailOrPayload === 'string' ? emailOrPayload : (emailOrPayload.email || emailOrPayload.usuario || emailOrPayload.emailAddress);
-      // Backend esperado: forgotPassword(email) com body { email }
       const payloads = [ { email } ];
       const endpoints = [
         '/auth/forgot-password',
@@ -934,7 +1011,6 @@ export const authService = {
   verifyResetToken: async (token) => {
     try {
       if (!token) throw new Error('verifyResetToken: token ausente');
-      // Se o backend não expõe validação separada, apenas retorna sucesso direto.
       const tryPaths = [
         `/auth/validate-reset-token?token=${encodeURIComponent(token)}`,
       ];
@@ -943,7 +1019,6 @@ export const authService = {
           const resp = await api.get(p, { headers: { 'X-Skip-Auth-Redirect': '1' } });
           return resp.data;
         } catch (e) {
-          // se não existir, seguimos para reset direto
         }
       }
       return { ok: true };
@@ -985,6 +1060,47 @@ export const authService = {
       }
       if (lastErr) throw lastErr;
       throw new Error('resetPassword: nenhum endpoint respondeu');
+    } catch (error) {
+      throw error;
+    }
+  },
+  changePassword: async (senhaAtual, novaSenha) => {
+    try {
+      if (!senhaAtual || !novaSenha) throw new Error('changePassword: senhas ausentes');
+      const endpoints = [
+        '/usuarios/me/senha',
+        '/auth/change-password',
+        '/usuarios/change-password',
+        '/usuarios/alterar-senha',
+        '/auth/alterar-senha',
+      ];
+      const bodies = [
+        { senhaAtual, novaSenha },
+        { senha_atual: senhaAtual, nova_senha: novaSenha },
+        { currentPassword: senhaAtual, newPassword: novaSenha },
+      ];
+      let lastErr = null;
+      for (const ep of endpoints) {
+        for (const b of bodies) {
+          try {
+            const res = await api.put(ep, b);
+            return res.data;
+          } catch (err) {
+            if (err?.response?.status === 404 || err?.response?.status === 405) {
+              try {
+                const resPost = await api.post(ep, b);
+                return resPost.data;
+              } catch (errPost) {
+                lastErr = errPost;
+              }
+            } else {
+              lastErr = err;
+            }
+          }
+        }
+      }
+      if (lastErr) throw lastErr;
+      throw new Error('changePassword: nenhum endpoint respondeu');
     } catch (error) {
       throw error;
     }

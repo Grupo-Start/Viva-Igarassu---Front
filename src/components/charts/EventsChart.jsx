@@ -155,7 +155,6 @@ export default function EventsChart({ data = null, empresaId = null, height = 30
   }, [source]);
 
   if (import.meta.env.MODE === 'development') {
-    try { console.debug('EventsChart monthly:', monthly); } catch (e) {}
   }
 
   if (loading) return <div className="visits-chart-container">Carregando gráfico...</div>;

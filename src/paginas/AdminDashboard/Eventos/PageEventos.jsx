@@ -249,9 +249,7 @@ export function PageEventos() {
         try {
           console.group('Evento payload');
           if (body instanceof FormData) {
-            for (const pair of body.entries()) console.debug('form:', pair[0], pair[1]);
           } else {
-            console.debug('json body:', body);
           }
           console.groupEnd();
         } catch (e) { console.warn('Falha ao logar payload', e); }
@@ -293,7 +291,6 @@ export function PageEventos() {
                   body.endereco = raw;
                   body.address = raw;
                 }
-                console.debug('Fallback: anexado endereco_completo ao payload', raw);
               }
             } catch (e) { console.warn('Falha ao anexar fallback de endereco:', e); }
           } else {
@@ -350,7 +347,6 @@ export function PageEventos() {
     (async () => {
       if (!window.confirm('Tem certeza que deseja excluir este evento?')) return;
       try {
-        console.debug('Deletando evento id (frontend):', id);
         await dashboardService.deleteEvento(id);
         await loadEventos();
       } catch (err) {

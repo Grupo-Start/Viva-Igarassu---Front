@@ -52,7 +52,6 @@ body {
   background: linear-gradient(180deg, rgba(10,61,98,0.98), rgba(6,45,73,0.98));
   border-radius: 18px;
   position: relative;
-  /* .qr-actions removido: nenhuma ação necessária após leitura do QR */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -164,7 +163,6 @@ body {
   }
 }
 
-/* Extra small devices: tighten spacing and ensure buttons full width */
 @media (max-width: 380px) {
   .scan-header h2 { font-size: 1.6rem; }
   .btn-wrap { width: 94%; }
