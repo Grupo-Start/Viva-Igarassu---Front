@@ -83,7 +83,15 @@ export function EmpresaRecompensas() {
         valor: recompensa.preco_moedas ?? recompensa.valor ?? "",
         quantidade: recompensa.quantidade_disponivel ?? recompensa.quantidade ?? "",
         imagem: "",
-        imagemPreview: recompensa.imagem_path ? ( (typeof recompensa.imagem_path === 'string' && (recompensa.imagem_path.startsWith('http') || recompensa.imagem_path.startsWith('/'))) ? recompensa.imagem_path : `${String(API_BASE_URL).replace(/\/$/, '')}/${String(recompensa.imagem_path).replace(/^\/+/, '')}` ) : (recompensa.imagem || null),
+        imagemPreview: (() => {
+          const imgField = recompensa.imagem_path ?? recompensa.imagem ?? null;
+          if (imgField && typeof imgField === 'string') {
+            if (imgField.startsWith('http')) return imgField;
+            if (imgField.startsWith('/')) return `${String(API_BASE_URL).replace(/\/$/, '')}${imgField}`;
+            return `${String(API_BASE_URL).replace(/\/$/, '')}/${String(imgField).replace(/^\/+/, '')}`;
+          }
+          return recompensa.imagem || null;
+        })(),
         empresa: recompensa?.empresa?.id_empresa || recompensa?.empresa || empresaPerfil || ""
       });
     } else {
@@ -174,12 +182,7 @@ export function EmpresaRecompensas() {
                 + Adicionar Recompensa
               </button>
             </div>
-            <div style={{ marginTop: 12 }}>
-              <details style={{ background: '#f7f7f7', padding: 10, borderRadius: 6 }}>
-                <summary style={{ cursor: 'pointer' }}>DEBUG: mostrar dados brutos</summary>
-                <pre style={{ whiteSpace: 'pre-wrap', maxHeight: 300, overflow: 'auto' }}>{JSON.stringify({ recompensas, formData }, null, 2)}</pre>
-              </details>
-            </div>
+            
             {loading && <p className="loading">Carregando recompensas...</p>}
             {error && <p className="error">{error}</p>}
             {!loading && !error && (
@@ -191,7 +194,6 @@ export function EmpresaRecompensas() {
                       <th>Descrição</th>
                       <th>Empresa</th>
                       <th>Imagem</th>
-                      <th>Imagem Path</th>
                       <th>Quantidade Disponível</th>
                       <th>Valor em Moedas</th>
                       <th>Ações</th>
@@ -199,8 +201,8 @@ export function EmpresaRecompensas() {
                   </thead>
                   <tbody>
                       {recompensas.length === 0 ? (
-                      <tr><td colSpan="5">Nenhuma recompensa encontrada.</td></tr>
-                    ) : (
+                        <tr><td colSpan="7">Nenhuma recompensa encontrada.</td></tr>
+                      ) : (
                       recompensas.map((recompensa, idx) => (
                         <tr key={recompensa.id ?? recompensa._id ?? recompensa.nome ?? idx}>
                           <td>{recompensa.nome || recompensa.titulo || recompensa.descricao}</td>
@@ -210,13 +212,15 @@ export function EmpresaRecompensas() {
                             {(() => {
                               const imgField = recompensa.imagem_path ?? recompensa.imagem ?? null;
                               if (!imgField) return <span style={{ color: '#aaa' }}>Sem imagem</span>;
-                              const src = (typeof imgField === 'string' && (imgField.startsWith('http') || imgField.startsWith('/')))
-                                ? imgField
-                                : `${String(API_BASE_URL).replace(/\/$/, '')}/${String(imgField).replace(/^\/+/, '')}`;
+                              let src = null;
+                              if (typeof imgField === 'string') {
+                                if (imgField.startsWith('http')) src = imgField;
+                                else if (imgField.startsWith('/')) src = `${String(API_BASE_URL).replace(/\/$/, '')}${imgField}`;
+                                else src = `${String(API_BASE_URL).replace(/\/$/, '')}/${String(imgField).replace(/^\/+/, '')}`;
+                              }
                               return <img src={src} alt="Imagem da recompensa" style={{ maxWidth: 60, maxHeight: 60, objectFit: 'cover' }} />;
                             })()}
                           </td>
-                          <td style={{ maxWidth: 200, wordBreak: 'break-word', color: '#666' }}>{recompensa.imagem_path ?? recompensa.imagem ?? ''}</td>
                           <td>{recompensa.quantidade_disponivel ?? recompensa.quantidade ?? ''}</td>
                           <td>{recompensa.preco_moedas ?? recompensa.valor ?? ''}</td>
                           <td>

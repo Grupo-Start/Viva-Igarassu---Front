@@ -17,7 +17,6 @@ export function RegisterPerson() {
     const [senha, setSenha] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-    const [debugInfo, setDebugInfo] = useState(null);
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -71,12 +70,7 @@ export function RegisterPerson() {
                 </div>
 
                 {error && <p style={{ color: 'crimson' }}>{error}</p>}
-                {debugInfo && (
-                    <details style={{ marginTop: 12, background: '#fff7f7', padding: 10, borderRadius: 6 }}>
-                        <summary style={{ cursor: 'pointer', color: '#b00' }}>Mostrar detalhes do erro</summary>
-                        <pre style={{ whiteSpace: 'pre-wrap', marginTop: 8 }}>{JSON.stringify(debugInfo, null, 2)}</pre>
-                    </details>
-                )}
+                
 
                 <Button disabled={loading} text={loading ? 'Enviando...' : 'Enviar'} onClick={async (e) => {
                     e.preventDefault();
@@ -117,13 +111,6 @@ export function RegisterPerson() {
                     } catch (err) {
                         const msg = err?.response?.data?.message || err?.message || 'Erro ao cadastrar';
                         setError(String(msg));
-                        const info = {
-                            message: err?.message,
-                            status: err?.response?.status,
-                            responseData: err?.response?.data,
-                            stack: err?.stack
-                        };
-                        setDebugInfo(info);
                     } finally {
                         setLoading(false);
                     }

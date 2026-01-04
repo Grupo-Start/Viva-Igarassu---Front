@@ -24,6 +24,12 @@ const api = axios.create({
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) config.headers = { ...(config.headers || {}), Authorization: `Bearer ${token}` };
+  try {
+    if (config && config.data && (typeof FormData !== 'undefined') && config.data instanceof FormData) {
+      config.headers = config.headers || {};
+      if (Object.prototype.hasOwnProperty.call(config.headers, 'Content-Type')) delete config.headers['Content-Type'];
+    }
+  } catch (e) { }
   return config;
 });
 
@@ -249,6 +255,72 @@ export const dashboardService = {
       return Array.isArray(data) ? data.length : data.count || data.total || 0;
     } catch (error) {
       return 0;
+    }
+  },
+
+  resgatarRecompensa: async (recompensaId, extra = {}) => {
+    try {
+      // build endpoints - prefer /resgates/:id when available
+      const endpoints = [];
+      // prefer explicit id in URL when available
+      if (recompensaId) endpoints.push(`/resgates/${encodeURIComponent(recompensaId)}`);
+      // if caller provided a codigo/slug in extra, try that as an URL id as well
+      if (!recompensaId && extra && extra.codigo) endpoints.push(`/resgates/${encodeURIComponent(extra.codigo)}`);
+      // generic collection endpoint as fallback
+      endpoints.push('/resgates');
+      if (recompensaId) endpoints.push(`/recompensas/${encodeURIComponent(recompensaId)}/resgatar`, `/recompensas/${encodeURIComponent(recompensaId)}/resgate`);
+      endpoints.push('/recompensas/resgatar');
+      endpoints.push('/resgates/meus');
+
+      const payloadOptions = [];
+      if (recompensaId) {
+        payloadOptions.push({ id_recompensa: recompensaId });
+        payloadOptions.push({ id_recompresas: recompensaId });
+        payloadOptions.push({ id_recompensas: recompensaId });
+        payloadOptions.push({ recompensa_id: recompensaId });
+        payloadOptions.push({ id: recompensaId });
+        payloadOptions.push({ idRecompensa: recompensaId });
+        payloadOptions.push({ recompensa: recompensaId });
+      }
+      // always allow empty payload and forward `extra` to help backends that accept code/slug
+      payloadOptions.push({});
+
+      let lastErr = null;
+      for (const ep of endpoints) {
+        for (const payload of payloadOptions) {
+          try {
+            const body = Object.keys(payload).length ? { ...payload, ...extra } : { ...extra };
+            const res = await api.post(ep, body);
+            // after successful resgate, try to refresh server-side user info in localStorage
+            try {
+              const me = await dashboardService.getMeusDados();
+              try {
+                // also fetch current saldo if available and attach to stored user
+                const latestSaldo = await dashboardService.getSaldo().catch(() => null);
+                if (me && typeof me === 'object') {
+                  if (latestSaldo != null) me.saldo = latestSaldo;
+                  try { localStorage.setItem('user', JSON.stringify(me)); } catch (e) { /* ignore */ }
+                  try { window.dispatchEvent(new CustomEvent('user:updated', { detail: me })); } catch (e) {}
+                } else if (latestSaldo != null) {
+                  // if no user object returned, at least store saldo separately
+                  try { localStorage.setItem('saldo', String(latestSaldo)); } catch (e) {}
+                  try { window.dispatchEvent(new CustomEvent('user:updated', { detail: { saldo: latestSaldo } })); } catch (e) {}
+                }
+              } catch (e) {
+                // ignore
+              }
+            } catch (e) {
+              // ignore failures to refresh user data
+            }
+            return res.data;
+          } catch (err) {
+            lastErr = err;
+          }
+        }
+      }
+      throw lastErr || new Error('resgatarRecompensa: nenhum endpoint disponível');
+    } catch (error) {
+      throw error;
     }
   },
 
@@ -859,6 +931,28 @@ export const dashboardService = {
       let config = {};
       let body = dados;
       const endpoints = ['/eventos', '/empresa/me/eventos', '/empresa/eventos', '/eventos/me'];
+      const isFormData = body instanceof FormData;
+      if (isFormData) {
+        try {
+          const ensure = (key, alias) => {
+            const v = body.get(key) || body.get(alias);
+            if (v != null && v !== '') {
+              if (!body.get(alias)) body.append(alias, v);
+            }
+          };
+          ensure('imagem', 'image');
+          ensure('imagem', 'file');
+          const imgFile = body.get('imagem') || body.get('image') || body.get('file');
+          if (imgFile instanceof File) {
+            if (!body.get('image')) body.append('image', imgFile);
+            if (!body.get('file')) body.append('file', imgFile);
+          }
+        } catch (e) {
+          console.warn('createEvento: falha ao normalizar FormData', e);
+        }
+        config.headers = config.headers || {};
+        if (Object.prototype.hasOwnProperty.call(config.headers, 'Content-Type')) delete config.headers['Content-Type'];
+      }
       let lastError = null;
       for (const ep of endpoints) {
         try {
@@ -934,8 +1028,89 @@ export const dashboardService = {
     try {
       let config = {};
       let body = dados;
-      const response = await api.put(`/eventos/${id}`, body, config);
-      return response.data;
+      const isFormData = (typeof FormData !== 'undefined') && (body instanceof FormData);
+      if (isFormData) {
+        try {
+          const ensure = (key, alias) => {
+            const v = body.get(key) || body.get(alias);
+            if (v != null && v !== '') {
+              if (!body.get(alias)) body.append(alias, v);
+            }
+          };
+          ensure('imagem', 'image');
+          ensure('imagem', 'file');
+          ensure('data', 'data_evento');
+          ensure('horario', 'hora');
+          const imgFile = body.get('imagem') || body.get('image') || body.get('file');
+          if (imgFile instanceof File) {
+            if (!body.get('image')) body.append('image', imgFile);
+            if (!body.get('file')) body.append('file', imgFile);
+          }
+        } catch (e) {
+          console.warn('updateEvento: falha ao normalizar FormData', e);
+        }
+        config.headers = config.headers || {};
+        if (Object.prototype.hasOwnProperty.call(config.headers, 'Content-Type')) delete config.headers['Content-Type'];
+      }
+
+      // always use the canonical endpoint PUT /eventos/:id
+      try {
+        const response = await api.put(`/eventos/${encodeURIComponent(id)}`, body, config);
+        return response.data;
+      } catch (err) {
+        // If FormData was used, some servers don't accept multipart on PUT.
+        // Try POST with method override as a fallback (common pattern: _method=PUT or X-HTTP-Method-Override)
+        if (isFormData) {
+          try {
+            // try POST with _method field to /eventos/:id
+            try {
+              if (!body.get('_method')) body.append('_method', 'PUT');
+            } catch (e) {}
+            const respPost = await api.post(`/eventos/${encodeURIComponent(id)}`, body, config);
+            return respPost.data;
+          } catch (postErr) {
+            // try POST with header override to /eventos/:id
+            try {
+              const cfg2 = { ...(config || {}) };
+              cfg2.headers = { ...(cfg2.headers || {}), 'X-HTTP-Method-Override': 'PUT' };
+              const respPost2 = await api.post(`/eventos/${encodeURIComponent(id)}`, body, cfg2);
+              return respPost2.data;
+            } catch (postErr2) {
+              // try posting to /eventos with _method=PUT and include id in form
+              try {
+                try { if (!body.get('_method')) body.append('_method', 'PUT'); } catch(e){}
+                try { if (!body.get('id')) body.append('id', String(id)); } catch(e){}
+                const respPost3 = await api.post('/eventos', body, config);
+                return respPost3.data;
+              } catch (postErr3) {
+                // try POST /eventos?_method=PUT
+                try {
+                  const respPost4 = await api.post(`/eventos?_method=PUT`, body, config);
+                  return respPost4.data;
+                } catch (postErr4) {
+                  console.warn('updateEvento: multiple POST fallbacks failed', postErr4?.response?.status);
+                  // finally try PATCH as last resort
+                  try {
+                    const respPatch = await api.patch(`/eventos/${encodeURIComponent(id)}`, body, config);
+                    return respPatch.data;
+                  } catch (patchErr) {
+                    console.warn('updateEvento: PATCH also failed', patchErr?.response?.status);
+                    throw postErr4 || postErr3 || postErr2 || postErr || patchErr || err;
+                  }
+                }
+              }
+            }
+          }
+        }
+        // non-FormData fallback: try PATCH
+        try {
+          const resp2 = await api.patch(`/eventos/${encodeURIComponent(id)}`, body, config);
+          return resp2.data;
+        } catch (err2) {
+          console.warn('updateEvento: falha ao atualizar evento em /eventos/:id', err?.response?.status, err2?.response?.status);
+          throw err2 || err;
+        }
+      }
     } catch (error) {
       throw error;
     }

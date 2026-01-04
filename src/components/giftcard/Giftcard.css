@@ -28,12 +28,23 @@
   object-fit: cover;
 }
 
+.giftcard-image {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+}
+
+.giftcard-image img[alt] {
+  display: block;
+}
+
 .giftcard-info {
-  padding: 20px;
+  padding: 22px 20px 26px 20px;
   background: linear-gradient(180deg, #4f8fb0 0%, #2f5f87 100%);
   color: #fff;
   position: relative;
-  min-height: 140px;
+  min-height: 120px;
 }
 
 .giftcard-value {
@@ -46,15 +57,24 @@
   margin-bottom: 12px;
 }
 
-.giftcard-text strong {
+.giftcard-title {
   font-size: 18px;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+}
+
+.giftcard-description {
+  margin: 0 0 10px 0;
+  font-size: 14px;
+  opacity: 0.95;
 }
 
 .giftcard-text p {
-  margin: 4px 0 0;
-  font-size: 14px;
-  opacity: 0.9;
+  margin: 0;
+  font-size: 13px;
+  opacity: 0.95;
 }
+
 
 .giftcard-code {
   position: absolute;

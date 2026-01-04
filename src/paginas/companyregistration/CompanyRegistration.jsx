@@ -13,7 +13,6 @@ export function CompanyRegistration() {
     const [servico, setServico] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-    const [debugInfo, setDebugInfo] = useState(null);
     const navigate = useNavigate();
     return (
         
@@ -69,18 +68,6 @@ export function CompanyRegistration() {
                 
 
                 {error && <p style={{ color: 'crimson' }}>{error}</p>}
-                {debugInfo && (
-                    <details style={{ marginTop: 12, background: '#fff7f7', padding: 10, borderRadius: 6 }}>
-                        <summary style={{ cursor: 'pointer', color: '#b00' }}>Mostrar detalhes do erro</summary>
-                        <pre style={{ whiteSpace: 'pre-wrap', marginTop: 8 }}>{JSON.stringify(debugInfo, null, 2)}</pre>
-                    </details>
-                )}
-                <div style={{ marginTop: 8 }}>
-                    <details style={{ marginTop: 6, background: '#fff7f7', padding: 8, borderRadius: 6 }}>
-                        <summary style={{ cursor: 'pointer', color: '#b00' }}>Informações de sessão (debug)</summary>
-                        <pre style={{ whiteSpace: 'pre-wrap', marginTop: 8 }}>{JSON.stringify({ token: localStorage.getItem('token'), user: (() => { try { return JSON.parse(localStorage.getItem('user')||'null') } catch(e){ return localStorage.getItem('user') } })() }, null, 2)}</pre>
-                    </details>
-                </div>
                 <Button disabled={loading} text={loading ? 'Enviando...' : 'Enviar'} onClick={async (e) => {
                     e.preventDefault();
                     setError(null);
@@ -187,7 +174,7 @@ export function CompanyRegistration() {
                                 empresa_obj: companyObj || current.empresa_obj || companyObj,
                             };
                             localStorage.setItem('user', JSON.stringify(merged));
-                            try { setDebugInfo({ savedUser: merged, detectedCompany: companyObj }); } catch(e){}
+                            
                             try { window.dispatchEvent(new Event('localUserChange')); } catch(e){}
                             try { setTimeout(() => { window.location.reload(); }, 150); } catch(e) {}
                         } catch (e) {}
@@ -196,7 +183,6 @@ export function CompanyRegistration() {
                             const msg = err?.response?.data?.message || err?.message || 'Erro ao cadastrar empresa';
                             const info = { status: err?.response?.status, responseData: err?.response?.data };
                             setError(String(msg));
-                            setDebugInfo(info);
                             console.warn('CompanyRegistration erro', info);
                     } finally {
                         setLoading(false);

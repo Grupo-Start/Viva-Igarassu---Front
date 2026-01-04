@@ -12,7 +12,6 @@ export function Login() {
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
-    const [debugInfo, setDebugInfo] = useState(null);
     const [mostrarSenha, setMostrarSenha] = useState(false);
 
     function toggleSenha() {
@@ -102,7 +101,6 @@ export function Login() {
         } catch (err) {
             console.error('Erro no login:', err);
             setError('E-mail ou senha inválidos. Tente novamente.');
-            try { setDebugInfo({ status: err?.response?.status, data: err?.response?.data, message: err?.message }); } catch(e){}
         } finally {
             setLoading(false);
         }
@@ -168,12 +166,7 @@ export function Login() {
                     <p><strong className="underline-login" onClick={() => navigate('/password-reset')}>Esqueceu sua senha ?</strong></p>
                 <p>Não tem conta ? <strong className="underline-login" onClick={() => navigate('/register')}>Cadastre-se</strong></p>
                 </div>
-                {debugInfo && (
-                    <details style={{ marginTop: 12, background: '#fff7f7', padding: 10, borderRadius: 6 }}>
-                        <summary style={{ cursor: 'pointer', color: '#b00' }}>Detalhes da falha (debug)</summary>
-                        <pre style={{ whiteSpace: 'pre-wrap', marginTop: 8 }}>{JSON.stringify(debugInfo, null, 2)}</pre>
-                    </details>
-                )}
+                
             </div>
 
         </div>

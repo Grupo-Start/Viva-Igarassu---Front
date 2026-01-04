@@ -45,16 +45,25 @@ export function PageRecompensas() {
   };
 
   const handleOpenModal = (recompensa = null) => {
-    if (recompensa) {
+      if (recompensa) {
       setIsEditing(true);
       setEditingId(recompensa.id ?? recompensa._id ?? recompensa.id_recompensas ?? recompensa.id_recompensa ?? recompensa.idRecompensa ?? recompensa.codigo ?? recompensa.cod ?? null);
+      const imgField = recompensa.imagem_path ?? recompensa.imagem ?? null;
+      let preview = null;
+      if (imgField && typeof imgField === 'string') {
+        if (imgField.startsWith('http')) preview = imgField;
+        else if (imgField.startsWith('/')) preview = `${String(API_BASE_URL).replace(/\/$/, '')}${imgField}`;
+        else preview = `${String(API_BASE_URL).replace(/\/$/, '')}/${String(imgField).replace(/^\/+/, '')}`;
+      } else {
+        preview = recompensa.imagem || null;
+      }
       setFormData({
         nome: recompensa.nome || "",
         descricao: recompensa.descricao || "",
         valor: recompensa.preco_moedas ?? recompensa.valor ?? "",
         quantidade: recompensa.quantidade_disponivel ?? recompensa.quantidade ?? "",
         imagem: "",
-        imagemPreview: recompensa.imagem_path ? ( (typeof recompensa.imagem_path === 'string' && (recompensa.imagem_path.startsWith('http') || recompensa.imagem_path.startsWith('/'))) ? recompensa.imagem_path : `${String(API_BASE_URL).replace(/\/$/, '')}/${String(recompensa.imagem_path).replace(/^\/+/, '')}` ) : (recompensa.imagem || null),
+        imagemPreview: preview,
         empresa: recompensa?.empresa?.id_empresa || recompensa?.empresa || empresaPerfil || ""
       });
     } else {
@@ -155,7 +164,6 @@ export function PageRecompensas() {
                       <th>Descrição</th>
                       <th>Empresa</th>
                       <th>Imagem</th>
-                      <th>Imagem Path</th>
                       <th>Quantidade Disponível</th>
                       <th>Valor em Moedas</th>
                       <th>Ações</th>
@@ -163,7 +171,7 @@ export function PageRecompensas() {
                   </thead>
                   <tbody>
                       {recompensas.length === 0 ? (
-                      <tr><td colSpan="5">Nenhuma recompensa encontrada.</td></tr>
+                      <tr><td colSpan="7">Nenhuma recompensa encontrada.</td></tr>
                     ) : (
                       recompensas.map((recompensa, idx) => (
                         <tr key={recompensa.id ?? recompensa._id ?? recompensa.nome ?? idx}>
@@ -174,13 +182,15 @@ export function PageRecompensas() {
                             {(() => {
                               const imgField = recompensa.imagem_path ?? recompensa.imagem ?? null;
                               if (!imgField) return <span style={{ color: '#aaa' }}>Sem imagem</span>;
-                              const src = (typeof imgField === 'string' && (imgField.startsWith('http') || imgField.startsWith('/')))
-                                ? imgField
-                                : `${String(API_BASE_URL).replace(/\/$/, '')}/${String(imgField).replace(/^\/+/, '')}`;
+                              let src = null;
+                              if (typeof imgField === 'string') {
+                                if (imgField.startsWith('http')) src = imgField;
+                                else if (imgField.startsWith('/')) src = `${String(API_BASE_URL).replace(/\/$/, '')}${imgField}`;
+                                else src = `${String(API_BASE_URL).replace(/\/$/, '')}/${String(imgField).replace(/^\/+/, '')}`;
+                              }
                               return <img src={src} alt="Imagem da recompensa" style={{ maxWidth: 60, maxHeight: 60, objectFit: 'cover' }} />;
                             })()}
                           </td>
-                          <td style={{ maxWidth: 200, wordBreak: 'break-word', color: '#666' }}>{recompensa.imagem_path ?? recompensa.imagem ?? ''}</td>
                           <td>{recompensa.quantidade_disponivel ?? recompensa.quantidade ?? ''}</td>
                           <td>{recompensa.preco_moedas ?? recompensa.valor ?? ''}</td>
                           <td>

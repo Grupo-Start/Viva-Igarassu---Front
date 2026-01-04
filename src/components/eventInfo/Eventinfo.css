@@ -16,6 +16,15 @@
   border-bottom: 1px solid rgba(255,255,255,0.05);
 }
 
+.event-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.event-info h3 {
+  text-align: center; /* centraliza título do painel de informações */
+}
+
 .event-info > :not(h3) {
   padding: 14px;
 }

@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { Sidebarusuario } from "../../../components/sidebarusuario/Sidebarusuario";
 import { Header } from "../../../components/header/Header";
 import { Giftcard } from "../../../components/giftcard/Giftcard";
-import { dashboardService } from "../../../services/api";
+import { PaginationRewards } from "../../../components/paginationRewards/PaginationRewards";
+import { dashboardService, API_BASE_URL } from "../../../services/api";
 import "./usuarioDashboard.css";
 import moeda from "../../../assets/moeda.png";
 import livraria from "../../../assets/livraria igarassu.jpg";
@@ -11,7 +12,9 @@ export function UsuarioDashboard() {
     const [figurinhasCount, setFigurinhasCount] = useState(0);
     const [saldo, setSaldo] = useState(0);
     const [resgates, setResgates] = useState([]);
+    const [currentPage, setCurrentPage] = useState(1);
     const [loading, setLoading] = useState(true);
+    const ITEMS_PER_PAGE = 6;
 
     useEffect(() => {
         const fetchDashboardData = async () => {
@@ -27,7 +30,18 @@ export function UsuarioDashboard() {
                 setFigurinhasCount(count);
                 
                 setSaldo(dashboard.usuario?.saldo || dashboard.saldo_moedas || dashboard.saldo || 0);
-                setResgates(dashboard.recompensas_resgatadas || dashboard.resgates || dashboard.recompensas || []);
+                const initialResgates = dashboard.recompensas_resgatadas || dashboard.resgates || dashboard.recompensas || [];
+                // If dashboard didn't include resgates, try the dedicated endpoint
+                if ((!initialResgates || initialResgates.length === 0)) {
+                    try {
+                        const meus = await dashboardService.getMeusResgates();
+                        setResgates(Array.isArray(meus) ? meus : initialResgates);
+                    } catch (e) {
+                        setResgates(initialResgates);
+                    }
+                } else {
+                    setResgates(initialResgates);
+                }
             } catch (err) {
                 console.error("Erro ao carregar dados do dashboard:", err);
                 const user = JSON.parse(localStorage.getItem("user") || "{}");
@@ -89,16 +103,75 @@ export function UsuarioDashboard() {
                                 <p className="empty-resgates">Você ainda não resgatou nenhuma recompensa.</p>
                             )}
                             
-                            {resgates.map((resgate) => (
-                                <Giftcard
-                                    key={resgate.id}
-                                    image={resgate.recompensa?.imagem || resgate.imagem || livraria}
-                                    value={`$ ${resgate.recompensa?.valor || resgate.valor || 0}`}
-                                    discount={resgate.recompensa?.desconto || resgate.desconto || ""}
-                                    store={resgate.recompensa?.empresa?.nome || resgate.loja || ""}
-                                    code={resgate.codigo || resgate.id}
-                                />
-                            ))}
+                            {(() => {
+                                const totalPages = Math.max(1, Math.ceil(resgates.length / ITEMS_PER_PAGE));
+                                if (currentPage > totalPages) setCurrentPage(1);
+                                const start = (currentPage - 1) * ITEMS_PER_PAGE;
+                                const end = start + ITEMS_PER_PAGE;
+                                const pageItems = resgates.slice(start, end);
+
+                                return pageItems.map((resgate, idx) => {
+                                const resolvedImage = (function(){
+                                    // resolve image trying several common fields; prefer recompensa.imagem_path, then recompensa.imagem, then top-level resgate.imagem
+                                    let imgField = resgate.recompensa?.imagem_path || resgate.recompensa?.imagem || resgate.imagem || resgate.imagem_path || '';
+                                    const base = String(API_BASE_URL).replace(/\/$/, '');
+                                    if (!imgField) {
+                                        return livraria;
+                                    }
+                                    try {
+                                        imgField = String(imgField).trim();
+                                        let resolved = null;
+                                        // already absolute (http/https)
+                                        if (/^https?:\/\//i.test(imgField)) {
+                                            resolved = imgField;
+                                        } else {
+                                            // if the string incorrectly contains an absolute URL concatenated after a prefix
+                                            // e.g. "http://localhost:3001https://res.cloudinary.com/...", prefer the absolute part
+                                            try {
+                                                const lastHttp = imgField.toLowerCase().lastIndexOf('http');
+                                                if (lastHttp > 0) {
+                                                    resolved = imgField.slice(lastHttp);
+                                                }
+                                            } catch (e) { /* ignore */ }
+                                            // protocol-relative //example.com/...
+                                            if (!resolved && /^\/\//.test(imgField)) resolved = `${window.location.protocol}${imgField}`;
+                                            // avoid duplicating API_BASE_URL
+                                            if (!resolved && imgField.indexOf(base) !== -1) resolved = imgField;
+                                            // absolute path on the API server
+                                            if (!resolved && imgField.startsWith('/')) resolved = `${base}${imgField}`;
+                                            // relative path -> prefix with API base
+                                            if (!resolved) resolved = `${base}/${imgField.replace(/^\/+/, '')}`;
+                                        }
+                                        // resolved image
+                                        return resolved || livraria;
+                                    } catch (e) {
+                                        // image resolution error handled
+                                        return livraria;
+                                    }
+                                })();
+                                
+                                    return (
+                                    <Giftcard
+                                        key={resgate.id || resgate.codigo || idx}
+                                        image={resolvedImage}
+                                        value={`$ ${resgate.recompensa?.valor || resgate.valor || resgate.recompensa?.preco_moedas || 0}`}
+                                        discount={resgate.recompensa?.desconto || resgate.desconto || ""}
+                                        store={resgate.recompensa?.empresa?.nome || resgate.loja || resgate.empresa || ""}
+                                        code={resgate.codigo || resgate.id || resgate.recompensa?.codigo || ''}
+                                        title={resgate.recompensa?.nome || resgate.nome || resgate.titulo || ''}
+                                        description={resgate.recompensa?.descricao || resgate.descricao || resgate.description || ''}
+                                    />
+                                );
+                                });
+                            })()}
+                        </div>
+
+                        <div style={{ display: 'flex', justifyContent: 'center', marginTop: 12 }}>
+                            <PaginationRewards
+                                currentPage={currentPage}
+                                totalPages={Math.max(1, Math.ceil(resgates.length / ITEMS_PER_PAGE))}
+                                onPageChange={(p) => setCurrentPage(p)}
+                            />
                         </div>
                     </div>
 

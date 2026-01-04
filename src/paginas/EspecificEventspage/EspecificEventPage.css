@@ -18,6 +18,10 @@
     margin-top: 28px;
 }
 
+.event-details {
+    align-items: stretch; /* ensure event-info and event-map match heights */
+}
+
 
 @media (max-width: 1024px) {
     .carnival-page main {
@@ -42,4 +46,9 @@
 
 .main-event {
   margin-bottom: 32px;
+}
+
+/* Alinha o nome do evento à esquerda nesta página específica */
+.carnival-page .main-event-text h3 {
+        text-align: left;
 }

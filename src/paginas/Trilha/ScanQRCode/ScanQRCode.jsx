@@ -60,7 +60,6 @@ export function ScanQRCode() {
     const [ponto, setPonto] = useState(null);
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(null);
-    const [debugPontos, setDebugPontos] = useState(null);
     const [decodedPreview, setDecodedPreview] = useState(null);
     const [serverErrorDetail, setServerErrorDetail] = useState(null);
     const [handledByQrEndpoint, setHandledByQrEndpoint] = useState(false);
@@ -397,15 +396,8 @@ export function ScanQRCode() {
                         const found = candidates.find(p => matchPonto(p, text));
                         if (!found) {
                             setError('QR não corresponde a nenhum ponto turístico cadastrado.');
-                            try {
-                                const extract = (p) => ({
-                                    id: p.id || p.id_ponto || p._id || null,
-                                    nome: p.nome || p.nome_ponto || p.name || null,
-                                    token: p.token || p.codigo_qr || p.qrcode || p.codigo || p.codigo_qrcode || p.id_figurinha || null,
-                                    other: Object.keys(p).filter(k => !['id','id_ponto','_id','nome','nome_ponto','token','codigo_qr','qrcode','codigo','codigo_qrcode','id_figurinha'].includes(k)).slice(0,10)
-                                });
-                                setDebugPontos(candidates.slice(0,50).map(extract));
-                            } catch (e) {}
+                                try {
+                                } catch (e) {}
                             return;
                         }
                         setPonto(found);

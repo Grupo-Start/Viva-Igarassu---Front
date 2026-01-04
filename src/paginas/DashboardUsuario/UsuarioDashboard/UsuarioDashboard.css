@@ -1,6 +1,7 @@
 
 .dashboard-layout-container {
   display: flex;
+  align-items: stretch; /* ensure children (nav/main) stretch vertically */
   min-height: calc(100vh - 70px);
 }
 
