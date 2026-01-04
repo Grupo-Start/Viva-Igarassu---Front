@@ -16,7 +16,7 @@
   padding: 10px 14px;
   color: #ffffff;
   background-color: #0a3d62;
-  text-align: center; /* centraliza título do mapa */
+  text-align: center;
 }
 
 
@@ -33,7 +33,7 @@
 
 .event-map-leaflet {
   flex: 1 1 auto;
-  height: 260px; /* default height, will expand with parent if available */
+  height: 260px;
   width: 100%;
 }
 

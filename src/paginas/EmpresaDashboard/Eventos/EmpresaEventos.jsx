@@ -189,7 +189,7 @@ export function EmpresaEventos() {
             fd.append('imagem', formData.imagem);
             try { if (!fd.get('image')) fd.append('image', formData.imagem); } catch(e){}
             try { if (!fd.get('file')) fd.append('file', formData.imagem); } catch(e){}
-          // also include imagem_path if present as string
+
           try { if (formData.imagem_path && typeof formData.imagem_path === 'string' && !fd.get('imagem_path')) fd.append('imagem_path', formData.imagem_path); } catch(e){}
           if (computedISO) fd.append('data_hora', computedISO);
           fd.append('titulo', formData.nome);

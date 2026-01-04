@@ -14,8 +14,6 @@
   width: 70px;
   transition: width 0.3s ease;
   overflow: hidden;
-  /* allow the sidebar to stretch to match the height of the main content
-     when the page grows: use full height of the parent flex item */
   height: 100%;
   flex-shrink: 0;
 }

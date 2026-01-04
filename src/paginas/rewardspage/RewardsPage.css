@@ -28,7 +28,7 @@
   flex-wrap: wrap;
   gap: 20px;
   justify-content: center;
-  align-items: stretch; /* make cards in a row have same height so buttons align */
+  align-items: stretch;
 }
 
 @media (max-width: 1024px) {

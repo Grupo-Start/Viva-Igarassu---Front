@@ -7,7 +7,7 @@
   padding: 15px;
   width: 100%;
   max-width: 300px;
-  flex: 1 1 300px; /* allow cards to grow and keep consistent sizes */
+  flex: 1 1 300px; 
 }
 
 .reward-image {
@@ -23,7 +23,7 @@
   flex-direction: column;
   gap: 8px;
   flex: 1 0 auto;
-  justify-content: space-between; /* keep button aligned to bottom */
+  justify-content: space-between;
 }
 
 .reward-info h4 {

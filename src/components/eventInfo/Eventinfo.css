@@ -22,7 +22,7 @@
 }
 
 .event-info h3 {
-  text-align: center; /* centraliza título do painel de informações */
+  text-align: center;
 }
 
 .event-info > :not(h3) {

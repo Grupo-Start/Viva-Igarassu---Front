@@ -49,7 +49,7 @@ export function RewardsPage() {
                 if (mounted) setError(err);
             } finally {
                 try {
-                    // primeiro tenta obter saldo do usuário do localStorage (caso público)
+
                     let s = null;
                     try {
                         const stored = localStorage.getItem('user');
@@ -60,7 +60,7 @@ export function RewardsPage() {
                     } catch (e) { s = null; }
 
                     if (s == null) {
-                        // tenta a API como fallback; evite redirecionamento automático para /login
+
                         try {
                             const s2 = await dashboardService.getSaldo();
                             s = (s2 != null) ? s2 : null;
@@ -109,7 +109,7 @@ export function RewardsPage() {
                                 } catch (e) {
                                     setSaldo(prev => prev);
                                 }
-                                // opcional: recarregar lista de recompensas
+
                                 try { const data = await dashboardService.getRecompensas(); const mapped = Array.isArray(data) ? data.map((r, i) => ({ id: r.id ?? r._id ?? r.id_recompresas ?? r.id_recompensa ?? r.idRecompensa ?? r.codigo ?? r.cod ?? r.recompensaId ?? null, image: r.imagem_path || r.imagem || r.image || r.url_imagem || r.url || null, title: r.nome || r.title || r.nome_recompensa || `Recompensa ${i + 1}`, description: r.descricao || r.description || r.desc || '', value: r.preco_moedas || r.valor_em_moedas || r.valor || r.preco || r.price || 0, })) : []; setRewards(mapped);} catch(e){}
                             }} />
                         ));

@@ -34,9 +34,9 @@ export function RewardsCard({ id, raw, image, title, description, value, onRedee
     let targetId = id || resolveIdFromRaw(raw);
     const fallbackPayload = {};
       if (!targetId && raw) {
-        // prefer explicit id_recompensas if present (backend uses this key in some APIs)
+
         fallbackPayload.codigo = raw.id_recompensas || raw.id_recompresa || raw.id_recompresa || raw.codigo || raw.cod || raw.codigo_recompensa || raw.cod_recompensa || raw.slug || raw.uuid || raw._id || raw.id || undefined;
-        // include nested recompensa.codigo or nested id
+
         if (!fallbackPayload.codigo && raw.recompensa && typeof raw.recompensa === 'object') fallbackPayload.codigo = raw.recompensa.id || raw.recompensa._id || raw.recompensa.codigo || raw.recompensa.cod;
       }
 

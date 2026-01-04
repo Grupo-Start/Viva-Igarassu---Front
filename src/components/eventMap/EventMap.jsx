@@ -59,7 +59,7 @@ export function EventMap({ event }) {
         return null;
     };
 
-    // removed debug logging
+
 
     const coords = resolveCoords();
     const hasCoords = coords && coords.length === 2 && !Number.isNaN(parseFloat(coords[0])) && !Number.isNaN(parseFloat(coords[1]));
@@ -98,13 +98,13 @@ export function EventMap({ event }) {
                 const res = await fetch(url, { headers: { "Accept-Language": "pt-BR" } });
                 if (!res.ok) throw new Error("Geocoding failed");
                 const arr = await res.json();
-                // geocode request performed
+
                 if (cancelled) return;
                 if (Array.isArray(arr) && arr.length > 0) {
                     const first = arr[0];
                     const lat = parseFloat(first.lat);
                     const lon = parseFloat(first.lon);
-                    // geocode result found
+
                     if (!Number.isNaN(lat) && !Number.isNaN(lon)) {
                         setGeocoded([lat, lon]);
                         setGeocodingState("done");
@@ -120,7 +120,7 @@ export function EventMap({ event }) {
         return () => {
             cancelled = true;
         };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+
     }, [event]);
 
     const finalCoords = hasCoords

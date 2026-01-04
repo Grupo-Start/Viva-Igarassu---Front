@@ -31,7 +31,7 @@ export function UsuarioDashboard() {
                 
                 setSaldo(dashboard.usuario?.saldo || dashboard.saldo_moedas || dashboard.saldo || 0);
                 const initialResgates = dashboard.recompensas_resgatadas || dashboard.resgates || dashboard.recompensas || [];
-                // If dashboard didn't include resgates, try the dedicated endpoint
+
                 if ((!initialResgates || initialResgates.length === 0)) {
                     try {
                         const meus = await dashboardService.getMeusResgates();
@@ -112,7 +112,7 @@ export function UsuarioDashboard() {
 
                                 return pageItems.map((resgate, idx) => {
                                 const resolvedImage = (function(){
-                                    // resolve image trying several common fields; prefer recompensa.imagem_path, then recompensa.imagem, then top-level resgate.imagem
+
                                     let imgField = resgate.recompensa?.imagem_path || resgate.recompensa?.imagem || resgate.imagem || resgate.imagem_path || '';
                                     const base = String(API_BASE_URL).replace(/\/$/, '');
                                     if (!imgField) {
@@ -121,31 +121,31 @@ export function UsuarioDashboard() {
                                     try {
                                         imgField = String(imgField).trim();
                                         let resolved = null;
-                                        // already absolute (http/https)
+
                                         if (/^https?:\/\//i.test(imgField)) {
                                             resolved = imgField;
                                         } else {
-                                            // if the string incorrectly contains an absolute URL concatenated after a prefix
-                                            // e.g. "http://localhost:3001https://res.cloudinary.com/...", prefer the absolute part
+
+
                                             try {
                                                 const lastHttp = imgField.toLowerCase().lastIndexOf('http');
                                                 if (lastHttp > 0) {
                                                     resolved = imgField.slice(lastHttp);
                                                 }
-                                            } catch (e) { /* ignore */ }
-                                            // protocol-relative //example.com/...
+                                            } catch (e) {  }
+
                                             if (!resolved && /^\/\//.test(imgField)) resolved = `${window.location.protocol}${imgField}`;
-                                            // avoid duplicating API_BASE_URL
+
                                             if (!resolved && imgField.indexOf(base) !== -1) resolved = imgField;
-                                            // absolute path on the API server
+
                                             if (!resolved && imgField.startsWith('/')) resolved = `${base}${imgField}`;
-                                            // relative path -> prefix with API base
+
                                             if (!resolved) resolved = `${base}/${imgField.replace(/^\/+/, '')}`;
                                         }
-                                        // resolved image
+
                                         return resolved || livraria;
                                     } catch (e) {
-                                        // image resolution error handled
+
                                         return livraria;
                                     }
                                 })();
