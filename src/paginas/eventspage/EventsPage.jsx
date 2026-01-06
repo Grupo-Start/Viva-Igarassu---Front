@@ -212,8 +212,9 @@ export function EventsPage() {
     const pageItems = eventos.slice(startIndex, startIndex + pageSize);
 
     return (
-        <div className="events-page">
-            <Header />
+        <>
+          <Header />
+          <div className="events-page">
             <main>
                 <h2>Eventos</h2>
                 <FilterBar filters={draftFilters} onChange={handleDraftChange} onFilter={applyFilters} />
@@ -238,6 +239,7 @@ export function EventsPage() {
                 <PaginationRewards currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
             </main>
             <Footer />
-        </div>
+          </div>
+        </>
     );
 }

@@ -12,7 +12,7 @@ export default function Footer() {
 
         <div className="footer-links">
           <h4>Links úteis</h4>
-          <Link to="/home">Home</Link>
+          <Link to="/">Home</Link>
           <Link to="/quem-somos">Quem somos</Link>
           <Link to="/cidade">A cidade</Link>
         </div>

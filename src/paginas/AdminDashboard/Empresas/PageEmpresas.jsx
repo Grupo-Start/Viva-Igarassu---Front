@@ -79,7 +79,7 @@ export function PageEmpresas() {
     return (
       <div>
         <DashboardHeader/>
-        <div style={{ display: 'flex', overflow: 'hidden' }}>
+        <div className="admin-layout">
           <SidebarAdmin/>
           <div className="admin-dashboard">
             <h1>Empresas</h1>
@@ -94,7 +94,7 @@ export function PageEmpresas() {
     return (
       <div>
         <DashboardHeader/>
-        <div style={{ display: 'flex', overflow: 'hidden' }}>
+        <div className="admin-layout">
           <SidebarAdmin/>
           <div className="admin-dashboard">
             <h1>Empresas</h1>
@@ -131,12 +131,12 @@ export function PageEmpresas() {
     return str.charAt(0).toUpperCase() + str.slice(1);
   };
  
-  return (
-    <div>
-      <DashboardHeader/>
-      <div style={{ display: 'flex', overflow: 'hidden' }}>
-        <SidebarAdmin/>
-        <div className="admin-dashboard">
+    return (
+      <div>
+        <DashboardHeader/>
+        <div className="admin-layout">
+          <SidebarAdmin/>
+          <div className="admin-dashboard">
           <h1>Empresas</h1>
           <div className="dashboard-content">
             <div className="empresas-header">

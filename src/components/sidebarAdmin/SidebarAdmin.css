@@ -4,23 +4,41 @@
   font-family:'Poppins', sans-serif;
 }
 
-.layout {
-  display: flex;
-  height: auto;
-}
-
 .sidebar {
   background-color:#0A3D62;
   color: #fff;
   width: 80px;
   transition: width 0.3s ease;
   overflow: hidden;
-  min-height: 100vh;
-  height: auto;
+  /* fit the parent height (parent must provide height via .admin-layout) */
+  height: 100%;
+  align-self: stretch;
 }
 
 .sidebar.open {
   width: 280px;
+}
+
+/* Layout helpers when sidebar and admin-dashboard are siblings inside .admin-layout */
+.admin-layout {
+  position: relative;
+}
+
+.sidebar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 2;
+}
+
+.admin-dashboard {
+  margin-left: 80px;
+  transition: margin-left 0.3s ease;
+}
+
+.sidebar.open + .admin-dashboard {
+  margin-left: 280px;
 }
 
 .sidebar-header {

@@ -9,7 +9,6 @@ export function SidebarAdmin() {
   const location = useLocation();
 
   return (
-    <div className="layout">
       <aside className={open ? "sidebar open" : "sidebar"}>
         <div className="sidebar-header">
           <h2>{open ? "Olá, Admin!" : ""}</h2>
@@ -75,7 +74,6 @@ export function SidebarAdmin() {
           </li>
         </ul>
       </aside>
-    </div>
   );
 }
 

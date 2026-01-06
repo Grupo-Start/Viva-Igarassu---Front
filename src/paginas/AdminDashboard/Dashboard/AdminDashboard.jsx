@@ -76,7 +76,7 @@ export function AdminDashboard() {
   return (
     <div>
       <DashboardHeader/>
-      <div style={{ display: 'flex', overflow: 'hidden' }}>
+      <div className="admin-layout">
         <SidebarAdmin/>
         <div className="admin-dashboard">
             <h1>Dashboard Administrativo</h1>

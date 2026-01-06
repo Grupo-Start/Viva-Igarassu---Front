@@ -147,11 +147,12 @@ export function Header() {
     return null;
   };
   const displayName = (user && (user.nome_empresa || (user.empresa_obj && (user.empresa_obj.nome_empresa || user.empresa_obj.nome)) || (user.empresa && (user.empresa.nome_empresa || user.empresa.nome)))) || computeDisplayName(user);
-
   return (
     <header className="header">
       <div className="header-logo">
-       <img src="/header-logo.png" alt="logo viva igarassu" />
+        <Link to="/">
+          <img src="/header-logo.png" alt="logo viva igarassu" />
+        </Link>
       </div>
 
       <nav className="header-nav">
@@ -164,7 +165,7 @@ export function Header() {
         <a href="#contato" onClick={(e) => { e.preventDefault(); document.getElementById('contato')?.scrollIntoView({ behavior: 'smooth' }); }}>Contato</a>
       </nav>
 
-      <div className="header-actions">
+      <div className="header-actions" ref={ref}>
         <input 
           type="text" 
           placeholder="Pesquisar" 
@@ -177,20 +178,28 @@ export function Header() {
             <img src="/icone-login.png" alt="Login" />
           </Link>
         ) : (
-          <div className="user-info" ref={ref}>
+          <div className="user-info">
             {displayName && <div className="header-company"><span>{displayName}</span></div>}
 
             <button className="admin-trigger" onClick={() => setOpen(s => !s)} aria-haspopup="true" aria-expanded={open}>
               <img src="/icone-login.png" alt="Menu" />
             </button>
+          </div>
+        )}
+
+        {user && (
+          <>
+            <button className="mobile-user-btn" onClick={() => setOpen(s => !s)} aria-haspopup="true" aria-expanded={open}>
+              <img src="/icone-login.png" alt="Menu" />
+            </button>
 
             {open && (
               <div className="admin-menu">
-                <button className="admin-menu-item" onClick={goToProfile}>Perfil</button>
+                <button className="admin-menu-item" onClick={goToProfile}>Meu perfil</button>
                 <button className="admin-menu-item" onClick={handleLogout}>Sair</button>
               </div>
             )}
-          </div>
+          </>
         )}
       </div>
     </header>

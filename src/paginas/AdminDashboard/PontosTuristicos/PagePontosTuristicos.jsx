@@ -280,7 +280,7 @@ export function PagePontosTuristicos() {
     return (
       <div>
         <DashboardHeader/>
-        <div style={{ display: 'flex', overflow: 'hidden' }}>
+        <div className="admin-layout">
           <SidebarAdmin/>
           <div className="admin-dashboard">
             <h1>Pontos Turísticos</h1>
@@ -295,7 +295,7 @@ export function PagePontosTuristicos() {
     return (
       <div>
         <DashboardHeader/>
-        <div style={{ display: 'flex', overflow: 'hidden' }}>
+        <div className="admin-layout">
           <SidebarAdmin/>
           <div className="admin-dashboard">
             <h1>Pontos Turísticos</h1>
@@ -307,12 +307,12 @@ export function PagePontosTuristicos() {
     );
   }
 
-  return (
-    <div>
-      <DashboardHeader/>
-      <div style={{ display: 'flex', overflow: 'hidden' }}>
-        <SidebarAdmin/>
-        <div className="admin-dashboard">
+    return (
+      <div>
+        <DashboardHeader/>
+        <div className="admin-layout">
+          <SidebarAdmin/>
+          <div className="admin-dashboard">
           <h1>Pontos Turísticos</h1>
           <div className="dashboard-content">
             <div className="pontos-header-top">

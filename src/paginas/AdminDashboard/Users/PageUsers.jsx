@@ -84,7 +84,7 @@ export function PageUsers() {
     return (
       <div>
         <DashboardHeader/>
-        <div style={{ display: 'flex', overflow: 'hidden' }}>
+        <div className="admin-layout">
           <SidebarAdmin/>
           <div className="admin-dashboard">
             <h1>Usuários</h1>
@@ -99,7 +99,7 @@ export function PageUsers() {
     return (
       <div>
         <DashboardHeader/>
-        <div style={{ display: 'flex', overflow: 'hidden' }}>
+        <div className="admin-layout">
           <SidebarAdmin/>
           <div className="admin-dashboard">
             <h1>Usuários</h1>
@@ -111,12 +111,12 @@ export function PageUsers() {
     );
   }
 
-  return (
-    <div>
-      <DashboardHeader/>
-      <div style={{ display: 'flex', overflow: 'hidden' }}>
-        <SidebarAdmin/>
-        <div className="admin-dashboard">
+    return (
+      <div>
+        <DashboardHeader/>
+        <div className="admin-layout">
+          <SidebarAdmin/>
+          <div className="admin-dashboard">
           <h1>Usuários</h1>
           <div className="dashboard-content">
             <div className="users-header">
