@@ -109,9 +109,12 @@ h1,hr{
  }
 
  .giftcard-usuario-dashboard{
-    display: flex;
-    gap: 20px;
-    flex-wrap: wrap;
+   display: grid;
+   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+   grid-auto-rows: 1fr;
+   gap: 20px;
+   justify-items: center;
+   align-items: stretch;
  }
 
  .empty-resgates {
@@ -192,10 +195,10 @@ h1,hr{
     }
 
     .giftcard-usuario-dashboard {
-        flex-direction: column;
-        align-items: center;
-        gap: 16px;
-        width: 100%;
+      grid-template-columns: 1fr;
+      justify-items: center;
+      gap: 16px;
+      width: 100%;
     }
 }
 

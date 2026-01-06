@@ -4,42 +4,26 @@
   font-family:'Poppins', sans-serif;
 }
 
+/* Sidebar sizing using flex so .admin-layout controls layout */
 .sidebar {
   background-color:#0A3D62;
   color: #fff;
   width: 80px;
-  transition: width 0.3s ease;
+  flex: 0 0 80px;
+  transition: width 0.28s ease;
   overflow: hidden;
-  /* fit the parent height (parent must provide height via .admin-layout) */
-  height: 100%;
+  height: auto;
   align-self: stretch;
+  box-sizing: border-box;
 }
 
 .sidebar.open {
   width: 280px;
+  flex: 0 0 280px;
 }
 
-/* Layout helpers when sidebar and admin-dashboard are siblings inside .admin-layout */
-.admin-layout {
-  position: relative;
-}
-
-.sidebar {
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  z-index: 2;
-}
-
-.admin-dashboard {
-  margin-left: 80px;
-  transition: margin-left 0.3s ease;
-}
-
-.sidebar.open + .admin-dashboard {
-  margin-left: 280px;
-}
+# Layout helpers when sidebar and admin-dashboard are siblings inside .admin-layout
+/* admin-dashboard is flex:1 in admin CSS; no extra margin needed when sidebar resizes */
 
 .sidebar-header {
   display: flex;
