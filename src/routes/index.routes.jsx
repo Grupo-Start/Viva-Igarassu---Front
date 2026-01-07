@@ -31,7 +31,6 @@ import { EmpresaEventos } from "../paginas/EmpresaDashboard/Eventos/EmpresaEvent
 import { EmpresaMeusDados } from "../paginas/EmpresaDashboard/MeusDados/EmpresaMeusDados";
 import { EmpresaRoute } from "../components/guards/EmpresaRoute";
 
-import { DashboardEmpresa } from "../paginas/dashboardEmpresa/dashboardEmpresa";
 import { UsuarioDashboard } from "../paginas/DashboardUsuario/UsuarioDashboard/UsuarioDashboard";
 import { UsuarioDados } from "../paginas/DashboardUsuario/UsuarioDados/Usuariodados";
 import { UsuarioFigurinhas } from "../paginas/DashboardUsuario/UsuarioFigurinhas/UsuarioFigurinhas";
@@ -77,7 +76,7 @@ export const paginas = createBrowserRouter([
   { path: "/empresa-dashboard/recompensas", element: <EmpresaRoute><EmpresaRecompensas /></EmpresaRoute> },
   { path: "/empresa-dashboard/eventos", element: <EmpresaRoute><EmpresaEventos /></EmpresaRoute> },
 
-  { path: "/dashboardEmpresa", element: <DashboardEmpresa /> },
+  { path: "/dashboardEmpresa", element: <EmpresaRoute><EmpresaDashboard /></EmpresaRoute> },
   { path: "/usuarioDashboard", element: <UsuarioDashboard /> },
   { path: "/usuarioDados", element: <UsuarioDados /> },
   { path: "/usuarioFigurinhas", element: <UsuarioFigurinhas /> },

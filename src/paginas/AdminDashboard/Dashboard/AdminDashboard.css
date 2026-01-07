@@ -4,6 +4,8 @@
   min-height: 100%;
   flex: 1;
   overflow-x: hidden;
+  overflow-y: auto;
+  max-height: calc(100vh - 70px);
   width: 100%;
   box-sizing: border-box;
   min-width: 0;

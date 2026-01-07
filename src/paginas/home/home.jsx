@@ -7,6 +7,20 @@ import { useState, useEffect } from "react";
 
 export function Home() {
   const navigate = useNavigate();
+  const [isLogged, setIsLogged] = useState(false);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem('user');
+      if (!raw) return setIsLogged(false);
+      const u = JSON.parse(raw);
+      const logged = !!(u && (u.id || u._id || u.token || u.accessToken || u.nome || u.email));
+      setIsLogged(logged);
+    } catch (e) {
+      setIsLogged(false);
+    }
+  }, []);
+
   return (
     <main className="telainicial-container">
       <Header />
@@ -44,7 +58,9 @@ export function Home() {
         </div>
 
         <div className="hero-ctas">
-          <button className="btn-primary" onClick={() => navigate('/register')}>Cadastre-se</button>
+          {!isLogged && (
+            <button className="btn-primary" onClick={() => navigate('/register')}>Cadastre-se</button>
+          )}
           <button className="btn-secondary" onClick={() => navigate('/pontos-turisticos')}>Explorar pontos</button>
         </div>
       </section>

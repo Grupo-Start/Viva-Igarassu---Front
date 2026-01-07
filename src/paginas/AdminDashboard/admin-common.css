@@ -86,10 +86,10 @@
   padding-top: 8px;
 }
 
-/* Layout helper for admin pages: makes the content area (beside sidebar) stretch
-   so the sidebar can match the page height. Header is 70px tall. */
+
 .admin-layout {
   display: flex;
   align-items: stretch;
   min-height: calc(100vh - 70px);
+  height: auto;
 }
