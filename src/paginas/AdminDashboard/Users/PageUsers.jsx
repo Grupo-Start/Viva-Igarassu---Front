@@ -3,6 +3,7 @@ import "../admin-common.css";
 import "./PageUsers.css";
 import { DashboardHeader } from "../../../components/dashboardHeader/DashboardHeader";
 import { SidebarAdmin } from "../../../components/sidebarAdmin/SidebarAdmin";
+import Footer from "../../../components/footer/Footer";
 import { IoMdPeople } from "react-icons/io";
 import { dashboardService } from "../../../services/api";
 
@@ -193,6 +194,7 @@ export function PageUsers() {
             </div>
           </div>
         </div>
+        <Footer admin />
       </div>
     </div>
   );

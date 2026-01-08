@@ -11,6 +11,7 @@ import { BiGift } from "react-icons/bi";
 import { DashboardHeader } from "../../../components/dashboardHeader/DashboardHeader";
 import { SidebarAdmin } from "../../../components/sidebarAdmin/SidebarAdmin";
 import { VisitsChart } from "../../../components/charts/VisitsChart";
+import Footer from "../../../components/footer/Footer";
 
 export function AdminDashboard() {
   const [stats, setStats] = useState({

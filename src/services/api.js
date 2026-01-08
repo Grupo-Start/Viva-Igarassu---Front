@@ -374,6 +374,10 @@ export const dashboardService = {
   getMeusDados: async () => {
     try {
       const endpoints = [
+        '/me',
+        '/usuarios/updateMe',
+        '/usuarios/update-me',
+        '/usuarios/atualizar-me',
         '/usuarios/me',
         '/auth/me',
         '/usuarios/perfil',
@@ -394,52 +398,64 @@ export const dashboardService = {
     }
   },
 
+  getHistoricoUsuario: async () => {
+    try {
+      const tryEndpoints = [
+        '/atividades/me',
+        '/atividades',
+        '/usuarios/me/atividades',
+        '/usuarios/atividades',
+        '/resgates/meus',
+        '/resgates',
+      ];
+      for (const ep of tryEndpoints) {
+        try {
+          const res = await api.get(ep);
+          const data = res.data;
+          if (Array.isArray(data)) return data;
+          if (data && Array.isArray(data.items)) return data.items;
+        } catch (e) {
+          if (e?.response?.status === 404) continue;
+          // if other error, try next endpoint
+        }
+      }
+      return [];
+    } catch (error) {
+      return [];
+    }
+  },
+
   atualizarMeusDados: async (dados) => {
     try {
-      const endpoints = [
-        '/usuarios/me',
-        '/auth/me',
-        '/usuarios/perfil',
-      ];
-      const body = {
-        nome: dados.nome || dados.nome_completo,
-        nome_completo: dados.nome || dados.nome_completo,
-      };
-      let lastErr = null;
-      for (const ep of endpoints) {
-        try {
-          const response = await api.put(ep, body);
-          const updatedUser = response.data;
-          const stored = localStorage.getItem('user');
-          if (stored) {
+      // Strictly use PUT on the canonical endpoint '/usuarios/me'
+      const endpoint = '/usuarios/me';
+      try {
+        console.debug('[api] PUT', endpoint, dados);
+        const response = await api.put(endpoint, dados);
+        console.debug('[api] PUT response', response.status, response.data);
+        const updatedUser = response.data;
+
+        const stored = localStorage.getItem('user');
+        if (stored) {
+          try {
             const user = JSON.parse(stored);
-            const merged = { ...user, ...updatedUser, nome: body.nome, nome_completo: body.nome_completo };
+            const merged = {
+              ...user,
+              ...updatedUser,
+              nome: dados.nome || dados.nome_completo || user.nome,
+              nome_completo: dados.nome_completo || dados.nome || user.nome_completo,
+            };
             localStorage.setItem('user', JSON.stringify(merged));
+          } catch (e) {
+            // ignore JSON parse errors
           }
-          return updatedUser;
-        } catch (e) {
-          lastErr = e;
-          if (e?.response?.status === 404 || e?.response?.status === 405) continue;
-          throw e;
         }
+        return updatedUser;
+      } catch (err) {
+        console.error('[api] PUT error', err?.response?.status, err?.response?.data || err.message);
+        throw err;
       }
-      for (const ep of endpoints) {
-        try {
-          const response = await api.patch(ep, body);
-          const updatedUser = response.data;
-          const stored = localStorage.getItem('user');
-          if (stored) {
-            const user = JSON.parse(stored);
-            const merged = { ...user, ...updatedUser, nome: body.nome, nome_completo: body.nome_completo };
-            localStorage.setItem('user', JSON.stringify(merged));
-          }
-          return updatedUser;
-        } catch (e) {
-          lastErr = e;
-        }
-      }
-      if (lastErr) throw lastErr;
-      throw new Error('atualizarMeusDados: nenhum endpoint respondeu');
+      
     } catch (error) {
       throw error;
     }

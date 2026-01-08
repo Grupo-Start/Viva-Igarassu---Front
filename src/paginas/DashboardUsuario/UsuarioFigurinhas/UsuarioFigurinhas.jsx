@@ -105,6 +105,9 @@ export function UsuarioFigurinhas() {
                 <main className="figurinhas-container">
                     <h1 className="titulo-album">Álbum de figurinhas</h1>
                     <hr/>
+                    <div className="album-header">
+                        <div className="album-stats">Você tem <strong>{figurinhas.length}</strong> figurinhas</div>
+                    </div>
                     
                     {loading && (
                         <div className="loading-message">Carregando suas figurinhas...</div>
@@ -131,14 +134,20 @@ export function UsuarioFigurinhas() {
                                 || figurinha.url_imagem 
                                 || figurinha.Figurinha?.imagem
                                 || figurinha.figurinha?.imagem;
-                            
+
+                            const key = figurinha.id_figurinha || figurinha.id || `fig-${index}`;
+
                             return (
-                                <div className="figurinha" key={figurinha.id_figurinha || figurinha.id || `fig-${index}`}>
-                                    {imagem && (
+                                <div className="figurinha" key={key} aria-label={nome || `Figurinha ${index + 1}`}>
+                                    {imagem ? (
                                         <img
                                             src={imagem}
                                             alt={nome || 'Figurinha'}
+                                            loading="lazy"
+                                            onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = figuSobrado; }}
                                         />
+                                    ) : (
+                                        <div className="placeholder" aria-hidden="true">?</div>
                                     )}
                                     <span>{nome || 'Sem nome'}</span>
                                 </div>

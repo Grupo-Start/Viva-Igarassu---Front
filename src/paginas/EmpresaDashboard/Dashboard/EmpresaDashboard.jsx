@@ -8,6 +8,7 @@ import { DashboardHeader } from "../../../components/dashboardHeader/DashboardHe
 import { Sidebar } from "../../../components/sidebar/Sidebar";
 import { api, dashboardService } from "../../../services/api";
 import EventsChart from "../../../components/charts/EventsChart";
+import Footer from "../../../components/footer/Footer";
 
 export function EmpresaDashboard() {
   const [eventsCount, setEventsCount] = useState(0);
@@ -140,7 +141,8 @@ export function EmpresaDashboard() {
             </div>
           </div>
         </div>
-      </div>
+            <Footer />
+          </div>
     </div>
   );
 }

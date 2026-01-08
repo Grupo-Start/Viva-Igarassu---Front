@@ -7,10 +7,12 @@ import { dashboardService, API_BASE_URL } from "../../../services/api";
 import "./usuarioDashboard.css";
 import moeda from "../../../assets/moeda.png";
 import livraria from "../../../assets/livraria igarassu.jpg";
+import Footer from "../../../components/footer/Footer";
 
 export function UsuarioDashboard() {
     const [figurinhasCount, setFigurinhasCount] = useState(0);
     const [saldo, setSaldo] = useState(0);
+    const [figuraImage, setFiguraImage] = useState(null);
     const [resgates, setResgates] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [loading, setLoading] = useState(true);
@@ -30,6 +32,44 @@ export function UsuarioDashboard() {
                 setFigurinhasCount(count);
                 
                 setSaldo(dashboard.usuario?.saldo || dashboard.saldo_moedas || dashboard.saldo || 0);
+                // tentativa de resolver imagem da primeira figurinha resgatada (se houver)
+                try {
+                    const figs = dashboard.figurinhas || dashboard.minhasFigurinhas || dashboard.figuras || dashboard.meuAlbum || null;
+                    if (Array.isArray(figs) && figs.length > 0) {
+                        let imgField = figs[0]?.imagem || figs[0]?.imagem_path || figs[0]?.image || figs[0]?.url || figs[0]?.path || '';
+                        const base = String(API_BASE_URL).replace(/\/$/, '');
+                        let resolved = null;
+                        if (imgField) {
+                            imgField = String(imgField).trim();
+                            if (/^https?:\/\//i.test(imgField)) resolved = imgField;
+                            else if (/^\/\//.test(imgField)) resolved = `${window.location.protocol}${imgField}`;
+                            else if (imgField.indexOf(base) !== -1) resolved = imgField;
+                            else if (imgField.startsWith('/')) resolved = `${base}${imgField}`;
+                            else resolved = `${base}/${imgField.replace(/^\/+/, '')}`;
+                        }
+                        setFiguraImage(resolved || null);
+                    }
+                } catch (e) { /* ignore */ }
+                // se não encontramos imagem no dashboard, buscar no endpoint de figurinhas do usuário
+                if (!figuraImage) {
+                    try {
+                        const minhas = await dashboardService.getMinhasFigurinhas();
+                        if (Array.isArray(minhas) && minhas.length > 0) {
+                            let imgField = minhas[0]?.imagem || minhas[0]?.imagem_path || minhas[0]?.image || minhas[0]?.url || minhas[0]?.path || '';
+                            const base = String(API_BASE_URL).replace(/\/$/, '');
+                            let resolved = null;
+                            if (imgField) {
+                                imgField = String(imgField).trim();
+                                if (/^https?:\/\//i.test(imgField)) resolved = imgField;
+                                else if (/^\/\//.test(imgField)) resolved = `${window.location.protocol}${imgField}`;
+                                else if (imgField.indexOf(base) !== -1) resolved = imgField;
+                                else if (imgField.startsWith('/')) resolved = `${base}${imgField}`;
+                                else resolved = `${base}/${imgField.replace(/^\/+/, '')}`;
+                            }
+                            if (resolved) setFiguraImage(resolved);
+                        }
+                    } catch (e) { /* ignore */ }
+                }
                 const initialResgates = dashboard.recompensas_resgatadas || dashboard.resgates || dashboard.recompensas || [];
 
                 if ((!initialResgates || initialResgates.length === 0)) {
@@ -89,6 +129,7 @@ export function UsuarioDashboard() {
                                 {loading ? "..." : figurinhasCount}
                             </h2>
                         </div>
+
 
                     </div>
 
@@ -177,6 +218,9 @@ export function UsuarioDashboard() {
 
                 </main>
             </div>
+
+            <Footer />
+
         </div>
     );
 }

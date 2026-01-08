@@ -1,9 +1,9 @@
 import "./footer.css";
 import { Link } from "react-router-dom";
 
-export default function Footer() {
+export default function Footer({ admin = false }) {
   return (
-    <footer className="footer" id="contato">
+    <footer className={`footer ${admin ? 'footer-admin' : ''}`} id="contato">
       <div className="footer-container">
 
             <div className="footer-logo">

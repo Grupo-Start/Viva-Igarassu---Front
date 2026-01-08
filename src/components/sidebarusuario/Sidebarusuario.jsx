@@ -1,12 +1,17 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import "./sidebarusuario.css";
 
 
 
 export function Sidebarusuario() {
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(() => (typeof window !== 'undefined' ? window.innerWidth >= 768 : true));
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const isActive = (path) => {
+    return location && location.pathname === path;
+  };
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -30,6 +35,7 @@ export function Sidebarusuario() {
 
         <ul className="menu">
           <li
+            className={isActive('/usuarioDashboard') ? 'active' : ''}
             onClick={() => navigate('/usuarioDashboard')}
             onKeyDown={(e) => { if (e.key === 'Enter') navigate('/usuarioDashboard'); }}
             role="button"
@@ -38,6 +44,7 @@ export function Sidebarusuario() {
             {open && " Dashboard Usuário"}
           </li>
           <li
+            className={isActive('/usuarioDados') ? 'active' : ''}
             onClick={() => navigate('/usuarioDados')}
             onKeyDown={(e) => { if (e.key === 'Enter') navigate('/usuarioDados'); }}
             role="button"
@@ -46,6 +53,7 @@ export function Sidebarusuario() {
             {open && " Meus Dados"}
           </li>
           <li
+            className={isActive('/usuarioFigurinhas') ? 'active' : ''}
             onClick={() => navigate('/usuarioFigurinhas')}
             onKeyDown={(e) => { if (e.key === 'Enter') navigate('/usuarioFigurinhas'); }}
             role="button"

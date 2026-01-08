@@ -3,6 +3,7 @@ import "../admin-common.css";
 import "./PageEmpresas.css";
 import { DashboardHeader } from "../../../components/dashboardHeader/DashboardHeader";
 import { SidebarAdmin } from "../../../components/sidebarAdmin/SidebarAdmin";
+import Footer from "../../../components/footer/Footer";
 import { HiOutlineOfficeBuilding } from "react-icons/hi";
 import { dashboardService } from "../../../services/api";
 

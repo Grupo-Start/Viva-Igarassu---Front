@@ -57,3 +57,19 @@ body {
 .read-the-docs {
   color: #888;
 }
+
+/* Layout helpers to keep footer at bottom without changing visuals */
+.app-root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.app-content {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+/* reserve space at bottom so content never touches footer */
+/* padding-bottom removed to prevent extra gap below footer */

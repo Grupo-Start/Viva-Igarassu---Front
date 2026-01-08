@@ -2,16 +2,12 @@
   background-color: #252525;
   color: #fff;
   padding: 40px 20px 20px;
-   margin-top: 60px;
+  margin-top: 0;
+  margin-bottom: 0;
 }
 
 .footer {
-  width: 100vw;
-  position: relative;
-  left: 50%;
-  right: 50%;
-  margin-left: -50vw;
-  margin-right: -50vw;
+  width: 100%;
   box-sizing: border-box;
 }
 
@@ -116,3 +112,24 @@ html, body {
 .conteudo .footer-contato p { text-align: center; }
 
 .conteudo .footer-copy { margin-top: 12px; }
+
+/* Admin compact footer */
+.footer.footer-admin {
+  background-color: #0a3d62; /* mesmo azul do header */
+  padding: 8px 0;
+  margin-top: 0;
+}
+
+.footer.footer-admin .footer-container {
+  display: none;
+}
+
+.footer.footer-admin .footer-copy {
+  display: block;
+  text-align: center;
+  font-size: 13px;
+  color: #ffffff;
+  border-top: none;
+  margin: 0;
+  padding: 6px 12px;
+}

@@ -55,6 +55,42 @@
   flex: 1 1 auto;
 }
 
+@media (max-width: 480px) {
+  .giftcard {
+    width: 100%;
+    max-width: 100%;
+    border-radius: 14px;
+  }
+
+  .giftcard-image {
+    height: 120px;
+  }
+
+  .giftcard-info {
+    padding: 12px 12px 16px 12px;
+  }
+}
+
+/* ensure giftcards are full-width on small and medium screens */
+@media (max-width: 768px) {
+  .giftcard {
+    width: 100%;
+    max-width: 100%;
+    border-radius: 14px;
+  }
+
+  .giftcard-image {
+    height: 120px;
+  }
+
+  .giftcard-info {
+    padding: 12px 12px 16px 12px;
+  }
+}
+
+/* Desktop safety: ensure giftcard doesn't expand beyond design width */
+/* desktop default handled by base rules */
+
 .giftcard-value {
   background-color: rgba(0, 0, 0, 0.25);
   padding: 6px 14px;
