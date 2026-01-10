@@ -24,6 +24,7 @@ import { EmpresaRecompensas } from "../paginas/EmpresaDashboard/Recompensas/Empr
 import { EmpresaEventos } from "../paginas/EmpresaDashboard/Eventos/EmpresaEventos";
 import { EmpresaMeusDados} from "../paginas/EmpresaDashboard/MeusDados/EmpresaMeusDados";
 import { ScanQRCode } from "../paginas/ScanQRCode/scanqrcode";
+import { Acidade } from "../paginas/Acidade/acidade";
 
 export const paginas = createBrowserRouter([
     {
@@ -162,6 +163,10 @@ export const paginas = createBrowserRouter([
         {
             path: "/tela-figurinha",
             element: <Telafigurinha />
+        },
+         {
+            path: "/a-cidade",
+            element: <Acidade />
         },
         
 ])

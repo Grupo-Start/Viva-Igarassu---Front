@@ -1,5 +1,5 @@
 import Footer from "../../components/footer/Footer";
-import Header from "../../components/header/Header";
+import Header from "../../components/header/header";
 import "./home.css";
 import { Icon } from "@iconify/react";
 import { useNavigate } from "react-router-dom";
