@@ -1,0 +1,152 @@
+/* ===================== */
+/* BANNER */
+/* ===================== */
+
+.banner-cidade {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
+.banner-img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.banner-conteudo {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: #ffffff;
+  padding: 16px;
+}
+
+.hashtag {
+  background: #0a3d62;
+  padding: 10px 18px;
+  border-radius: 20px;
+  font-size: 20px;
+  margin-bottom: 16px;
+}
+
+.banner-conteudo h1 {
+  font-size: 150px;
+  font-weight: 800;
+}
+
+.banner-conteudo p {
+  font-size: 32px;
+  line-height: 1.25;
+  max-width: 720px;
+  margin-top: 40px;
+}
+
+.banner-conteudo h1,
+.banner-conteudo p,
+.hashtag {
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+}
+
+/* ===================== */
+/* INFO CARDS */
+/* ===================== */
+
+.info-cards {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 28px;
+  padding: 48px 20px;
+  background: #ffffff;
+}
+
+.info-card {
+  background: #EDF4FA;
+  border: 2px solid #bcdce6;
+  border-radius: 18px;
+  padding: 36px 24px;
+  text-align: center;
+  color: #0A3D62;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+}
+
+.info-card svg {
+  font-size: 48px;
+  margin-bottom: 16px;
+  color: #0A3D62;
+}
+
+.info-card h3 {
+  font-size: 22px;
+  font-weight: 800;
+  margin-bottom: 10px;
+}
+
+.info-card p {
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+/* ===================== */
+/* SOBRE - CARD GRANDE */
+/* ===================== */
+
+.sobre-wrapper {
+  padding: 40px 20px 60px;
+  background: #ffffff;
+  text-align: center;
+}
+
+.sobre-card {
+  background: #EDF4FA;
+  border: 2px solid #bcdce6;
+  border-radius: 20px;
+  padding: 40px 32px;
+  max-width: 900px;
+  margin: 0 auto 28px;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+}
+
+.sobre-card h2 {
+  font-size: 28px;
+  color: #0A3D62;
+  margin-bottom: 20px;
+}
+
+.sobre-card p {
+  font-size: 16px;
+  line-height: 1.7;
+  color: #0A3D62;
+  margin-bottom: 14px;
+  text-align: justify;
+}
+
+/* ===================== */
+/* FRASE FINAL */
+/* ===================== */
+
+.rodape-texto {
+  display: block;
+  font-size: 30px;
+  font-weight: 600;
+  color: #0A3D62;
+}
+
+.rodape-igarassu {
+  color: #4BBFBF;
+}
+
+/* ===================== */
+/* DESKTOP */
+/* ===================== */
+
+@media (min-width: 768px) {
+  .info-cards {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+}
