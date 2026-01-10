@@ -113,9 +113,8 @@ html, body {
 
 .conteudo .footer-copy { margin-top: 12px; }
 
-/* Admin compact footer */
 .footer.footer-admin {
-  background-color: #0a3d62; /* mesmo azul do header */
+  background-color: #0a3d62;
   padding: 8px 0;
   margin-top: 0;
 }

@@ -9,6 +9,8 @@ import figuConventoFranciscano from "../../../assets/figu_covento_franciscano.pn
 import figuMuseu from "../../../assets/figu_museu.png";
 import figuSobrado from "../../../assets/figu_sobrado.png";
 import { useNavigate, useLocation } from "react-router-dom";
+import { Header } from "../../../components/header/Header";
+import Footer from "../../../components/footer/Footer";
 
 export function Telafigurinha() {
   const navigate = useNavigate();
@@ -17,6 +19,8 @@ export function Telafigurinha() {
   const initialLabel = location?.state?.moeda || location?.state?.currency || 'ESTELITAS';
   const [rewardRaw, setRewardRaw] = React.useState(initialReward);
   const [rewardLabel, setRewardLabel] = React.useState(initialLabel);
+  const initialOwned = location?.state?.owned ?? null;
+  const [ownedFlag, setOwnedFlag] = React.useState(initialOwned);
 
   React.useEffect(() => {
     if (rewardRaw == null) {
@@ -24,8 +28,9 @@ export function Telafigurinha() {
         const raw = sessionStorage.getItem('lastReward');
         if (raw) {
           const parsed = JSON.parse(raw || '{}');
-          if (parsed && typeof parsed === 'object') {
+            if (parsed && typeof parsed === 'object') {
             if (parsed.reward != null) setRewardRaw(parsed.reward);
+            if (parsed.owned != null) setOwnedFlag(parsed.owned);
             const findValorFigurinha = (obj, seen = new Set()) => {
               if (!obj || typeof obj === 'string' || typeof obj === 'number') return null;
               if (seen.has(obj)) return null;
@@ -169,27 +174,31 @@ export function Telafigurinha() {
   const figuraImg = resolveFiguraImagem();
 
   return (
-    <div className="parabens-container">
-      <h1 className="titulo">PARABÉNS!</h1>
-      <p className="subtitulo">
-        {rewardDisplay ? `Você ganhou ${rewardDisplay} ${rewardLabel}` : 'Você ganhou uma figurinha exclusiva!'}
-      </p>
+    <>
+      <Header />
+      <div className="parabens-container">
+        <h1 className="titulo">PARABÉNS!</h1>
+        <p className="subtitulo">
+          {ownedFlag ? 'Você já possui esta figurinha.' : (rewardDisplay ? `Você ganhou ${rewardDisplay} ${rewardLabel}` : 'Você ganhou uma figurinha exclusiva!')}
+        </p>
 
-      <div className="card">
-        <div className="card-left">
-          <img src={figuraImg} alt="Figurinha" />
+        <div className="card">
+          <div className="card-left">
+            <img src={figuraImg} alt="Figurinha" />
+          </div>
+
+          <div className="divisor"></div>
+
+          <div className="card-right">
+            <span className="ganhou">VOCÊ GANHOU</span>
+            <span className="valor">{ownedFlag ? (rewardDisplay || '') : rewardDisplay}</span>
+            <span className="moeda">{ownedFlag ? '' : rewardLabel}</span>
+          </div>
         </div>
 
-        <div className="divisor"></div>
-
-        <div className="card-right">
-          <span className="ganhou">VOCÊ GANHOU</span>
-          <span className="valor">{rewardDisplay}</span>
-          <span className="moeda">{rewardLabel}</span>
-        </div>
+        <button className="btn-album" onClick={() => navigate('/usuarioFigurinhas')}>Ver meu álbum</button>
       </div>
-
-      <button className="btn-album" onClick={() => navigate('/usuarioFigurinhas')}>Ver meu álbum</button>
-    </div>
+      <Footer />
+    </>
   );
 }

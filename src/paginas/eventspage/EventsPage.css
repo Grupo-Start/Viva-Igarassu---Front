@@ -38,9 +38,11 @@
 
 .events-page h2 {
   text-align: center;
-  font-size: 28px;
-  margin-bottom: 32px;
-  color: #0A3D62;
+  font-size: 36px;
+  margin: 0 auto 32px;
+  max-width: 720px;
+  color: #083b5c;
+  font-weight: 800;
 }
 
 .events-grid {
@@ -49,6 +51,27 @@
   gap: 24px;
   justify-items: stretch;
   margin-top: 48px;
+}
+
+.events-filter-toggle { text-align: center; margin-bottom: 16px; }
+.open-filter-btn {
+  background: #083b5c;
+  color: #fff;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 700;
+}
+.open-filter-btn:hover { opacity: 0.95; }
+
+.filter-panel { max-width: 980px; margin: 12px auto 20px; padding: 12px; background: #fff; border-radius: 12px; box-shadow: 0 8px 24px rgba(2,6,23,0.06); }
+.filter-panel-header { display:flex; justify-content:flex-end; }
+.close-filter-btn { background: transparent; border: none; color: #083b5c; font-weight: 700; cursor: pointer; }
+
+@media (max-width: 600px) {
+  .filter-panel { position: fixed; top: 70px; left: 12px; right: 12px; z-index: 1400; max-width: none; padding: 16px; border-radius: 12px; }
+  .filter-panel-header { position: absolute; right: 12px; top: 8px; }
 }
 
 .empty {
@@ -65,7 +88,7 @@
   }
 
   .events-page h2 {
-    font-size: 24px;
+    font-size: 28px;
   }
 }
 
@@ -80,7 +103,7 @@
   }
 
   .events-page h2 {
-    font-size: 20px;
+    font-size: 22px;
     margin-bottom: 24px;
   }
 }

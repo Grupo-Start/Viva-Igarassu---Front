@@ -58,7 +58,6 @@ body {
   color: #888;
 }
 
-/* Layout helpers to keep footer at bottom without changing visuals */
 .app-root {
   display: flex;
   flex-direction: column;
@@ -71,5 +70,3 @@ body {
   flex-direction: column;
 }
 
-/* reserve space at bottom so content never touches footer */
-/* padding-bottom removed to prevent extra gap below footer */

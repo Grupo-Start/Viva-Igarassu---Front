@@ -2,6 +2,7 @@ import "./RewardsCard.css";
 import { Button } from "../button/Button";
 import { API_BASE_URL, dashboardService } from "../../services/api";
 import { useState } from "react";
+import { useNavigate } from 'react-router-dom';
 
 function resolveImageSrc(image) {
   if (!image) return null;
@@ -13,9 +14,10 @@ function resolveImageSrc(image) {
   return `${base}/${path}`;
 }
 
-export function RewardsCard({ id, raw, image, title, description, value, onRedeemed }) {
+export function RewardsCard({ id, raw, image, title, description, value, onRedeemed, saldo }) {
   const src = resolveImageSrc(image);
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const resolveIdFromRaw = (r) => {
     if (!r) return null;
@@ -31,6 +33,11 @@ export function RewardsCard({ id, raw, image, title, description, value, onRedee
   };
 
   const handleResgatar = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      try { navigate('/login', { state: { from: window.location.pathname } }); } catch (e) { window.location.href = '/login'; }
+      return;
+    }
     let targetId = id || resolveIdFromRaw(raw);
     const fallbackPayload = {};
       if (!targetId && raw) {
@@ -80,7 +87,12 @@ export function RewardsCard({ id, raw, image, title, description, value, onRedee
         <p className="reward-value">{value} ESTELITAS</p>
         <h4>{title}</h4>
         <p>{description}</p>
-        <Button text={loading ? 'Processando...' : 'Resgatar'} onClick={handleResgatar} disabled={loading} />
+        <Button
+          text={loading ? 'Processando...' : 'Resgatar'}
+          onClick={handleResgatar}
+          disabled={loading || (saldo != null && Number(saldo) < Number(value))}
+          title={saldo != null && Number(saldo) < Number(value) ? 'Saldo insuficiente' : undefined}
+        />
       </div>
     </div>
   );

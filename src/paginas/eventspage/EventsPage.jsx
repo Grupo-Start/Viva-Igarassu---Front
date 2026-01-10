@@ -7,8 +7,10 @@ import { EventCard } from "../../components/eventcard/EventCard";
 import { FilterBar } from "../../components/filterbar/FilterBar";
 import { PaginationRewards } from "../../components/paginationRewards/PaginationRewards";
 import { Header } from "../../components/header/Header";
+import FaixaInfo from "../../components/header/FaixaInfo";
 import Footer from "../../components/footer/Footer";
 import { dashboardService, API_BASE_URL } from "../../services/api";
+
 
 export function EventsPage() {
     const [currentPage, setCurrentPage] = useState(1);
@@ -16,6 +18,7 @@ export function EventsPage() {
     const [allEventos, setAllEventos] = useState([]);
     const [appliedFilters, setAppliedFilters] = useState({ pesquisa: '', tipo: '', categoria: '', dataInicial: '', dataFinal: '' });
     const [draftFilters, setDraftFilters] = useState({ pesquisa: '', tipo: '', categoria: '', dataInicial: '', dataFinal: '' });
+    const [showFilter, setShowFilter] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const navigation = useNavigate();
@@ -113,6 +116,7 @@ export function EventsPage() {
     const applyFilters = () => {
         setAppliedFilters(draftFilters);
         setCurrentPage(1);
+        setShowFilter(false);
     };
 
     const isPaid = (ev) => {
@@ -214,10 +218,22 @@ export function EventsPage() {
     return (
         <>
           <Header />
-          <div className="events-page">
-            <main>
-                <h2>Eventos</h2>
-                <FilterBar filters={draftFilters} onChange={handleDraftChange} onFilter={applyFilters} />
+          <FaixaInfo />
+                    <div className="events-page">
+                        <main>
+                            <h2>Eventos</h2>
+                <div className="events-filter-toggle">
+                    <button className="open-filter-btn" onClick={() => setShowFilter(s => !s)} aria-expanded={showFilter} aria-controls="events-filter-panel">Filtrar</button>
+                </div>
+
+                {showFilter && (
+                    <div id="events-filter-panel" className="filter-panel">
+                        <div className="filter-panel-header">
+                            <button className="close-filter-btn" onClick={() => setShowFilter(false)}>Fechar</button>
+                        </div>
+                        <FilterBar filters={draftFilters} onChange={handleDraftChange} onFilter={applyFilters} />
+                    </div>
+                )}
                 <div className="events-grid">
                     {loading && <div>Carregando eventos...</div>}
                     {error && <div className="error">{error}</div>}
@@ -237,9 +253,9 @@ export function EventsPage() {
 
                 </div>
                 <PaginationRewards currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
-            </main>
-            <Footer />
-          </div>
+                        </main>
+                    </div>
+                    <Footer />
         </>
     );
 }

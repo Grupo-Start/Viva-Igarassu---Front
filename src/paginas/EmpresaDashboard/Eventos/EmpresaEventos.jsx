@@ -120,7 +120,7 @@ export function EmpresaEventos() {
     setError(null);
     if (evento) {
       setIsEditing(true);
-      setEditingId(evento.id_evento || evento.id || null);
+      setEditingId(evento.id_evento || evento.id || evento._id || evento.idEvento || evento.id_evento || evento.codigo || null);
       const horaVal = normalizeTime(evento.horario || evento.hora || evento.horario_evento || evento.data_hora || evento.dataHora || '');
       const enderecoResolved = formatEnderecoResolved(evento._endereco_resolved ?? evento.endereco ?? evento.endereco_completo ?? evento.address ?? null);
       const rawImg = evento.imagem_path ?? evento.imagem ?? null;
@@ -155,6 +155,8 @@ export function EmpresaEventos() {
     e.preventDefault();
     (async () => {
       try {
+        console.debug('[EmpresaEventos] submit payload', { isEditing, editingId, imagemType: (formData.imagem instanceof File) ? 'File' : typeof formData.imagem });
+        if (isEditing && !editingId) { setError('ID do evento para editar não foi definido.'); return; }
         const required = ['nome', 'data', 'horario', 'endereco', 'descricao'];
         const missing = required.filter(key => !formData[key] || String(formData[key]).trim() === '');
         if (missing.length > 0) {
@@ -187,8 +189,6 @@ export function EmpresaEventos() {
           fd.append('endereco', formData.endereco);
           fd.append('endereco_completo', formData.endereco);
             fd.append('imagem', formData.imagem);
-            try { if (!fd.get('image')) fd.append('image', formData.imagem); } catch(e){}
-            try { if (!fd.get('file')) fd.append('file', formData.imagem); } catch(e){}
 
           try { if (formData.imagem_path && typeof formData.imagem_path === 'string' && !fd.get('imagem_path')) fd.append('imagem_path', formData.imagem_path); } catch(e){}
           if (computedISO) fd.append('data_hora', computedISO);
@@ -198,6 +198,11 @@ export function EmpresaEventos() {
           fd.append('data_evento', formData.data);
           fd.append('hora', formData.horario);
           fd.append('descricao_evento', formData.descricao);
+          try {
+            const entries = [];
+            for (const p of fd.entries()) entries.push([p[0], p[1] instanceof File ? `[File:${p[1].name}]` : p[1]]);
+            console.debug('[EmpresaEventos] FormData entries before submit:', entries);
+          } catch (logErr) { console.debug('[EmpresaEventos] failed to enumerate FormData', logErr); }
           body = fd;
         } else {
           body = {

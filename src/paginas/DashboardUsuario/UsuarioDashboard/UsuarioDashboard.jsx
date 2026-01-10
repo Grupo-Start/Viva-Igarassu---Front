@@ -32,7 +32,6 @@ export function UsuarioDashboard() {
                 setFigurinhasCount(count);
                 
                 setSaldo(dashboard.usuario?.saldo || dashboard.saldo_moedas || dashboard.saldo || 0);
-                // tentativa de resolver imagem da primeira figurinha resgatada (se houver)
                 try {
                     const figs = dashboard.figurinhas || dashboard.minhasFigurinhas || dashboard.figuras || dashboard.meuAlbum || null;
                     if (Array.isArray(figs) && figs.length > 0) {
@@ -49,8 +48,7 @@ export function UsuarioDashboard() {
                         }
                         setFiguraImage(resolved || null);
                     }
-                } catch (e) { /* ignore */ }
-                // se não encontramos imagem no dashboard, buscar no endpoint de figurinhas do usuário
+                        } catch (e) { }
                 if (!figuraImage) {
                     try {
                         const minhas = await dashboardService.getMinhasFigurinhas();
@@ -68,7 +66,7 @@ export function UsuarioDashboard() {
                             }
                             if (resolved) setFiguraImage(resolved);
                         }
-                    } catch (e) { /* ignore */ }
+                    } catch (e) { }
                 }
                 const initialResgates = dashboard.recompensas_resgatadas || dashboard.resgates || dashboard.recompensas || [];
 

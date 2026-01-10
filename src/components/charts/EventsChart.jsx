@@ -169,7 +169,7 @@ export default function EventsChart({ data = null, empresaId = null, height = 30
           <YAxis />
           <Tooltip formatter={(value) => value} />
           <Legend formatter={() => 'Eventos'} />
-          <Line type="monotone" dataKey="eventos" stroke="#0A84FF" strokeWidth={2} activeDot={{ r: 6 }} />
+          <Line type="monotone" dataKey="eventos" stroke="#46c7c2" strokeWidth={2} activeDot={{ r: 6 }} />
         </LineChart>
       </ResponsiveContainer>
     </div>

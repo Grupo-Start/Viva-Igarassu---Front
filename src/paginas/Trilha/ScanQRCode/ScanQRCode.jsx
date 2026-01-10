@@ -9,6 +9,7 @@ import "./scanQRCode.css";
 
 export function ScanQRCode() {
     const navigate = useNavigate();
+    const mainRef = useRef(null);
     const extractReward = (resp) => {
         if (!resp) return null;
         try {
@@ -56,6 +57,35 @@ export function ScanQRCode() {
         } catch (e) { console.warn('extractReward error', e); }
         return null;
     };
+    const detectAlreadyOwned = (resp) => {
+        try {
+            if (!resp) return false;
+            const r = resp?.data ? resp.data : resp;
+            
+            if (r === 'already' || r === 'owned') return true;
+            if (r?.already === true || r?.owned === true) return true;
+            
+            const status = resp?.status || resp?.response?.status || null;
+            
+            const msg = String(r?.message || r?.msg || r?.result || '') || '';
+            const lower = msg.toLowerCase();
+
+            
+            const ptRegex = /\b(vo[cç]e j[aá] possui|vo[cç]e j[aá] tem|j[aá] possui|j[aá] tem|j[aá] adquiriu|j[aá] conquistou|conquistado anteriormente|j[aá] resgatou|ja possui|ja tem)\b/i;
+            
+            const enRegex = /\b(already (owned|have|claimed|redeemed)|you already (have|own|claimed|redeemed))\b/i;
+
+            
+            if (status === 409) {
+                if (ptRegex.test(lower) || enRegex.test(lower)) return true;
+            }
+
+            if (ptRegex.test(lower) || enRegex.test(lower)) return true;
+
+            return false;
+        } catch (e) {}
+        return false;
+    };
     const [qrCodeData, setQrCodeData] = useState(null);
     const [ponto, setPonto] = useState(null);
     const [error, setError] = useState(null);
@@ -63,6 +93,38 @@ export function ScanQRCode() {
     const [decodedPreview, setDecodedPreview] = useState(null);
     const [serverErrorDetail, setServerErrorDetail] = useState(null);
     const [handledByQrEndpoint, setHandledByQrEndpoint] = useState(false);
+    const [showAlbumButton, setShowAlbumButton] = useState(false);
+
+    const updateUserSaldoFromApi = async () => {
+        try {
+            const dash = await dashboardService.getDashboardUsuario().catch(() => null);
+            if (dash) {
+                const usuario = dash.usuario || dash.meusDados || null;
+                try {
+                    if (usuario && typeof usuario === 'object') {
+                        const storedRaw = localStorage.getItem('user');
+                        const stored = storedRaw ? JSON.parse(storedRaw) : {};
+                        const merged = { ...stored, ...usuario };
+                        localStorage.setItem('user', JSON.stringify(merged));
+                        window.dispatchEvent(new CustomEvent('user:updated', { detail: merged }));
+                        return;
+                    }
+                } catch (e) {}
+                const saldoVal = dash.usuario?.saldo ?? dash.saldo ?? dash.saldo_moedas ?? null;
+                if (saldoVal != null) {
+                    try { localStorage.setItem('saldo', String(saldoVal)); } catch (e) {}
+                    try { window.dispatchEvent(new CustomEvent('user:updated', { detail: { saldo: saldoVal } })); } catch (e) {}
+                    return;
+                }
+            }
+            
+            const me = await dashboardService.getMeusDados().catch(() => null);
+            if (me) {
+                try { localStorage.setItem('user', JSON.stringify(me)); } catch (e) {}
+                try { window.dispatchEvent(new CustomEvent('user:updated', { detail: me })); } catch (e) {}
+            }
+        } catch (e) {}
+    };
 
     const extractUuids = (text) => {
         try {
@@ -116,6 +178,18 @@ export function ScanQRCode() {
     }, []);
 
     useEffect(() => {
+        try {
+            if (typeof window !== 'undefined') {
+                window.requestAnimationFrame(() => {
+                    try { window.scrollTo({ top: 0, left: 0, behavior: 'auto' }); } catch(e) {}
+                    try { if (mainRef.current && mainRef.current.scrollIntoView) mainRef.current.scrollIntoView({ behavior: 'auto', block: 'start' }); } catch(e) {}
+                    try { const qrEl = document.getElementById('qr-reader'); if (qrEl && qrEl.focus) qrEl.focus(); } catch(e) {}
+                });
+            }
+        } catch (e) {}
+    }, []);
+
+    useEffect(() => {
         (async () => {
             try {
                 const params = new URLSearchParams(window.location.search);
@@ -129,21 +203,35 @@ export function ScanQRCode() {
                         const resp = await dashboardService.visitarViaQr(tokenParam);
                         const resolvedPonto = resp?.ponto || resp?.pontoId || resp?.id_ponto || resp?.id || resp;
                         const serverMsg = resp?.message || resp?.msg || null;
-                        if (resolvedPonto) {
+                            if (resolvedPonto) {
                             setQrCodeData(window.location.href);
                             setSuccess(serverMsg || 'Visita registrada com sucesso!');
                             const reward = extractReward(resp);
-                            setTimeout(() => {
-                                try { sessionStorage.setItem('lastReward', JSON.stringify({ reward, message: serverMsg, ponto: resolvedPonto, ts: Date.now() })); } catch(e) {}
-                                navigate('/tela-figurinha', { state: { reward, ponto: resolvedPonto, message: serverMsg } });
-                            }, 1500);
+                                const ownedFlag = detectAlreadyOwned(resp);
+                                    setTimeout(() => {
+                                    try { sessionStorage.setItem('lastReward', JSON.stringify({ reward, message: serverMsg, ponto: resolvedPonto, owned: ownedFlag, ts: Date.now() })); } catch(e) {}
+                                    try { updateUserSaldoFromApi(); } catch (e) {}
+                                    if (ownedFlag) {
+                                        setSuccess('Você já possui esta figurinha.');
+                                        setShowAlbumButton(true);
+                                    } else {
+                                        navigate('/tela-figurinha', { state: { reward, ponto: resolvedPonto, message: serverMsg, owned: ownedFlag } });
+                                    }
+                                }, 1500);
                         } else {
                             setQrCodeData(window.location.href);
                             setSuccess(serverMsg || 'Requisição enviada com sucesso.');
                             const reward = extractReward(resp);
+                            const ownedFlag = detectAlreadyOwned(resp);
                             setTimeout(() => {
-                                try { sessionStorage.setItem('lastReward', JSON.stringify({ reward, message: serverMsg, ts: Date.now() })); } catch(e) {}
-                                navigate('/tela-figurinha', { state: { reward, message: serverMsg } });
+                                try { sessionStorage.setItem('lastReward', JSON.stringify({ reward, message: serverMsg, owned: ownedFlag, ts: Date.now() })); } catch(e) {}
+                                try { updateUserSaldoFromApi(); } catch (e) {}
+                                if (ownedFlag) {
+                                    setSuccess('Você já possui esta figurinha.');
+                                    setShowAlbumButton(true);
+                                } else {
+                                    navigate('/tela-figurinha', { state: { reward, message: serverMsg, owned: ownedFlag } });
+                                }
                             }, 1500);
                         }
                 } catch (e) {
@@ -169,6 +257,7 @@ export function ScanQRCode() {
     const startScanner = async () => {
         setError(null);
         setSuccess(null);
+        setShowAlbumButton(false);
         setQrCodeData(null);
         try {
             const t = localStorage.getItem('token');
@@ -230,9 +319,16 @@ export function ScanQRCode() {
                                             setHandledByQrEndpoint(true);
                                             setSuccess(serverMsg || 'Visita registrada com sucesso! Figurinha creditada.');
                                             const reward = extractReward(resolved);
+                                            const ownedFlag_resolved = detectAlreadyOwned(resolved);
                                             setTimeout(() => {
-                                                try { sessionStorage.setItem('lastReward', JSON.stringify({ reward, message: serverMsg, ponto: foundResolved, ts: Date.now() })); } catch(e) {}
-                                                navigate('/tela-figurinha', { state: { reward: reward, ponto: foundResolved, message: serverMsg } });
+                                                try { sessionStorage.setItem('lastReward', JSON.stringify({ reward, message: serverMsg, ponto: foundResolved, owned: ownedFlag_resolved, ts: Date.now() })); } catch(e) {}
+                                                try { updateUserSaldoFromApi(); } catch (e) {}
+                                                if (ownedFlag_resolved) {
+                                                    setSuccess('Você já possui esta figurinha.');
+                                                    setShowAlbumButton(true);
+                                                } else {
+                                                    navigate('/tela-figurinha', { state: { reward: reward, ponto: foundResolved, message: serverMsg, owned: ownedFlag_resolved } });
+                                                }
                                             }, 1500);
                                             return;
                                         }
@@ -265,8 +361,15 @@ export function ScanQRCode() {
                                                 setSuccess(serverMsgPost || 'Visita registrada via POST direto no endpoint do QR.');
                                                 const rewardPost = extractReward(postDirect?.data || postDirect);
                                                 setTimeout(() => {
-                                                    try { sessionStorage.setItem('lastReward', JSON.stringify({ reward: rewardPost, message: serverMsgPost, ponto: foundResolved, ts: Date.now() })); } catch(e) {}
-                                                    navigate('/tela-figurinha', { state: { reward: rewardPost, ponto: foundResolved, message: serverMsgPost } });
+                                                      const ownedFlag_post = detectAlreadyOwned(postDirect?.data || postDirect);
+                                                      try { sessionStorage.setItem('lastReward', JSON.stringify({ reward: rewardPost, message: serverMsgPost, ponto: foundResolved, owned: ownedFlag_post, ts: Date.now() })); } catch(e) {}
+                                                      try { updateUserSaldoFromApi(); } catch (e) {}
+                                                      if (ownedFlag_post) {
+                                                          setSuccess('Você já possui esta figurinha.');
+                                                          setShowAlbumButton(true);
+                                                      } else {
+                                                          navigate('/tela-figurinha', { state: { reward: rewardPost, ponto: foundResolved, message: serverMsgPost, owned: ownedFlag_post } });
+                                                      }
                                                 }, 1500);
                                                 return;
                                             } else {
@@ -297,8 +400,15 @@ export function ScanQRCode() {
                                             setSuccess(serverMsgDirect || 'Visita registrada via endpoint do QR.');
                                             const rewardDirect = extractReward(direct?.data || direct);
                                             setTimeout(() => {
-                                                try { sessionStorage.setItem('lastReward', JSON.stringify({ reward: rewardDirect, message: serverMsgDirect, ponto: foundResolved, ts: Date.now() })); } catch(e) {}
-                                                navigate('/tela-figurinha', { state: { reward: rewardDirect, ponto: foundResolved, message: serverMsgDirect } });
+                                                   const ownedFlag_direct = detectAlreadyOwned(direct?.data || direct);
+                                                   try { sessionStorage.setItem('lastReward', JSON.stringify({ reward: rewardDirect, message: serverMsgDirect, ponto: foundResolved, owned: ownedFlag_direct, ts: Date.now() })); } catch(e) {}
+                                                   try { updateUserSaldoFromApi(); } catch (e) {}
+                                                   if (ownedFlag_direct) {
+                                                       setSuccess('Você já possui esta figurinha.');
+                                                       setShowAlbumButton(true);
+                                                   } else {
+                                                       navigate('/tela-figurinha', { state: { reward: rewardDirect, ponto: foundResolved, message: serverMsgDirect, owned: ownedFlag_direct } });
+                                                   }
                                             }, 1500);
                                             return;
                                         } else {
@@ -409,16 +519,23 @@ export function ScanQRCode() {
                                 const regResp = await dashboardService.registrarVisita(resolvedId);
                                 setSuccess('Visita registrada com sucesso! Figurinha creditada.');
                                 const rewardReg = extractReward(regResp);
-                                setTimeout(() => {
-                                    try { sessionStorage.setItem('lastReward', JSON.stringify({ reward: rewardReg, message: 'Visita registrada', ponto: found, ts: Date.now() })); } catch(e) {}
-                                    navigate('/tela-figurinha', { state: { reward: rewardReg, ponto: found, message: 'Visita registrada' } });
+                                        setTimeout(() => {
+                                        const ownedFlag_reg = detectAlreadyOwned(regResp);
+                                        try { sessionStorage.setItem('lastReward', JSON.stringify({ reward: rewardReg, message: 'Visita registrada', ponto: found, owned: ownedFlag_reg, ts: Date.now() })); } catch(e) {}
+                                        try { updateUserSaldoFromApi(); } catch (e) {}
+                                        if (ownedFlag_reg) {
+                                            setSuccess('Você já possui esta figurinha.');
+                                            setShowAlbumButton(true);
+                                        } else {
+                                            navigate('/tela-figurinha', { state: { reward: rewardReg, ponto: found, message: 'Visita registrada', owned: ownedFlag_reg } });
+                                        }
                                 }, 1500);
                             } else {
                                 setSuccess('Visita registrada com sucesso! Figurinha creditada.');
                                 setTimeout(() => {
-                                    try { sessionStorage.setItem('lastReward', JSON.stringify({ reward: null, message: 'Visita registrada', ponto: found, ts: Date.now() })); } catch(e) {}
-                                    navigate('/tela-figurinha', { state: { reward: null, ponto: found, message: 'Visita registrada' } });
-                                }, 1500);
+                                try { sessionStorage.setItem('lastReward', JSON.stringify({ reward: null, message: 'Visita registrada', ponto: found, owned: false, ts: Date.now() })); } catch(e) {}
+                                navigate('/tela-figurinha', { state: { reward: null, ponto: found, message: 'Visita registrada', owned: false } });
+                            }, 1500);
                             }
                         } catch (regErr) {
                             setError('Falha ao registrar visita: ' + (regErr?.message || regErr));
@@ -501,6 +618,11 @@ export function ScanQRCode() {
             <div className="scan-result">
                 {error && <div className="scan-error">Erro: {error}</div>}
                 {success && <div className="scan-success">{success}</div>}
+                {showAlbumButton && (
+                    <div style={{ marginTop: 12, display: 'flex', justifyContent: 'center' }}>
+                        <div className="btn-wrap"><Button text="Ver meu álbum" onClick={() => navigate('/usuarioFigurinhas')} /></div>
+                    </div>
+                )}
             </div>
 
             </main>

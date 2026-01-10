@@ -7,8 +7,8 @@ export default function Footer({ admin = false }) {
       <div className="footer-container">
 
             <div className="footer-logo">
-            <img src="header-logo.png" alt="logo viva igarassu" />
-        </div>
+              <img src="/header-logo.png" alt="logo viva igarassu" />
+              </div>
 
         <div className="footer-links">
           <h4>Links úteis</h4>

@@ -49,12 +49,35 @@ api.interceptors.response.use(
           }
         } catch (e) {}
       }
+      
+      try {
+        const hdrs = cfg.headers || {};
+        for (const key of Object.keys(hdrs || {})) {
+          try {
+            if (String(key).toLowerCase() === 'x-skip-auth-redirect') { skipHeader = true; break; }
+            const val = hdrs[key];
+            if (typeof val === 'string' && val.toLowerCase() === '1') { skipHeader = true; break; }
+            if (typeof val === 'number' && Number(val) === 1) { skipHeader = true; break; }
+          } catch (e) {}
+        }
+      } catch (e) {}
+      
+      try {
+        const publicPaths = ['/eventos', '/pontos-turisticos', '/pontos', '/recompensas', '/recompensa'];
+        const reqUrl = String(cfg.url || '').toLowerCase();
+        for (const p of publicPaths) {
+          if (reqUrl.includes(p)) { skipHeader = true; break; }
+        }
+      } catch (e) {}
       const status = error.response?.status;
       console.warn('api.interceptor.response: request error', { url: cfg.url, method: cfg.method, status, skipHeader });
       if (status === 401 && !skipHeader) {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        window.location.href = '/login';
+        try { localStorage.removeItem('token'); } catch (e) {}
+        try { localStorage.removeItem('user'); } catch (e) {}
+        try {
+          
+          window.dispatchEvent(new CustomEvent('auth:unauthorized', { detail: { url: cfg.url, method: cfg.method, status } }));
+        } catch (e) {}
       }
     } catch (e) {
     }
@@ -72,121 +95,86 @@ export const dashboardService = {
     }
   },
 
-  createRecompensa: async (dados) => {
+  getResgatesCountEmpresa: async (empresaIdInput) => {
     try {
-      let config = {};
-      let body = dados;
-      const isFormData = dados instanceof FormData;
-      if (isFormData) {
-      } else {
-        body = {
-          nome: dados.nome,
-          descricao: dados.descricao,
-          quantidade: dados.quantidade,
-          quantidade_disponivel: dados.quantidade || dados.quantidade_disponivel || dados.qtde || dados.estoque,
-          valor: dados.valor,
-          preco_moedas: dados.valor || dados.preco_moedas || dados.preco || dados.preco_moeda,
-          valor_em_moedas: dados.valor || dados.preco_moedas,
-          empresa: dados.empresa || dados.id_empresa || dados.empresa_id || dados.empresaId,
-        };
-      }
-      if (isFormData) {
-        try {
-          const ensure = (key, alias) => {
-            const v = body.get(key) || body.get(alias);
-            if (v != null && v !== '') {
-              if (!body.get(alias)) body.append(alias, v);
-            }
-          };
-          ensure('quantidade', 'quantidade_disponivel');
-          ensure('quantidade', 'qtde');
-          ensure('valor', 'preco_moedas');
-          ensure('valor', 'valor_em_moedas');
-          ensure('empresa', 'id_empresa');
-          ensure('empresa', 'empresa_id');
-          const imgFile = body.get('imagem') || body.get('image') || body.get('file');
-          if (imgFile instanceof File) {
-            if (!body.get('image')) body.append('image', imgFile);
-            if (!body.get('file')) body.append('file', imgFile);
-          }
-        } catch (e) {
-          console.warn('createRecompensa: falha ao normalizar FormData', e);
-        }
-        config.headers = config.headers || {};
-        if (Object.prototype.hasOwnProperty.call(config.headers, 'Content-Type')) delete config.headers['Content-Type'];
-      }
+      
+      let empresaId = empresaIdInput;
       try {
-        if (isFormData) {
-          const entries = [];
-          for (const p of body.entries()) entries.push([p[0], p[1]]);
-        } else {
+        if (empresaId && typeof empresaId === 'object') {
+          empresaId = empresaId.id || empresaId._id || empresaId.id_empresa || empresaId.empresaId || empresaId.idEmpresa || null;
         }
-      } catch (e) {
-        console.warn('createRecompensa: erro ao serializar payload para log', e);
+        if (empresaId != null) empresaId = String(empresaId);
+      } catch (e) { empresaId = empresaIdInput; }
+
+      const endpoints = [];
+      if (empresaId) {
+        
+        endpoints.push(`/resgates?empresa=${encodeURIComponent(empresaId)}`);
+        endpoints.push(`/resgates?empresa_id=${encodeURIComponent(empresaId)}`);
+        endpoints.push(`/resgates?id_empresa=${encodeURIComponent(empresaId)}`);
+        endpoints.push(`/resgates?empresaId=${encodeURIComponent(empresaId)}`);
+        endpoints.push(`/empresa/${encodeURIComponent(empresaId)}/resgates`);
+        endpoints.push(`/resgates/empresa/${encodeURIComponent(empresaId)}`);
       }
 
-      if (isFormData) {
-          try {
-            const entries = [];
-            for (const p of body.entries()) entries.push([p[0], p[1]]);
-          } catch (e) {}
-      }
-      const response = await api.post('/recompensas', body, config);
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
-  },
+      
+      endpoints.push('/empresa/me/resgates');
+      endpoints.push('/resgates/meus');
+      endpoints.push('/resgates');
 
-  updateRecompensa: async (id, dados) => {
-    try {
-      let config = {};
-      let body = dados;
-      const isFormData = dados instanceof FormData;
-      if (isFormData) {
+      for (const ep of endpoints) {
         try {
-          const ensure = (key, alias) => {
-            const v = body.get(key) || body.get(alias);
-            if (v != null && v !== '') {
-              if (!body.get(alias)) body.append(alias, v);
+          const res = await api.get(ep, { headers: { 'X-Skip-Auth-Redirect': '1' } });
+          const data = res.data;
+
+          if (Array.isArray(data)) {
+            if (!empresaId) return data.length;
+            
+            const filtered = data.filter(item => {
+              try {
+                
+                const candidates = [];
+                if (item.empresa) candidates.push(item.empresa);
+                if (item.recompensa && item.recompensa.empresa) candidates.push(item.recompensa.empresa);
+                if (item.recompensa && item.recompensa.id_empresa) candidates.push(item.recompensa.id_empresa);
+                if (item.id_empresa) candidates.push(item.id_empresa);
+                if (item.empresa_id) candidates.push(item.empresa_id);
+                for (const c of candidates) {
+                  if (!c) continue;
+                  const s = String(c.id ?? c._id ?? c.id_empresa ?? c.empresaId ?? c).trim();
+                  if (s === empresaId) return true;
+                }
+                return false;
+              } catch (e) { return false; }
+            });
+            return filtered.length;
+          }
+
+          if (data && typeof data === 'object') {
+            
+            const possible = data.count ?? data.total ?? data.length ?? 0;
+            if (possible) return Number(possible);
+            
+            const items = Array.isArray(data.items) ? data.items : (Array.isArray(data.data) ? data.data : null);
+            if (Array.isArray(items)) {
+              if (!empresaId) return items.length;
+              const filtered = items.filter(it => {
+                try {
+                  const id = String(it.empresa?.id_empresa || it.empresa_id || it.id_empresa || it.recompensa?.empresa || it.recompensa?.id_empresa || '').trim();
+                  return id === empresaId;
+                } catch (e) { return false; }
+              });
+              return filtered.length;
             }
-          };
-          ensure('quantidade', 'quantidade_disponivel');
-          ensure('valor', 'preco_moedas');
-          ensure('valor', 'valor_em_moedas');
-          ensure('empresa', 'id_empresa');
-          const imgFile = body.get('imagem') || body.get('image') || body.get('file');
-          if (imgFile instanceof File) {
-            if (!body.get('image')) body.append('image', imgFile);
-            if (!body.get('file')) body.append('file', imgFile);
           }
         } catch (e) {
-          console.warn('updateRecompensa: falha ao normalizar FormData', e);
+          
+          continue;
         }
-        config.headers = config.headers || {};
-        if (Object.prototype.hasOwnProperty.call(config.headers, 'Content-Type')) delete config.headers['Content-Type'];
-      } else {
-        body = {
-          nome: dados.nome,
-          descricao: dados.descricao,
-          quantidade: dados.quantidade,
-          quantidade_disponivel: dados.quantidade || dados.quantidade_disponivel,
-          valor: dados.valor,
-          preco_moedas: dados.valor || dados.preco_moedas,
-          valor_em_moedas: dados.valor || dados.preco_moedas,
-          empresa: dados.empresa || dados.id_empresa || dados.empresa_id,
-        };
       }
-      if (isFormData) {
-        try {
-          const entries = [];
-          for (const p of body.entries()) entries.push([p[0], p[1]]);
-        } catch (e) {}
-      }
-      const response = await api.put(`/recompensas/${id}`, body, config);
-      return response.data;
+      return 0;
     } catch (error) {
-      throw error;
+      return 0;
     }
   },
   deleteRecompensa: async (id) => {
@@ -211,6 +199,152 @@ export const dashboardService = {
       }
     } catch (error) {
       console.warn('deleteRecompensa: erro ao chamar DELETE /recompensas/:id', error?.response?.status, error?.response?.data);
+      throw error;
+    }
+  },
+
+  createRecompensa: async (dados, empresaOnly = false) => {
+    try {
+      try {
+        const isDev = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.MODE !== 'production') || (typeof process !== 'undefined' && process.env && process.env.NODE_ENV !== 'production');
+        if (isDev) {
+          try {
+            if (dados instanceof FormData) {
+              const entries = [];
+              for (const e of dados.entries()) entries.push([e[0], e[1] instanceof File ? `[File:${e[1].name}]` : e[1]]);
+              console.debug('[debug createRecompensa] FormData entries:', entries);
+            } else {
+              console.debug('[debug createRecompensa] JSON body:', dados);
+            }
+          } catch (e) { console.debug('[debug createRecompensa] failed to log payload', e); }
+        }
+      } catch (e) {}
+      let config = {};
+      let body = dados;
+      const defaultEndpoints = ['/recompensas', '/empresa/me/recompensas', '/empresa/recompensas', '/recompensas/me'];
+      const endpoints = empresaOnly ? ['/empresa/me/recompensas', '/empresa/recompensas', '/recompensas'] : defaultEndpoints;
+
+      const isFormData = (typeof FormData !== 'undefined') && (body instanceof FormData);
+      
+      let formHasFile = false;
+      try {
+        if (isFormData) {
+          const fileCandidates = ['imagem', 'image', 'file', 'foto'];
+          for (const k of fileCandidates) {
+            try {
+              const v = body.get(k);
+              if (v && (typeof File !== 'undefined' && v instanceof File)) { formHasFile = true; break; }
+            } catch (e) {}
+          }
+        }
+      } catch (e) { formHasFile = false; }
+      if (isFormData) {
+        config.headers = config.headers || {};
+        if (Object.prototype.hasOwnProperty.call(config.headers, 'Content-Type')) delete config.headers['Content-Type'];
+      }
+
+      
+
+      
+      if (isFormData && formHasFile) {
+        
+        const idx = endpoints.indexOf('/recompensas');
+        if (idx > 0) endpoints.splice(idx, 1);
+        if (endpoints[0] !== '/recompensas') endpoints.unshift('/recompensas');
+      }
+
+      let lastErr = null;
+      for (const ep of endpoints) {
+        try {
+          const res = await api.post(ep, body, config);
+          return res.data;
+        } catch (err) {
+          lastErr = err;
+          console.warn('createRecompensa: tentativa', ep, 'falhou', err?.response?.status, err?.response?.data || err?.message);
+        }
+      }
+
+      
+      if (!isFormData) {
+        const wrappers = ['recompensa', 'data', 'body'];
+        for (const w of wrappers) {
+          try {
+            const wrapped = { [w]: body };
+            const res = await api.post('/recompensas', wrapped, config);
+            return res.data;
+          } catch (e) {
+            lastErr = e;
+            console.warn('createRecompensa: envelope', w, 'falhou', e?.response?.status, e?.response?.data || e?.message);
+          }
+        }
+      }
+
+      throw lastErr || new Error('createRecompensa: nenhum endpoint disponível');
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  updateRecompensa: async (id, dados, empresaOnly = false) => {
+    try {
+      try {
+        const isDev = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.MODE !== 'production') || (typeof process !== 'undefined' && process.env && process.env.NODE_ENV !== 'production');
+        if (isDev) {
+          try {
+            if (dados instanceof FormData) {
+              const entries = [];
+              for (const e of dados.entries()) entries.push([e[0], e[1] instanceof File ? `[File:${e[1].name}]` : e[1]]);
+              console.debug('[debug updateRecompensa] FormData entries:', entries);
+            } else {
+              console.debug('[debug updateRecompensa] JSON body:', dados);
+            }
+          } catch (e) { console.debug('[debug updateRecompensa] failed to log payload', e); }
+        }
+      } catch (e) {}
+      if (!id) throw new Error('updateRecompensa: id ausente');
+      let config = {};
+      let body = dados;
+      const isFormData = (typeof FormData !== 'undefined') && (body instanceof FormData);
+      if (isFormData) {
+        config.headers = config.headers || {};
+        if (Object.prototype.hasOwnProperty.call(config.headers, 'Content-Type')) delete config.headers['Content-Type'];
+      }
+
+      const endpoints = empresaOnly ? [`/empresa/recompensas/${encodeURIComponent(id)}`, `/empresa/me/recompensas/${encodeURIComponent(id)}`] : [`/recompensas/${encodeURIComponent(id)}`];
+
+      
+      try {
+        const resp = await api.put(`/recompensas/${encodeURIComponent(id)}`, body, config);
+        return resp.data;
+      } catch (err) {
+        
+      }
+
+      
+      try {
+        if (isFormData) {
+          try { if (!body.get('_method')) body.append('_method', 'PUT'); } catch (e) {}
+          const respPost = await api.post(`/recompensas/${encodeURIComponent(id)}`, body, config);
+          return respPost.data;
+        }
+      } catch (postErr) {
+        try {
+          const cfg2 = { ...(config || {}) };
+          cfg2.headers = { ...(cfg2.headers || {}), 'X-HTTP-Method-Override': 'PUT' };
+          const respPost2 = await api.post(`/recompensas/${encodeURIComponent(id)}`, body, cfg2);
+          return respPost2.data;
+        } catch (postErr2) {
+          
+        }
+      }
+
+      try {
+        const respPatch = await api.patch(`/recompensas/${encodeURIComponent(id)}`, body, config);
+        return respPatch.data;
+      } catch (patchErr) {
+        throw patchErr || new Error('updateRecompensa: falha ao atualizar');
+      }
+    } catch (error) {
       throw error;
     }
   },
@@ -258,6 +392,50 @@ export const dashboardService = {
     }
   },
 
+  getResgatesCountEmpresa: async (empresaId) => {
+    try {
+      const endpoints = [];
+      if (empresaId) {
+        endpoints.push(`/resgates?empresa=${encodeURIComponent(empresaId)}`);
+        endpoints.push(`/empresa/${encodeURIComponent(empresaId)}/resgates`);
+        endpoints.push(`/resgates/empresa/${encodeURIComponent(empresaId)}`);
+      }
+      
+      endpoints.push('/empresa/me/resgates');
+      endpoints.push('/resgates/meus');
+      endpoints.push('/resgates');
+
+      for (const ep of endpoints) {
+        try {
+          const res = await api.get(ep, { headers: { 'X-Skip-Auth-Redirect': '1' } });
+          const data = res.data;
+          if (Array.isArray(data)) {
+            if (!empresaId) return data.length;
+            
+            const filtered = data.filter(item => {
+              try {
+                const id1 = String(item.empresa?.id_empresa || item.empresa_id || item.id_empresa || item.empresa?._id || item.empresa || '');
+                const id2 = String(item.id_empresa || item.empresa_id || item.empresaId || item.empresa || '');
+                return id1 === String(empresaId) || id2 === String(empresaId);
+              } catch (e) { return false; }
+            });
+            return filtered.length;
+          }
+          if (data && (typeof data === 'object')) {
+            const possible = data.count || data.total || data.length || 0;
+            if (possible) return Number(possible);
+          }
+        } catch (e) {
+          
+          continue;
+        }
+      }
+      return 0;
+    } catch (error) {
+      return 0;
+    }
+  },
+
   resgatarRecompensa: async (recompensaId, extra = {}) => {
     try {
 
@@ -299,12 +477,18 @@ export const dashboardService = {
                 const latestSaldo = await dashboardService.getSaldo().catch(() => null);
                 if (me && typeof me === 'object') {
                   if (latestSaldo != null) me.saldo = latestSaldo;
-                  try { localStorage.setItem('user', JSON.stringify(me)); } catch (e) { /* ignore */ }
-                  try { window.dispatchEvent(new CustomEvent('user:updated', { detail: me })); } catch (e) {}
+                  try { localStorage.setItem('user', JSON.stringify(me)); } catch (e) { }
+                          try { 
+                            console.debug('[api] resgatarRecompensa: dispatch user:updated', { me, latestSaldo });
+                            window.dispatchEvent(new CustomEvent('user:updated', { detail: me }));
+                          } catch (e) { console.warn('[api] resgatarRecompensa: dispatch failed', e); }
                 } else if (latestSaldo != null) {
 
-                  try { localStorage.setItem('saldo', String(latestSaldo)); } catch (e) {}
-                  try { window.dispatchEvent(new CustomEvent('user:updated', { detail: { saldo: latestSaldo } })); } catch (e) {}
+                          try { localStorage.setItem('saldo', String(latestSaldo)); } catch (e) {}
+                          try { 
+                            console.debug('[api] resgatarRecompensa: dispatch user:updated saldo', { latestSaldo });
+                            window.dispatchEvent(new CustomEvent('user:updated', { detail: { saldo: latestSaldo } })); 
+                          } catch (e) { console.warn('[api] resgatarRecompensa: dispatch failed', e); }
                 }
               } catch (e) {
 
@@ -365,8 +549,13 @@ export const dashboardService = {
   getSaldo: async () => {
     try {
       const dashboard = await dashboardService.getDashboardUsuario();
-      return dashboard.saldo || dashboard.estelitas || 0;
+      
+      try { console.debug('[api] getSaldo: dashboard result', dashboard); } catch (e) {}
+      const result = dashboard?.saldo ?? dashboard?.saldo_moedas ?? dashboard?.estelitas ?? dashboard?.usuario?.saldo ?? 0;
+      try { console.debug('[api] getSaldo: resolved', { result }); } catch (e) {}
+      return result;
     } catch (error) {
+      try { console.warn('[api] getSaldo: error', error); } catch (e) {}
       return 0;
     }
   },
@@ -416,7 +605,7 @@ export const dashboardService = {
           if (data && Array.isArray(data.items)) return data.items;
         } catch (e) {
           if (e?.response?.status === 404) continue;
-          // if other error, try next endpoint
+          
         }
       }
       return [];
@@ -427,7 +616,7 @@ export const dashboardService = {
 
   atualizarMeusDados: async (dados) => {
     try {
-      // Strictly use PUT on the canonical endpoint '/usuarios/me'
+      
       const endpoint = '/usuarios/me';
       try {
         console.debug('[api] PUT', endpoint, dados);
@@ -447,7 +636,7 @@ export const dashboardService = {
             };
             localStorage.setItem('user', JSON.stringify(merged));
           } catch (e) {
-            // ignore JSON parse errors
+            
           }
         }
         return updatedUser;
@@ -595,10 +784,25 @@ export const dashboardService = {
     }
   },
 
-  getPontosTuristicos: async () => {
+  getPontosTuristicos: async (options = {}) => {
     try {
-      const response = await api.get('/pontos-turisticos');
+      
+      const requestConfig = {};
+      if (options.forceReload) {
+        requestConfig.params = { _: Date.now() };
+      }
+      const response = await api.get('/pontos-turisticos', requestConfig);
       return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  getPontoTuristico: async (pontoId) => {
+    try {
+      if (!pontoId) throw new Error('getPontoTuristico: pontoId ausente');
+      const resp = await api.get(`/pontos-turisticos/${encodeURIComponent(pontoId)}`);
+      return resp.data;
     } catch (error) {
       throw error;
     }
@@ -949,23 +1153,6 @@ export const dashboardService = {
       const endpoints = ['/eventos', '/empresa/me/eventos', '/empresa/eventos', '/eventos/me'];
       const isFormData = body instanceof FormData;
       if (isFormData) {
-        try {
-          const ensure = (key, alias) => {
-            const v = body.get(key) || body.get(alias);
-            if (v != null && v !== '') {
-              if (!body.get(alias)) body.append(alias, v);
-            }
-          };
-          ensure('imagem', 'image');
-          ensure('imagem', 'file');
-          const imgFile = body.get('imagem') || body.get('image') || body.get('file');
-          if (imgFile instanceof File) {
-            if (!body.get('image')) body.append('image', imgFile);
-            if (!body.get('file')) body.append('file', imgFile);
-          }
-        } catch (e) {
-          console.warn('createEvento: falha ao normalizar FormData', e);
-        }
         config.headers = config.headers || {};
         if (Object.prototype.hasOwnProperty.call(config.headers, 'Content-Type')) delete config.headers['Content-Type'];
       }
@@ -1046,25 +1233,6 @@ export const dashboardService = {
       let body = dados;
       const isFormData = (typeof FormData !== 'undefined') && (body instanceof FormData);
       if (isFormData) {
-        try {
-          const ensure = (key, alias) => {
-            const v = body.get(key) || body.get(alias);
-            if (v != null && v !== '') {
-              if (!body.get(alias)) body.append(alias, v);
-            }
-          };
-          ensure('imagem', 'image');
-          ensure('imagem', 'file');
-          ensure('data', 'data_evento');
-          ensure('horario', 'hora');
-          const imgFile = body.get('imagem') || body.get('image') || body.get('file');
-          if (imgFile instanceof File) {
-            if (!body.get('image')) body.append('image', imgFile);
-            if (!body.get('file')) body.append('file', imgFile);
-          }
-        } catch (e) {
-          console.warn('updateEvento: falha ao normalizar FormData', e);
-        }
         config.headers = config.headers || {};
         if (Object.prototype.hasOwnProperty.call(config.headers, 'Content-Type')) delete config.headers['Content-Type'];
       }

@@ -19,7 +19,7 @@
 }
 
 .event-details {
-    align-items: stretch; /* ensure event-info and event-map match heights */
+    align-items: stretch;
 }
 
 

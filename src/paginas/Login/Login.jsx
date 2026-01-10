@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "../../components/button/Button";
 import "./Login.css";
 import Img from "../../assets/Logoimg.jpeg";
@@ -19,6 +19,7 @@ export function Login() {
     }
 
     const navigate = useNavigate();
+    const location = useLocation();
 
     const handleSubmit = async (e) => {
         if (e && typeof e.preventDefault === 'function') e.preventDefault();
@@ -91,7 +92,10 @@ export function Login() {
             const tipoIsAdmin = tipo === 'adm' || role === 'adm' || isAdmin === true;
             const tipoIsEmpresa = isEmpresa === true || tipo.includes('empresa') || tipo.includes('empreendedor') || role.includes('empresa') || role.includes('empreendedor');
 
-            if (tipoIsAdmin) {
+            const from = location?.state?.from;
+            if (from) {
+                navigate(from, { replace: true });
+            } else if (tipoIsAdmin) {
                 navigate('/admin-dashboard', { replace: true });
             } else if (tipoIsEmpresa) {
                 navigate('/empresa-dashboard', { replace: true });
@@ -106,7 +110,7 @@ export function Login() {
         }
     };
 
-    const navigation = useNavigate();
+    
 
     return (
 

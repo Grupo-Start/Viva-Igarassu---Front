@@ -81,6 +81,8 @@
   height: 34px;
   filter: brightness(0) invert(1);
 }
+.company-trigger { display: none; background: transparent; border: none; padding: 6px; margin-left: 6px; cursor: pointer; }
+.company-trigger img { width: 28px; height: 28px; filter: brightness(0) invert(1); }
 
 .admin-menu {
   position: absolute;
@@ -112,5 +114,37 @@
   .header-company {
     display: none;
   }
+}
+
+.Admin .admin-label { display: inline-flex; align-items: center; margin-left: 6px; color: #ffffff; font-weight: 500; }
+@media (max-width: 520px) {
+  .Admin .admin-label { display: none !important; }
+  .Admin img { display: inline-block; }
+}
+
+@media (max-width: 520px) {
+  .header { position: relative; }
+  .header-actions { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); }
+  .header-actions .admin-menu {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 8px);
+    box-shadow: 0 8px 24px rgba(2,6,23,0.12);
+    background: #fff;
+    border-radius: 10px;
+    padding: 6px;
+    z-index: 1500;
+    min-width: 110px;
+  }
+  .header-actions .admin-menu::before { display: none; }
+  .header-actions .admin-menu .admin-menu-item { padding: 8px 10px; white-space: nowrap; font-size: 14px; }
+}
+
+@media (max-width: 520px) {
+  .header-company { display: none !important; }
+  .Admin .admin-label, .Empresa .empresa-label { display: none !important; }
+  .header-actions img { display: inline-block !important; width: 28px !important; height: 28px !important; filter: brightness(0) invert(1) !important; }
+  .admin-trigger, .mobile-logout-btn { display: flex !important; align-items: center; justify-content: center; }
+  .company-trigger { display: flex !important; align-items: center; justify-content: center; }
 }
 

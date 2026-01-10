@@ -1,4 +1,6 @@
 import Header from "../../../components/header/Header";
+import Footer from "../../../components/footer/Footer";
+import FaixaInfo from "../../../components/header/FaixaInfo";
 import "./Pontoturistico.css";
 import { useParams, useNavigate } from "react-router-dom";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
@@ -96,41 +98,52 @@ export function Pontoturistico() {
   const [pontoIndex, setPontoIndex] = useState(0);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchPonto = async () => {
+  const fetchPonto = async (forceReload = false) => {
+    try {
+      setLoading(true);
       try {
-        setLoading(true);
-        const pontos = await dashboardService.getPontosTuristicos();
-        const lista = Array.isArray(pontos) ? pontos : (pontos?.data || pontos?.pontos || []);
-        
-        const foundIndex = lista.findIndex(p => 
-          String(p.id) === String(id) || 
-          String(p.id_ponto) === String(id) || 
-          String(p.slug) === String(id) ||
-          String(p.nome).toLowerCase().replace(/\s+/g, '-') === String(id)
-        );
-        
-        if (foundIndex >= 0) {
-          setPonto(lista[foundIndex]);
-          setPontoIndex(foundIndex + 1);
-        } else {
-          setPonto(null);
+        const resp = await dashboardService.getPontoTuristico(id);
+        const p = Array.isArray(resp) ? resp[0] : (resp?.data || resp);
+        if (p) {
+          setPonto(p);
+          setPontoIndex(1);
+          setLoading(false);
+          return;
         }
-      } catch (error) {
-        console.error("Erro ao buscar ponto turístico:", error);
-        setPonto(null);
-      } finally {
-        setLoading(false);
+      } catch (singleErr) {
       }
-    };
 
-    fetchPonto();
-  }, [id]);
+      const pontos = await dashboardService.getPontosTuristicos({ forceReload });
+      const lista = Array.isArray(pontos) ? pontos : (pontos?.data || pontos?.pontos || []);
+
+      const foundIndex = lista.findIndex(p => 
+        String(p.id) === String(id) || 
+        String(p.id_ponto) === String(id) || 
+        String(p.slug) === String(id) ||
+        String((p.nome || p.name || '').toLowerCase()).replace(/\s+/g, '-') === String(id)
+      );
+
+      if (foundIndex >= 0) {
+        setPonto(lista[foundIndex]);
+        setPontoIndex(foundIndex + 1);
+      } else {
+        setPonto(null);
+      }
+    } catch (error) {
+      console.error("Erro ao buscar ponto turístico:", error);
+      setPonto(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { fetchPonto(); }, [id]);
 
   if (loading) {
     return (
       <main className="ponto-container">
         <Header />
+        <FaixaInfo />
         <section className="ponto-titulo">
           <h4>Pontos turísticos</h4>
           <h1>Carregando...</h1>
@@ -143,6 +156,7 @@ export function Pontoturistico() {
     return (
       <main className="ponto-container">
         <Header />
+        <FaixaInfo />
         <section className="ponto-titulo">
           <h4>Pontos turísticos</h4>
           <h1>Ponto não encontrado</h1>
@@ -162,9 +176,55 @@ export function Pontoturistico() {
   const nomePonto = ponto.nome || ponto.name || '';
   const local = getDadosPorNome(nomePonto);
 
-  const lat = ponto.latitude || ponto.lat || ponto.coordenadas?.[0] || -7.8306;
-  const lng = ponto.longitude || ponto.lng || ponto.long || ponto.coordenadas?.[1] || -34.9067;
-  const coordenadas = [parseFloat(lat), parseFloat(lng)];
+  const IGARASSU_FALLBACK = [-7.8349, -34.90682];
+
+  const tryParse = (v) => {
+    if (v == null) return null;
+    if (Array.isArray(v) && v.length >= 2) return [v[0], v[1]];
+    if (typeof v === 'string') {
+      const m = v.trim().match(/(-?\d{1,3}\.\d+)[,\s]+(-?\d{1,3}\.\d+)/);
+      if (m) return [parseFloat(m[1]), parseFloat(m[2])];
+    }
+    if (typeof v === 'object') {
+      if ((v.lat || v.latitude) && (v.lng || v.longitude)) return [v.lat || v.latitude, v.lng || v.longitude];
+      if (v.coordinates && Array.isArray(v.coordinates)) return [v.coordinates[0], v.coordinates[1]];
+    }
+    return null;
+  };
+
+  const normalizeCoords = (c) => {
+    const parsed = tryParse(c);
+    if (!parsed || parsed.length < 2) return null;
+    const a = parseFloat(parsed[0]);
+    const b = parseFloat(parsed[1]);
+    if (Number.isNaN(a) || Number.isNaN(b)) return null;
+    const absA = Math.abs(a);
+    const absB = Math.abs(b);
+    if (a < -90 || a > 90 || (absA > 20 && absB <= 20)) return [b, a];
+    return [a, b];
+  };
+
+  const rawCandidates = [
+    ponto.coordenadas,
+    ponto.coordinates,
+    ponto.coords,
+    ponto.location,
+    ponto.localizacao,
+    ponto.endereco,
+    ponto.latitude && ponto.longitude ? [ponto.latitude, ponto.longitude] : null,
+    ponto.lat && (ponto.lng || ponto.long) ? [ponto.lat, ponto.lng || ponto.long] : null,
+  ];
+
+  let final = null;
+  for (const cand of rawCandidates) {
+    const n = normalizeCoords(cand);
+    if (n) { final = n; break; }
+  }
+
+  if (!final) final = IGARASSU_FALLBACK;
+  const coordenadas = [parseFloat(final[0]), parseFloat(final[1])];
+
+  
 
   let curiosidades = ponto.curiosidades || ponto.curiosidade || null;
   if (typeof curiosidades === 'string') {
@@ -184,11 +244,15 @@ export function Pontoturistico() {
   }
 
   return (
+    <>
     <main className="ponto-container">
       <Header />
+      <FaixaInfo />
 
       <section className="ponto-titulo">
         <h4>Pontos turísticos</h4>
+      </section>
+      <section className="ponto-titulo2">
         <h1>{ponto.nome || ponto.name}</h1>
       </section>
 
@@ -222,6 +286,8 @@ export function Pontoturistico() {
             <h3>Mapa</h3>
           </div>
 
+          
+
           <div className="mapa-container">
             <MapContainer
               center={coordenadas}
@@ -238,13 +304,23 @@ export function Pontoturistico() {
               </Marker>
             </MapContainer>
           </div>
+          
         </div>
       </section>
 
       <section className="ponto-cta">
         <h2>RESGATE AGORA A SUA FIGURINHA!</h2>
-        <button onClick={() => navigate(`/scan/${id}`)}>ESCANEAR AQUI</button>
+        <button onClick={() => {
+          const token = localStorage.getItem('token');
+          if (!token) {
+            navigate('/login', { state: { from: `/scan/${id}` } });
+            return;
+          }
+          navigate(`/scan/${id}`);
+        }}>ESCANEAR AQUI</button>
       </section>
     </main>
+    <Footer />
+    </>
   );
 }

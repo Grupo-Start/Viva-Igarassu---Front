@@ -61,8 +61,24 @@ export function EventMap({ event }) {
 
 
 
-    const coords = resolveCoords();
-    const hasCoords = coords && coords.length === 2 && !Number.isNaN(parseFloat(coords[0])) && !Number.isNaN(parseFloat(coords[1]));
+    const rawCoords = resolveCoords();
+
+    const normalizeCoords = (c) => {
+        if (!c || !Array.isArray(c) || c.length < 2) return null;
+        const a = parseFloat(c[0]);
+        const b = parseFloat(c[1]);
+        if (Number.isNaN(a) || Number.isNaN(b)) return null;
+        const absA = Math.abs(a);
+        const absB = Math.abs(b);
+        
+        if (a < -90 || a > 90 || (absA > 20 && absB <= 20)) {
+            return [b, a];
+        }
+        return [a, b];
+    };
+
+    const coords = normalizeCoords(rawCoords);
+    const hasCoords = coords && coords.length === 2 && !Number.isNaN(coords[0]) && !Number.isNaN(coords[1]);
 
     const [geocoded, setGeocoded] = useState(null);
     const [geocodingState, setGeocodingState] = useState("idle");
@@ -129,6 +145,8 @@ export function EventMap({ event }) {
         ? [parseFloat(geocoded[0]), parseFloat(geocoded[1])]
         : null;
 
+    const IGARASSU_CENTER = [-7.8349, -34.90682];
+
     if (finalCoords) {
         const center = finalCoords;
         return (
@@ -149,12 +167,22 @@ export function EventMap({ event }) {
         );
     }
 
-    return (
-        <div className="event-map">
-            <h3>Mapa</h3>
-            <div style={{ padding: 14 }}>
-                <img src={mapImg} alt={event?.nome || "Mapa de Igarassu"} className="event-map-image" />
+        const fallbackCenter = IGARASSU_CENTER;
+        return (
+            <div className="event-map">
+                <h3>Mapa</h3>
+                <div className="approx-badge">📍 Localização aproximada: Igarassu</div>
+                <div className="event-map-leaflet">
+                    <MapContainer center={fallbackCenter} zoom={13} scrollWheelZoom={false} style={{ height: "100%", width: "100%" }}>
+                        <TileLayer
+                            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                        />
+                        <Marker position={fallbackCenter}>
+                            <Popup>{event?.nome ? `${event.nome} — localização aproximada: Igarassu` : 'Localização aproximada: Igarassu'}</Popup>
+                        </Marker>
+                    </MapContainer>
+                </div>
             </div>
-        </div>
-    );
+        );
 }

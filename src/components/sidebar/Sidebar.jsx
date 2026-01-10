@@ -5,7 +5,7 @@ import "./sidebar.css";
 import { LuMenu } from "react-icons/lu";
 
 export function Sidebar() {
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(() => (typeof window !== 'undefined' ? window.innerWidth >= 768 : true));
   const navigate = useNavigate();
   const [companyName, setCompanyName] = useState('');
 
@@ -60,7 +60,7 @@ export function Sidebar() {
     <div className="layout">
       <aside className={open ? "sidebar open" : "sidebar"}>
         <div className="sidebar-header">
-          <h2>{open ? (companyName || "Olá!") : ""}</h2>
+          <h2>{open ? "Olá" : ""}</h2>
           <button className="toggle" onClick={() => setOpen(!open)}>
             <LuMenu />
           </button>
@@ -83,13 +83,13 @@ export function Sidebar() {
             </NavLink>
           </li>
           <li>
-            <NavLink to="/empresa-dashboard/recompensas" className={({isActive}) => isActive ? 'menu-item menu-active' : 'menu-item'}>
-              {open ? ' Recompensas' : 'Re'}
+            <NavLink to="/empresa-dashboard/eventos" className={({isActive}) => isActive ? 'menu-item menu-active' : 'menu-item'}>
+              {open ? ' Eventos' : 'E'}
             </NavLink>
           </li>
           <li>
-            <NavLink to="/empresa-dashboard/eventos" className={({isActive}) => isActive ? 'menu-item menu-active' : 'menu-item'}>
-              {open ? ' Eventos' : 'E'}
+            <NavLink to="/empresa-dashboard/recompensas" className={({isActive}) => isActive ? 'menu-item menu-active' : 'menu-item'}>
+              {open ? ' Recompensas' : 'Re'}
             </NavLink>
           </li>
         </ul>

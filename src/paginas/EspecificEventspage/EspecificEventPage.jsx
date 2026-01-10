@@ -1,4 +1,5 @@
 import { Header } from "../../components/header/Header";
+import FaixaInfo from "../../components/header/FaixaInfo";
 import { MainEvent } from "../../components/mainEvent/MainEvent";
 import { EventInfo } from "../../components/eventInfo/EventInfo";
 import { EventMap } from "../../components/eventMap/EventMap";
@@ -54,6 +55,7 @@ export function CarnivalPage() {
   return (
     <div className="carnival-page">
       <Header />
+      <FaixaInfo />
       <main className="carnival-main">
         <h2 className="carnival-title">Eventos</h2>
         <MainEvent event={event} loading={loading} />

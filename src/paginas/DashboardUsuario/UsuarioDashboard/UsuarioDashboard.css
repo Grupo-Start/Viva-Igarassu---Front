@@ -45,7 +45,6 @@ h1,hr{
   align-items: stretch;
 }
 
-/* Keep conquests aligned with rewards grid: use same max-width and center */
 .conquistas-container {
   max-width: 1200px;
   margin-left: auto;
@@ -61,7 +60,6 @@ h1,hr{
   padding-left: 12px;
   padding-right: 12px;
 }
-
 
 .conquista-card, .conquista-card2 {
   background: linear-gradient(135deg, #4BBFBF 0%, #2C5782 94%);
@@ -166,7 +164,6 @@ h1,hr{
         padding: 24px;
     }
 
-    /* allow two per row on medium screens */
     .conquista-card, .conquista-card2 {
       flex: 1 1 48%;
       padding: 8px;

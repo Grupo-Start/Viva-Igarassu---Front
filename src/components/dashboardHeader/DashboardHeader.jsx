@@ -65,9 +65,27 @@ export function DashboardHeader() {
             <span>{companyName}</span>
           </div>
         )}
+        {companyName && (
+          <button className="company-trigger" onClick={() => setOpen(s => !s)} aria-label="Empresa">
+            <img src="/icone-login.png" alt="Empresa" />
+          </button>
+        )}
         {isAdminUser && (
-          <Link to="/admin-dashboard" className="Admin">
-            <span>Admin</span>
+          <Link
+            to="/admin-dashboard"
+            className="Admin"
+            aria-haspopup="true"
+            onClick={(e) => {
+              try {
+                if (typeof window !== 'undefined' && window.innerWidth <= 520) {
+                  e.preventDefault();
+                  setOpen(s => !s);
+                }
+              } catch (err) {}
+            }}
+          >
+            <img src="/icone-login.png" alt="Admin" />
+            <span className="admin-label">Admin</span>
           </Link>
         )}
 

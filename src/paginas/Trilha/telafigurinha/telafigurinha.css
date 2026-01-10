@@ -105,3 +105,25 @@
 .btn-album:hover {
   background-color: #3bb5ad;
 }
+
+@media (max-width: 900px) {
+  .titulo { font-size: 56px; }
+  .card { width: 90%; height: auto; padding: 24px; gap: 20px; border-radius: 18px; }
+  .card-left img { width: 140px; }
+  .valor { font-size: 40px; }
+}
+
+@media (max-width: 520px) {
+  .parabens-container { padding: 20px 12px; }
+  .titulo { font-size: 36px; margin-bottom: 6px; }
+  .subtitulo { font-size: 14px; margin-bottom: 20px; }
+  .card { width: 100%; flex-direction: column; align-items: center; padding: 18px; gap: 12px; }
+  .card-left { width: auto; }
+  .card-left img { width: 110px; height: auto; }
+  .divisor { display: none; }
+  .card-right { text-align: center; }
+  .ganhou { font-size: 16px; }
+  .valor { font-size: 28px; }
+  .moeda { font-size: 16px; }
+  .btn-album { width: 100%; padding: 12px; }
+}

@@ -93,3 +93,7 @@
   min-height: calc(100vh - 70px);
   height: auto;
 }
+
+.admin-layout {
+  background-color: #f5f7fa;
+}

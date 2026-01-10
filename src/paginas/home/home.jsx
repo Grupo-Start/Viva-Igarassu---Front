@@ -1,9 +1,11 @@
 import Footer from "../../components/footer/Footer";
 import Header from "../../components/header/Header";
+import FaixaInfo from "../../components/header/FaixaInfo";
 import "./home.css";
 import { Icon } from "@iconify/react";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { dashboardService } from '../../services/api';
 
 export function Home() {
   const navigate = useNavigate();
@@ -21,6 +23,37 @@ export function Home() {
     }
   }, []);
 
+  const normalize = (s) => {
+    try {
+      return String(s || '').normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    } catch (e) { return String(s || '').toLowerCase(); }
+  };
+
+  const resolvePointId = async (p) => {
+    try {
+      const data = await dashboardService.getPontosTuristicos();
+      const lista = Array.isArray(data) ? data : (data?.data || data?.pontos || []);
+      const target = normalize(p.name || p.nome || '');
+      const found = (lista || []).find(pt => {
+        try {
+          const names = [pt.nome, pt.name, pt.titulo, pt.titulo_ponto, pt.nome_ponto];
+          for (const n of names) {
+            if (!n) continue;
+            const nn = normalize(n);
+            if (!nn) continue;
+            if (nn === target) return true;
+            if (nn.includes(target) || target.includes(nn)) return true;
+          }
+        } catch (e) {}
+        return false;
+      });
+      const resolved = found ? (found.id || found.id_ponto || found._id || found.uuid || found.uuid_ponto || '') : (p.id || '');
+      return { id: resolved, obj: found || p };
+    } catch (e) {
+      return { id: p.id || '', obj: p };
+    }
+  };
+
   return (
     <main className="telainicial-container">
       <Header />
@@ -31,14 +64,7 @@ export function Home() {
           alt="imagem igarassu - tela inicial"
         />
 
-        <div className="faixa-info">
-          <span className="faixa-texto">
-            <span className="faixa-link" onClick={() => navigate('/eventspage')}>Agenda</span> | <span className="faixa-link" onClick={() => navigate('/pontos-turisticos')}>Pontos Turísticos</span> | <span className="faixa-link" onClick={() => {
-              const target = document.getElementById('trilha-historico');
-              if (target) target.scrollIntoView({ behavior: 'smooth' });
-            }}>Trilha Sítio Histórico</span> | <span className="faixa-link" onClick={() => navigate('/rewardspage')}>Recompensas</span>
-          </span>
-        </div>
+        <FaixaInfo />
       </section>
 
       <section className="hero">
@@ -111,12 +137,12 @@ export function Home() {
           {(() => {
             const initialPoints = [
               { id: 1, name: "Igreja Matriz dos Santos Cosme e Damião", unlocked: true, image: "igreja.jpg" },
-              { id: 2, name: "Convento Sagrado Coração de Jesus", unlocked: true, image: "convento.png" },
-              { id: 3, name: "Convento Franciscano de Santo Antônio e Pinacoteca", unlocked: true, image: "conventofranciscano.jpeg" },
-              { id: 4, name: "Sobrado do Imperador", unlocked: false, image: "sobrado.jpg" },
-              { id: 5, name: "Biblioteca Municipal", unlocked: false, image: "biblioteca.png" },
-              { id: 6, name: "Museu Histórico de Igarassu", unlocked: false, image: "museu.png" },
-              { id: 7, name: "Casa do Artesão e Centro de Informações Turísticas", unlocked: false, image: "casa.png" }
+              { id: 2, name: "Convento do Sagrado Coração de Jesus", unlocked: true, image: "convento.png" },
+              { id: 3, name: "Convento Franciscano e Museu Pinacoteca", unlocked: true, image: "conventofranciscano.jpeg" },
+              { id: 4, name: "Sobrado do Imperador", unlocked: true, image: "sobrado.jpg" },
+              { id: 5, name: "Biblioteca Pública de Igarassu", unlocked: true, image: "biblioteca.png" },
+              { id: 6, name: "Museu Histórico de Igarassu", unlocked: true, image: "museu.png" },
+              { id: 7, name: "Casa do Artesão e Centro de Informações Turísticas", unlocked: true, image: "casa.png" }
             ];
 
             return (
@@ -125,11 +151,15 @@ export function Home() {
                   <div key={p.id} className="timeline-row">
                     <div
                       className={`timeline-circle ${p.unlocked ? 'unlocked' : 'locked'}`}
-                      onClick={() => p.unlocked && navigate('/pontos-turisticos')}
-                      aria-label={p.name}
+                      onClick={async () => {
+                        const res = await resolvePointId(p);
+                        if (res && res.id) navigate(`/pontos-turisticos/${res.id}`, { state: { ponto: res.obj } });
+                        else navigate('/pontos-turisticos');
+                      }}
+                      aria-label={`${p.name} ${p.unlocked ? '' : '(bloqueado)'}`}
                       role="button"
                       tabIndex={0}
-                      onKeyDown={(e) => { if (e.key === 'Enter' && p.unlocked) navigate('/pontos-turisticos'); }}
+                      onKeyDown={async (e) => { if (e.key === 'Enter') { const res = await resolvePointId(p); if (res && res.id) navigate(`/pontos-turisticos/${res.id}`, { state: { ponto: res.obj } }); else navigate('/pontos-turisticos'); } }}
                     >
                       {p.image ? (
                         <img src={`/${p.image}`} alt={p.name} className="timeline-circle__img" />
@@ -138,9 +168,9 @@ export function Home() {
                       )}
 
                       {p.unlocked ? (
-                        <span className="timeline-badge check">✓</span>
+                        <span className="timeline-badge check"><Icon icon="mdi:check-bold" /></span>
                       ) : (
-                        <span className="timeline-badge lock">🔒</span>
+                        <span className="timeline-badge lock"><Icon icon="mdi:lock" /></span>
                       )}
                     </div>
 

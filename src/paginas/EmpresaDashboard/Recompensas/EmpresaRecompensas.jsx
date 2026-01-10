@@ -109,7 +109,7 @@ export function EmpresaRecompensas() {
     setFormData({ nome: "", descricao: "", valor: "", quantidade: "" });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
@@ -119,33 +119,89 @@ export function EmpresaRecompensas() {
     fd.append('valor', formData.valor);
     fd.append('quantidade', formData.quantidade);
     if (empresaPerfil) fd.append('empresa', empresaPerfil);
+    try {
+      if (formData.valor != null && formData.valor !== '') {
+        fd.append('preco_moedas', formData.valor);
+        fd.append('valor_moedas', formData.valor);
+      }
+      if (formData.quantidade != null && formData.quantidade !== '') {
+        fd.append('quantidade_disponivel', formData.quantidade);
+        fd.append('quantidade_disponive', formData.quantidade);
+        fd.append('qtd', formData.quantidade);
+        fd.append('quantidadeDisponivel', formData.quantidade);
+      }
+      if (empresaPerfil) {
+        fd.append('id_empresa', empresaPerfil);
+        fd.append('empresa_id', empresaPerfil);
+      }
+      if (!formData.imagem && formData.imagemPreview && typeof formData.imagemPreview === 'string') {
+        fd.append('imagem_path', formData.imagemPreview);
+        fd.append('imagemPath', formData.imagemPreview);
+      }
+    } catch (e) {}
+
     if (formData.imagem instanceof File) {
       fd.append('imagem', formData.imagem);
-      fd.append('image', formData.imagem);
-      fd.append('file', formData.imagem);
     }
-    if (isEditing) {
-      dashboardService.updateRecompensa(editingId, fd, true)
-        .then((res) => {
+
+    
+    const payloadObj = {
+      nome: formData.nome,
+      descricao: formData.descricao,
+      valor: formData.valor,
+      preco_moedas: formData.valor,
+      quantidade: formData.quantidade,
+      quantidade_disponivel: formData.quantidade,
+      quantidade_disponive: formData.quantidade,
+      id_empresa: empresaPerfil,
+      empresa_id: empresaPerfil,
+    };
+    if (!formData.imagem && formData.imagemPreview && typeof formData.imagemPreview === 'string') {
+      payloadObj.imagem_path = formData.imagemPreview;
+    }
+
+    
+    try {
+      const entries = [];
+      for (const e of fd.entries()) entries.push([e[0], e[1] instanceof File ? `[File:${e[1].name}]` : e[1]]);
+      console.debug('[debug EmpresaRecompensas] FormData entries:', entries);
+      console.debug('[debug EmpresaRecompensas] JSON fallback payload:', payloadObj);
+    } catch (e) { console.debug('[debug EmpresaRecompensas] failed to log payload', e); }
+
+    try {
+      if (isEditing) {
+        const hasFile = formData.imagem instanceof File;
+        try {
+          if (hasFile) {
+            await dashboardService.updateRecompensa(editingId, fd, true);
+          } else {
+            await dashboardService.updateRecompensa(editingId, payloadObj, true);
+          }
           loadRecompensas();
           handleCloseModal();
-        })
-        .catch(err => {
+        } catch (err) {
           console.error('EmpresaRecompensas: updateRecompensa erro', err);
-          setError("Erro ao editar recompensa: " + (err.response?.data?.message || err.message));
-        })
-        .finally(() => setLoading(false));
-    } else {
-      dashboardService.createRecompensa(fd, true)
-        .then((res) => {
+          setError('Erro ao atualizar recompensa: ' + (err.response?.data?.message || err.message));
+        }
+      } else {
+        const hasFile = formData.imagem instanceof File;
+        try {
+          if (hasFile) {
+            await dashboardService.createRecompensa(fd, true);
+          } else {
+            await dashboardService.createRecompensa(payloadObj, true);
+          }
           loadRecompensas();
           handleCloseModal();
-        })
-        .catch(err => {
+        } catch (err) {
           console.error('EmpresaRecompensas: createRecompensa erro', err);
           setError("Erro ao criar recompensa: " + (err.response?.data?.message || err.message));
-        })
-        .finally(() => setLoading(false));
+        }
+      }
+    } catch (finalErr) {
+      setError("Erro ao enviar recompensa: " + (finalErr.response?.data?.message || finalErr.message));
+    } finally {
+      setLoading(false);
     }
   };
 

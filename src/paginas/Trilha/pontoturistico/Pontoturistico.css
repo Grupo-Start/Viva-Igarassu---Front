@@ -4,21 +4,23 @@
 }
 
 .ponto-titulo {
-  max-width: 1100px;
-  margin: 60px auto 40px;
-}
-
-.ponto-titulo h4 {
-  font-size: 35px;
-  font-weight: 00;
-  color: #083b5c;
-  margin-bottom: 8px;
-}
-
-.ponto-titulo h1 {
-  font-size: 32px;
-  font-weight: 600;
+  max-width: 720px;
+  margin: 30px auto 40px; 
   text-align: center;
+  font-size: 36px;
+  font-weight: 800;
+  color: #083b5c;
+  margin-bottom: 40px; 
+  text-align: center;
+}
+
+.ponto-titulo2 {
+  font-size: 20px;
+  font-weight: 600;
+  text-align: left;
+  margin-top: 60px;
+  margin-left: 190px;
+  margin-bottom: 30px;
 }
 
 .ponto-principal {
@@ -67,7 +69,7 @@
 }
 
 .card-info li {
-  font-size: 16px;
+  font-size: 20px;
   margin-bottom: 10px;
 }
 
@@ -135,11 +137,12 @@
   }
 
   .ponto-titulo h4 {
-    font-size: 18px;
+    font-size: 28px;
+    font-weight: 800;
   }
 
   .ponto-titulo h1 {
-    font-size: 22px;
+    font-size: 24px;
   }
 
   .ponto-principal {
@@ -147,6 +150,26 @@
     padding: 0 16px;
     gap: 24px;
     margin-bottom: 40px;
+  }
+
+  .ponto-titulo2 {
+    margin-left: 0;
+    padding: 0 16px;
+    margin-top: 20px;
+  }
+
+  .ponto-debug {
+    margin-top: 12px;
+    padding: 10px;
+    background: #f7f7f9;
+    border: 1px dashed #ccc;
+    border-radius: 6px;
+    font-family: monospace;
+    color: #222;
+  }
+
+  .ponto-titulo2 h1 {
+    font-size: 20px;
   }
 
   .ponto-imagem {
@@ -167,11 +190,11 @@
   }
 
   .card-info h3 {
-    font-size: 16px;
+    font-size: 10px;
   }
 
   .card-info ul {
-    padding: 16px;
+    padding: 12px;
     padding-left: 36px;
   }
 
@@ -214,11 +237,22 @@
 
 @media (max-width: 480px) {
   .ponto-titulo h4 {
-    font-size: 16px;
+    font-size: 22px;
+    font-weight: 800;
   }
 
   .ponto-titulo h1 {
     font-size: 20px;
+  }
+
+  .ponto-titulo2 {
+    margin-left: 0;
+    padding: 0 12px;
+    margin-top: 12px;
+  }
+
+  .ponto-titulo2 h1 {
+    font-size: 16px;
   }
 
   .ponto-descricao {

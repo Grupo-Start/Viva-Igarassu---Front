@@ -3,15 +3,17 @@ import "../admin-common.css";
 import "./PageUsers.css";
 import { DashboardHeader } from "../../../components/dashboardHeader/DashboardHeader";
 import { SidebarAdmin } from "../../../components/sidebarAdmin/SidebarAdmin";
-import Footer from "../../../components/footer/Footer";
 import { IoMdPeople } from "react-icons/io";
 import { dashboardService } from "../../../services/api";
+import { Pagination } from "../../../components/pagination/Pagination";
 
 export function PageUsers() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [filterType, setFilterType] = useState('todos');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   useEffect(() => {
     loadUsers();
@@ -79,6 +81,16 @@ export function PageUsers() {
     if (filterType === 'empreendedor') return user.tipo === 'empreendedor';
     if (filterType === 'comum') return user.tipo === 'comum';
     return true;
+  });
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filterType]);
+
+  const sortedUsers = filteredUsers.slice().sort((a, b) => {
+    const na = (a.nome || '').toString();
+    const nb = (b.nome || '').toString();
+    return na.localeCompare(nb, 'pt', { sensitivity: 'base' });
   });
 
   if (loading) {
@@ -160,7 +172,14 @@ export function PageUsers() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredUsers.map((user, idx) => (
+                  {(
+                    (() => {
+                      const total = sortedUsers.length;
+                      const start = (currentPage - 1) * itemsPerPage;
+                      const end = start + itemsPerPage;
+                      return sortedUsers.slice(start, end);
+                    })()
+                  ).map((user, idx) => (
                     <tr key={user.id ?? user.email ?? idx}>
                       <td>{user.nome}</td>
                       <td>{user.email}</td>
@@ -192,9 +211,13 @@ export function PageUsers() {
                 </tbody>
               </table>
             </div>
+              {Math.ceil(filteredUsers.length / itemsPerPage) > 1 && (
+                <div className="pagination-container">
+                  <Pagination currentPage={currentPage} totalPages={Math.max(1, Math.ceil(filteredUsers.length / itemsPerPage))} onPageChange={(p) => setCurrentPage(p)} />
+                </div>
+              )}
           </div>
         </div>
-        <Footer admin />
       </div>
     </div>
   );

@@ -4,7 +4,7 @@ import "./SidebarAdmin.css";
 import { LuMenu } from "react-icons/lu";
 
 export function SidebarAdmin() {
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(() => (typeof window !== 'undefined' ? window.innerWidth >= 768 : true));
   const navigate = useNavigate();
   const location = useLocation();
 

@@ -1,4 +1,6 @@
 import Header from "../../../components/header/Header";
+import FaixaInfo from "../../../components/header/FaixaInfo";
+import Footer from "../../../components/footer/Footer";
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { dashboardService } from "../../../services/api";
@@ -51,9 +53,11 @@ export function Pontos() {
   }, []);
 
   return (
+    <div className="page-layout">
     <main className="pontos-container">
       <Header />
 
+      <FaixaInfo />
       <section className="pontos-titulo">
         <h1>Pontos Turísticos</h1>
       </section>
@@ -91,5 +95,7 @@ export function Pontos() {
         </section>
       )}
     </main>
+    <Footer />
+    </div>
   );
 }

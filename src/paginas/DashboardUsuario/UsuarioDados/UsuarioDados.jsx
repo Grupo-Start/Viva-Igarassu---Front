@@ -8,7 +8,6 @@ import { dashboardService } from "../../../services/api";
 export function UsuarioDados() {
     const [nome, setNome] = useState("");
     const [email, setEmail] = useState("");
-    // layout chooser removed — single consistent layout
     const [tipoUsuario, setTipoUsuario] = useState("");
     const [dataCadastro, setDataCadastro] = useState("");
     const [atividades, setAtividades] = useState([]);
@@ -29,7 +28,6 @@ export function UsuarioDados() {
             try {
                 setLoading(true);
                 const userData = await dashboardService.getMeusDados();
-                // only overwrite if API provides a non-empty name/email
                 const apiNome = userData && (userData.nome || userData.nome_completo || userData.name);
                 const apiEmail = userData && (userData.email || userData.email_address);
                 const apiTipo = userData && (userData.tipo_usuario || userData.tipo || userData.role || userData.user_type);
@@ -55,7 +53,6 @@ export function UsuarioDados() {
                     if (!it) return null;
                     return new Date(it.data || it.data_resgate || it.created_at || it.createdAt || it.date || it.timestamp || it.created || null);
                 };
-                // filtrar apenas resgates (quando possível identificar)
                 items = items.filter(Boolean).filter((it) => {
                     try {
                         const lower = (v) => (String(v || '').toLowerCase());
@@ -78,13 +75,11 @@ export function UsuarioDados() {
             }
         };
 
-        // Pre-fill from localStorage if available while API loads
         try {
             const stored = localStorage.getItem('user');
             if (stored) {
                 const parsed = JSON.parse(stored);
                 if (parsed) {
-                    // normalize common name fields
                     const candidateName = parsed.nome || parsed.nome_completo || parsed.name || parsed.fullName || parsed.firstName || parsed.usuario_nome;
                     setNome(candidateName || "");
                     setEmail(parsed.email || parsed.email_address || "");
@@ -97,7 +92,6 @@ export function UsuarioDados() {
                 }
             }
         } catch (e) {
-            // ignore parse errors
         }
 
         fetchUserData();
@@ -114,7 +108,6 @@ export function UsuarioDados() {
         try {
             setSaving(true);
             setMessage({ type: "", text: "" });
-            // send as nome_completo to match backend expectations (force PUT)
             const payload = { nome_completo: nome.trim() };
             try {
                 console.debug('[UsuarioDados] PUT request', { endpoint: '/usuarios/me', payload, tokenPreview: (localStorage.getItem('token')||'').slice(0,10) });
@@ -129,8 +122,6 @@ export function UsuarioDados() {
             setSaving(false);
         }
     };
-
-    // layout chooser removed
 
     return (
         <div>
@@ -197,7 +188,7 @@ export function UsuarioDados() {
                                 </button>
                             </div>
                         </div>
-                        {/* Atividades recentes (resgates) */}
+                        
                         <div className="meusdados-card activities-section">
                             <h2>Últimos resgates</h2>
                             {atividadesLoading && <p className="loading">Carregando atividades...</p>}

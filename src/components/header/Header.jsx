@@ -1,5 +1,5 @@
 import './Header.css';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import React, { useEffect, useState, useRef } from 'react';
 import { dashboardService } from '../../services/api';
 
@@ -71,6 +71,8 @@ export function Header() {
 
   const [open, setOpen] = useState(false);
   const ref = useRef();
+  const location = useLocation();
+  const isHome = (location && location.pathname === '/');
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -156,27 +158,27 @@ export function Header() {
       </div>
 
       <nav className="header-nav">
-        <Link to="/">Home</Link>
-        <p>|</p>
-        <Link to="/quem-somos">Quem somos</Link>
-        <p>|</p>
-        <Link to="/cidade">A cidade</Link>
-        <p>|</p>
-        <a href="#contato" onClick={(e) => { e.preventDefault(); document.getElementById('contato')?.scrollIntoView({ behavior: 'smooth' }); }}>Contato</a>
+        {(() => {
+          const items = [
+            { to: '/', label: 'Home' },
+            { to: '/quem-somos', label: 'Quem somos' },
+            { to: '/cidade', label: 'A cidade' },
+          ];
+          return items.map((it, idx) => (
+            <React.Fragment key={it.to}>
+              {idx > 0 && <p className="sep">|</p>}
+              <NavLink to={it.to} className={({isActive}) => isActive ? 'active' : ''}>{it.label}</NavLink>
+            </React.Fragment>
+          ));
+        })()}
       </nav>
 
       <div className="header-actions" ref={ref}>
-        <input 
-          type="text" 
-          placeholder="Pesquisar" 
-          className="search-input"
-        />
-
         {!user ? (
-          <Link to="/login" className="login">
+          <NavLink to="/login" className={({isActive}) => isActive ? 'login active' : 'login'}>
             <span>Login</span>
             <img src="/icone-login.png" alt="Login" />
-          </Link>
+          </NavLink>
         ) : (
           <div className="user-info">
             {displayName && <div className="header-company"><span>{displayName}</span></div>}
@@ -192,6 +194,12 @@ export function Header() {
             <button className="mobile-user-btn" onClick={() => setOpen(s => !s)} aria-haspopup="true" aria-expanded={open}>
               <img src="/icone-login.png" alt="Menu" />
             </button>
+
+            {getUserRole(user) === 'admin' && (
+              <button className="mobile-admin-btn" onClick={() => { navigate('/admin-dashboard'); setOpen(false); }} aria-label="Admin">
+                <img src="/icone-login.png" alt="Admin" />
+              </button>
+            )}
 
             {open && (
               <div className="admin-menu">

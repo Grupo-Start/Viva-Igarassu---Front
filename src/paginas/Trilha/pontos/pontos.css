@@ -2,15 +2,26 @@
   font-family: "Poppins", sans-serif;
   color: #083b5c;
 }
+.page-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.pontos-container {
+  flex: 1 0 auto;
+}
 
 .pontos-titulo {
   text-align: center;
-  margin: 60px 0 40px;
+  margin: 0 auto 24px;
+  max-width: 720px;
 }
 
 .pontos-titulo h1 {
   font-size: 36px;
   font-weight: 800;
+  color: #083b5c;
 }
 
 .pontos-grid {
@@ -91,12 +102,13 @@
 
 @media (max-width: 768px) {
   .pontos-titulo {
-    margin: 30px 0 24px;
+    margin: 0 auto 24px;
     padding: 0 16px;
+    max-width: 720px;
   }
 
   .pontos-titulo h1 {
-    font-size: 26px;
+    font-size: 28px;
   }
 
   .pontos-grid {

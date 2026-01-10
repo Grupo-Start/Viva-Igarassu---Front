@@ -5,6 +5,7 @@ import { DashboardHeader } from "../../../components/dashboardHeader/DashboardHe
 import { SidebarAdmin } from "../../../components/sidebarAdmin/SidebarAdmin";
 import { MdEvent } from "react-icons/md";
 import { dashboardService, API_BASE_URL } from "../../../services/api";
+import { Pagination } from "../../../components/pagination/Pagination";
 
 export function PageEventos() {
   const [eventos, setEventos] = useState([]);
@@ -24,6 +25,8 @@ export function PageEventos() {
     imagem_path: null
   };
   const [formData, setFormData] = useState(initialForm);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   useEffect(() => {
     loadEventos();
@@ -181,7 +184,7 @@ export function PageEventos() {
   const handleOpenModal = (evento = null) => {
     if (evento) {
       setIsEditing(true);
-      setEditingId(evento.id_evento || evento.id);
+      setEditingId(evento.id_evento || evento.id || evento._id || evento.idEvento || evento.id_evento || evento.codigo || null);
       const horaVal = normalizeTime(evento.horario || evento.hora || evento.horario_evento || evento.data_hora || evento.dataHora || '');
       const enderecoResolved = evento.endereco_completo || evento.endereco || evento.endereco_evento || evento.address || '';
       const rawImg = evento.imagem_path ?? evento.imagem ?? null;
@@ -296,6 +299,11 @@ export function PageEventos() {
         } catch (e) { console.warn('Falha ao logar payload', e); }
 
         try {
+          console.debug('[PageEventos] submit payload', { isEditing, editingId, imagemType: (formData.imagem instanceof File) ? 'File' : typeof formData.imagem });
+          if (isEditing && !editingId) {
+            setError('ID do evento para editar não foi definido.');
+            return;
+          }
           let id_endereco = formData.id_endereco || null;
           if (!id_endereco) {
             if (body instanceof FormData) {
@@ -460,7 +468,11 @@ export function PageEventos() {
                     {eventos.length === 0 ? (
                       <tr><td colSpan="7">Nenhum evento encontrado.</td></tr>
                     ) : (
-                      eventos.map(evento => (
+                      (() => {
+                        const totalPages = Math.max(1, Math.ceil(eventos.length / itemsPerPage));
+                        const start = (currentPage - 1) * itemsPerPage;
+                        const paged = eventos.slice(start, start + itemsPerPage);
+                        return paged.map(evento => (
                         <tr key={evento.id_evento || evento.id}>
                           <td>{evento.nome}</td>
                           <td>{(() => {
@@ -479,10 +491,18 @@ export function PageEventos() {
                             </div>
                           </td>
                         </tr>
-                      ))
+                        ));
+                      })()
                     )}
                   </tbody>
                 </table>
+                {Math.ceil(eventos.length / itemsPerPage) > 1 && (
+                  <Pagination
+                    currentPage={currentPage}
+                    totalPages={Math.max(1, Math.ceil(eventos.length / itemsPerPage))}
+                    onPageChange={(p) => setCurrentPage(p)}
+                  />
+                )}
               </div>
             )}
             {showModal && (
