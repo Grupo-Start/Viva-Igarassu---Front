@@ -3,7 +3,7 @@ import "./EmpresaEventos.css";
 import { DashboardHeader } from "../../../components/dashboardHeader/DashboardHeader";
 import { Sidebar } from "../../../components/sidebar/Sidebar";
 import { MdEvent } from "react-icons/md";
-import { dashboardService } from "../../../services/api";
+import { dashboardService, API_BASE_URL } from "../../../services/api";
 
 export function EmpresaEventos() {
   const initialForm = {
@@ -12,8 +12,31 @@ export function EmpresaEventos() {
     horario: '',
     endereco: '',
     descricao: '',
-    imagem: null
+    imagem: null,
+    imagemPreview: null,
+    imagem_path: null
   };
+
+  function formatEnderecoResolved(resolved) {
+    if (!resolved) return '';
+    try {
+      if (typeof resolved === 'string') return resolved;
+      if (typeof resolved === 'object') {
+        if (resolved.endereco_completo) return resolved.endereco_completo;
+        const rua = resolved.logradouro || resolved.rua || resolved.nome || resolved.address || '';
+        const numero = resolved.numero || resolved.numero_endereco || resolved.n || '';
+        const complemento = resolved.complemento || resolved.compl || '';
+        const bairro = resolved.bairro || '';
+        const cidade = resolved.cidade || resolved.localidade || '';
+        const estado = resolved.estado || resolved.uf || '';
+        const cep = resolved.cep || resolved.codigo_postal || '';
+        const parts = [rua, numero, complemento, bairro, cidade, estado, cep].map(p => (p || '').toString().trim()).filter(Boolean);
+        if (parts.length > 0) return parts.join(', ');
+        return JSON.stringify(resolved);
+      }
+      return String(resolved);
+    } catch (e) { return '';} 
+  }
 
   const [eventos, setEventos] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -23,9 +46,7 @@ export function EmpresaEventos() {
   const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState(initialForm);
 
-  useEffect(() => {
-    loadEventos();
-  }, []);
+  useEffect(() => { loadEventos(); }, []);
 
   const loadEventos = async () => {
     try {
@@ -34,45 +55,11 @@ export function EmpresaEventos() {
       const data = await dashboardService.getEventosMe();
       let arr = Array.isArray(data) ? data : [];
 
-      let empresaId = null;
-      let empresaName = null;
-      try {
-        const u = JSON.parse(localStorage.getItem('user') || '{}');
-        empresaId = u.empresa || u.empresa_id || u.id_empresa || u.empresaId || u.empresa?.id || u.id || u._id || null;
-        empresaName = u.nome_empresa || u.nome || u.name || u.razao_social || null;
-      } catch (e) { empresaId = null; }
-
-      if (empresaId || empresaName) {
-        const checkEventEmpresa = (ev) => {
-          const evEmpresaId = ev.id_empresa ?? ev.empresa_id ?? ev.idEmpresa ?? ev.empresa?.id ?? ev.empresaId ?? ev.empresa?._id ?? ev.empresa ?? null;
-          if (evEmpresaId && empresaId && String(evEmpresaId) === String(empresaId)) return true;
-          const evEmpresaName = (ev.empresa && typeof ev.empresa === 'object')
-            ? (ev.empresa.nome_empresa || ev.empresa.nome || ev.empresa.name || ev.empresa.razao_social || null)
-            : (typeof ev.empresa === 'string' ? ev.empresa : (ev.nome_empresa || ev.empresa_nome || ev.razao_social || null));
-          if (empresaName && evEmpresaName && String(evEmpresaName).toLowerCase().includes(String(empresaName).toLowerCase())) return true;
-
-          const creator = ev.criador || ev.creator || ev.owner || ev.usuario || ev.user || ev.responsavel;
-          if (creator && typeof creator === 'object') {
-            const cid = creator.id || creator._id || creator.id_empresa || creator.empresa_id;
-            if (cid && empresaId && String(cid) === String(empresaId)) return true;
-            const cname = creator.nome_empresa || creator.nome || creator.name || creator.razao_social || null;
-            if (empresaName && cname && String(cname).toLowerCase().includes(String(empresaName).toLowerCase())) return true;
-          }
-
-          try { if (empresaId && JSON.stringify(ev).includes(String(empresaId))) return true; } catch(e){}
-          try { if (empresaName && JSON.stringify(ev).toLowerCase().includes(String(empresaName).toLowerCase())) return true; } catch(e){}
-          return false;
-        };
-        arr = arr.filter(checkEventEmpresa);
-      }
-
       const ids = Array.from(new Set(
-        arr.map(ev => ev.id_endereco || ev.idEndereco || ev.endereco_id || (ev.endereco && ev.endereco.id) || null)
-          .filter(Boolean)
+        arr.map(ev => ev.id_endereco || ev.idEndereco || ev.endereco_id || (ev.endereco && ev.endereco.id) || null).filter(Boolean)
       ));
 
       const addressMap = {};
-      const notFound = new Set();
       if (ids.length > 0) {
         await Promise.all(ids.map(async (id) => {
           try {
@@ -80,12 +67,8 @@ export function EmpresaEventos() {
             addressMap[String(id)] = addr;
           } catch (e) {
             const status = e?.response?.status;
-            if (status === 404) {
-              notFound.add(String(id));
-              addressMap[String(id)] = null;
-            } else {
-              console.warn('Erro ao buscar endereco id', id, e?.message || e);
-            }
+            if (status === 404) addressMap[String(id)] = null;
+            else console.warn('Erro ao buscar endereco id', id, e?.message || e);
           }
         }));
       }
@@ -102,7 +85,7 @@ export function EmpresaEventos() {
         if (!dateStr) return Infinity;
         try {
           if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) {
-            const [d,m,y] = dateStr.split('/');
+            const [d, m, y] = dateStr.split('/');
             return new Date(`${y}-${m}-${d}T00:00:00`).getTime();
           }
           if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return new Date(dateStr + 'T00:00:00').getTime();
@@ -111,7 +94,8 @@ export function EmpresaEventos() {
         } catch (e) { return Infinity; }
       };
 
-      enriched.sort((a,b) => parseEventDate(b) - parseEventDate(a));
+      enriched.sort((a, b) => parseEventDate(b) - parseEventDate(a));
+      
       setEventos(enriched);
     } catch (err) {
       console.error('Falha ao carregar eventos', err);
@@ -121,18 +105,35 @@ export function EmpresaEventos() {
     }
   };
 
+  const resolveEventImage = (ev) => {
+    const imgField = ev?.imagem_path || ev?.imagem || ev?.image || ev?.imagemPath || null;
+    if (!imgField) return null;
+    if (typeof imgField === 'string') {
+      if (imgField.startsWith('http')) return imgField;
+      if (imgField.startsWith('/')) return `${String(API_BASE_URL).replace(/\/$/, '')}${imgField}`;
+      return `${String(API_BASE_URL).replace(/\/$/, '')}/${String(imgField).replace(/^\/+/, '')}`;
+    }
+    return null;
+  };
+
   const handleOpenModal = (evento) => {
     setError(null);
     if (evento) {
       setIsEditing(true);
-      setEditingId(evento.id_evento || evento.id || null);
+      setEditingId(evento.id_evento || evento.id || evento._id || evento.idEvento || evento.id_evento || evento.codigo || null);
+      const horaVal = normalizeTime(evento.horario || evento.hora || evento.horario_evento || evento.data_hora || evento.dataHora || '');
+      const enderecoResolved = formatEnderecoResolved(evento._endereco_resolved ?? evento.endereco ?? evento.endereco_completo ?? evento.address ?? null);
+      const rawImg = evento.imagem_path ?? evento.imagem ?? null;
+      const imgPreview = (typeof rawImg === 'string' && rawImg) ? (rawImg.startsWith('http') ? rawImg : (rawImg.startsWith('/') ? `${String(API_BASE_URL).replace(/\/$/, '')}${rawImg}` : `${String(API_BASE_URL).replace(/\/$/, '')}/${String(rawImg).replace(/^\/+/, '')}`)) : null;
       setFormData({
         nome: evento.nome || '',
-        data: evento.data ? String(evento.data).substring(0, 10) : '',
-        horario: evento.horario || '',
-        endereco: evento.endereco || evento.endereco_completo || '',
+        data: evento.data ? String(evento.data).substring(0, 10) : (evento.data_evento ? String(evento.data_evento).substring(0,10) : ''),
+        horario: horaVal,
+        endereco: enderecoResolved || (evento.endereco || evento.endereco_completo || ''),
         descricao: evento.descricao || '',
-        imagem: null
+        imagem: rawImg,
+        imagemPreview: imgPreview,
+        imagem_path: rawImg
       });
     } else {
       setIsEditing(false);
@@ -152,100 +153,106 @@ export function EmpresaEventos() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      const required = ['nome', 'data', 'horario', 'endereco', 'descricao'];
-      const missing = required.filter(key => !formData[key] || String(formData[key]).trim() === '');
-      if (missing.length > 0) {
-        setError('Campos obrigatórios não preenchidos: ' + missing.join(', '));
-        return;
-      }
-
-      let empresaId = null;
+    (async () => {
       try {
-        const u = JSON.parse(localStorage.getItem('user') || '{}');
-        empresaId = u.empresa || u.empresa_id || u.id_empresa || u.empresaId || u.id || u._id || null;
-      } catch (e) { empresaId = null; }
-      if (!empresaId) {
-        setError('É necessário estar logado como empresa para cadastrar eventos.');
-        return;
-      }
+        console.debug('[EmpresaEventos] submit payload', { isEditing, editingId, imagemType: (formData.imagem instanceof File) ? 'File' : typeof formData.imagem });
+        if (isEditing && !editingId) { setError('ID do evento para editar não foi definido.'); return; }
+        const required = ['nome', 'data', 'horario', 'endereco', 'descricao'];
+        const missing = required.filter(key => !formData[key] || String(formData[key]).trim() === '');
+        if (missing.length > 0) {
+          setError('Campos obrigatórios não preenchidos: ' + missing.join(', '));
+          return;
+        }
 
-      let body;
-      const computedISO = (() => {
+        let empresaId = null;
         try {
-          if (formData.data && formData.horario) return new Date(`${formData.data}T${formData.horario}`).toISOString();
-        } catch (e) { /**/ }
-        return null;
-      })();
+          const u = JSON.parse(localStorage.getItem('user') || '{}');
+          empresaId = u.empresa || u.empresa_id || u.id_empresa || u.empresaId || u.id || u._id || null;
+        } catch (e) { empresaId = null; }
+        if (!empresaId) {
+          setError('É necessário estar logado como empresa para cadastrar eventos.');
+          return;
+        }
 
-      if (formData.imagem instanceof File) {
-      body = new FormData();
-        body.append('nome', formData.nome);
-        body.append('descricao', formData.descricao);
-        body.append('data', formData.data);
-        body.append('horario', formData.horario);
-        body.append('endereco', formData.endereco);
-        body.append('endereco_completo', formData.endereco);
-        body.append('imagem', formData.imagem);
-        if (computedISO) body.append('data_hora', computedISO);
-        body.append('titulo', formData.nome);
-        body.append('name', formData.nome);
-        body.append('date', formData.data);
-        body.append('data_evento', formData.data);
-        body.append('hora', formData.horario);
-        body.append('descricao_evento', formData.descricao);
-      } else {
-        body = {
-          nome: formData.nome,
-          titulo: formData.nome,
-          name: formData.nome,
-          descricao: formData.descricao,
-          descricao_evento: formData.descricao,
-          data: formData.data,
-          data_evento: formData.data,
-          date: formData.data,
-          horario: formData.horario,
-          hora: formData.horario,
-          endereco: formData.endereco,
-          endereco_completo: formData.endereco,
-          endereco_evento: formData.endereco,
-          descricao: formData.descricao,
-        };
-        if (computedISO) body.data_hora = computedISO;
+        let body;
+        const computedISO = (() => {
+          try { if (formData.data && formData.horario) return new Date(`${formData.data}T${formData.horario}`).toISOString(); } catch (e) { }
+          return null;
+        })();
+
+        if (formData.imagem instanceof File) {
+          const fd = new FormData();
+          fd.append('nome', formData.nome);
+          fd.append('descricao', formData.descricao);
+          fd.append('data', formData.data);
+          fd.append('horario', formData.horario);
+          fd.append('endereco', formData.endereco);
+          fd.append('endereco_completo', formData.endereco);
+            fd.append('imagem', formData.imagem);
+
+          try { if (formData.imagem_path && typeof formData.imagem_path === 'string' && !fd.get('imagem_path')) fd.append('imagem_path', formData.imagem_path); } catch(e){}
+          if (computedISO) fd.append('data_hora', computedISO);
+          fd.append('titulo', formData.nome);
+          fd.append('name', formData.nome);
+          fd.append('date', formData.data);
+          fd.append('data_evento', formData.data);
+          fd.append('hora', formData.horario);
+          fd.append('descricao_evento', formData.descricao);
+          try {
+            const entries = [];
+            for (const p of fd.entries()) entries.push([p[0], p[1] instanceof File ? `[File:${p[1].name}]` : p[1]]);
+            console.debug('[EmpresaEventos] FormData entries before submit:', entries);
+          } catch (logErr) { console.debug('[EmpresaEventos] failed to enumerate FormData', logErr); }
+          body = fd;
+        } else {
+          body = {
+            nome: formData.nome,
+            titulo: formData.nome,
+            name: formData.nome,
+            descricao: formData.descricao,
+            descricao_evento: formData.descricao,
+            data: formData.data,
+            data_evento: formData.data,
+            date: formData.data,
+            horario: formData.horario,
+            hora: formData.horario,
+            endereco: formData.endereco,
+            endereco_completo: formData.endereco,
+            endereco_evento: formData.endereco,
+            imagem_path: (typeof formData.imagem === 'string') ? formData.imagem : (formData.imagem_path || undefined),
+          };
+          if (computedISO) body.data_hora = computedISO;
+        }
+
+        const empresaVal = (empresaId && !isNaN(Number(empresaId))) ? Number(empresaId) : empresaId;
+        if (body instanceof FormData) {
+          body.append('id_empresa', String(empresaVal));
+          body.append('empresa_id', String(empresaVal));
+          body.append('empresa', String(empresaVal));
+        } else {
+          body.id_empresa = empresaVal;
+          body.empresa_id = empresaVal;
+          body.empresa = empresaVal;
+        }
+
+        if (isEditing) await dashboardService.updateEvento(editingId, body);
+        else await dashboardService.createEvento(body);
+
+        await loadEventos();
+        handleCloseModal();
+      } catch (err) {
+        console.error('Falha ao salvar evento', err, err?.response?.data);
+        let serverMessage = err?.response?.data?.message ?? err?.response?.data ?? err.message;
+        try { if (typeof serverMessage === 'object') serverMessage = JSON.stringify(serverMessage); } catch(e){}
+        setError('Erro ao salvar evento: ' + serverMessage);
       }
-
-      const empresaVal = (empresaId && !isNaN(Number(empresaId))) ? Number(empresaId) : empresaId;
-      if (body instanceof FormData) {
-        body.append('id_empresa', String(empresaVal));
-        body.append('empresa_id', String(empresaVal));
-        body.append('empresa', String(empresaVal));
-      } else {
-        body.id_empresa = empresaVal;
-        body.empresa_id = empresaVal;
-        body.empresa = empresaVal;
-      }
-
-      if (isEditing) {
-        await dashboardService.updateEvento(editingId, body);
-      } else {
-        await dashboardService.createEvento(body);
-      }
-
-      await loadEventos();
-      handleCloseModal();
-    } catch (err) {
-      console.error('Falha ao salvar evento', err, err?.response?.data);
-      let serverMessage = err?.response?.data?.message ?? err?.response?.data ?? err.message;
-      try { if (typeof serverMessage === 'object') serverMessage = JSON.stringify(serverMessage); } catch(e){}
-      setError('Erro ao salvar evento: ' + serverMessage);
-    }
+    })();
   };
 
   const handleDelete = (id) => {
     (async () => {
       if (!window.confirm('Tem certeza que deseja excluir este evento?')) return;
       try {
-        console.debug('Deletando evento id (frontend):', id);
         await dashboardService.deleteEvento(id);
         await loadEventos();
       } catch (err) {
@@ -257,28 +264,35 @@ export function EmpresaEventos() {
 
   function formatData(dataStr) {
     if (!dataStr) return '';
-    if (/^\d{4}-\d{2}-\d{2}$/.test(dataStr)) {
-      return dataStr.split('-').reverse().join('/');
-    }
-    if (/^\d{2}\/\d{2}\/\d{4}$/.test(dataStr)) {
-      return dataStr;
-    }
-    if (/^\d{4}-\d{2}-\d{2}T/.test(dataStr)) {
-      return dataStr.substring(0, 10).split('-').reverse().join('/');
-    }
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dataStr)) return dataStr.split('-').reverse().join('/');
+    if (/^\d{2}\/\d{2}\/\d{4}$/.test(dataStr)) return dataStr;
+    if (/^\d{4}-\d{2}-\d{2}T/.test(dataStr)) return dataStr.substring(0, 10).split('-').reverse().join('/');
     return dataStr;
   }
 
   function formatHora(horaStr) {
     if (!horaStr) return '';
     const match = horaStr.match(/^\d{2}:\d{2}(:\d{2})?/);
-    if (match) {
-      return match[0];
-    }
-    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(horaStr)) {
-      return horaStr.substring(11, 16); // pega HH:mm
-    }
+    if (match) return match[0];
+    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(horaStr)) return horaStr.substring(11, 16);
     return horaStr;
+  }
+
+  function normalizeTime(h) {
+    if (!h) return '';
+    try {
+      if (typeof h === 'string') {
+        if (/^\d{2}:\d{2}(:\d{2})?$/.test(h)) return h.substring(0,5);
+        if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(h)) return h.substring(h.indexOf('T') + 1, h.indexOf('T') + 6);
+      }
+      const d = new Date(h);
+      if (!isNaN(d)) {
+        const hh = String(d.getHours()).padStart(2, '0');
+        const mm = String(d.getMinutes()).padStart(2, '0');
+        return `${hh}:${mm}`;
+      }
+    } catch (e) {}
+    return '';
   }
 
   return (
@@ -306,6 +320,7 @@ export function EmpresaEventos() {
                   <thead>
                     <tr>
                       <th>Nome</th>
+                      <th>Imagem</th>
                       <th>Empresa</th>
                       <th>Data</th>
                       <th>Horário</th>
@@ -315,66 +330,64 @@ export function EmpresaEventos() {
                   </thead>
                   <tbody>
                     {eventos.length === 0 ? (
-                      <tr><td colSpan="6">Nenhum evento encontrado.</td></tr>
+                      <tr><td colSpan="7">Nenhum evento encontrado.</td></tr>
                     ) : (
-                      eventos.map(evento => {
-                        console.debug('evento (debug):', evento);
-                        return (
-                          <tr key={evento.id_evento || evento.id}>
-                            <td>{evento.nome}</td>
-                            <td>{
-                              (evento.empresa && typeof evento.empresa === 'object')
-                                ? (evento.empresa.nome_empresa || evento.empresa.nome || evento.empresa.name || evento.empresa.razao_social || '-')
-                                : (evento.empresa || '-')
-                            }</td>
-                            <td>{formatData(evento.data)}</td>
-                            <td>{formatHora(evento.horario)}</td>
-                            <td>{(() => {
-                              const resolved = evento._endereco_resolved;
-                              if (resolved) {
-                                if (typeof resolved === 'object') {
-                                  if (resolved.endereco_completo) return resolved.endereco_completo;
-                                  const rua = resolved.logradouro || resolved.rua || resolved.nome || resolved.address || '';
-                                  const numero = resolved.numero || resolved.numero_endereco || resolved.n || '';
-                                  const complemento = resolved.complemento || resolved.compl || '';
-                                  const bairro = resolved.bairro || '';
-                                  const cidade = resolved.cidade || resolved.localidade || '';
-                                  const estado = resolved.estado || resolved.uf || '';
-                                  const cep = resolved.cep || resolved.codigo_postal || '';
-                                  const parts = [rua, numero, complemento, bairro, cidade, estado, cep].map(p => (p || '').toString().trim()).filter(Boolean);
-                                  if (parts.length > 0) return parts.join(', ');
-                                  return JSON.stringify(resolved);
-                                }
-                                return String(resolved);
-                              }
-                              const e = evento.endereco || evento.endereco_completo || evento.address || evento.id_endereco || null;
-                              if (!e) return '-';
-                              const isIdLike = typeof e === 'string' && /^[0-9a-fA-F\-]{8,}$/.test(e);
-                              if (isIdLike && !(e.includes(' ') || e.includes(','))) return `ID: ${e} (endereço não disponível)`;
-                              if (typeof e === 'object') {
-                                if (e.endereco_completo) return e.endereco_completo;
-                                const rua = e.logradouro || e.rua || e.nome || e.address || '';
-                                const numero = e.numero || e.numero_endereco || '';
-                                const complemento = e.complemento || '';
-                                const bairro = e.bairro || '';
-                                const cidade = e.cidade || e.localidade || '';
-                                const estado = e.estado || e.uf || '';
-                                const cep = e.cep || '';
+                      eventos.map(evento => (
+                        <tr key={evento.id_evento || evento.id}>
+                          <td>{evento.nome}</td>
+                          <td>{(() => {
+                            const src = resolveEventImage(evento);
+                            if (!src) return <span style={{ color: '#aaa' }}>Sem imagem</span>;
+                            return <img src={src} alt={evento.nome || 'imagem'} style={{ maxWidth: 80, maxHeight: 60, objectFit: 'cover', borderRadius: 4 }} />;
+                          })()}</td>
+                          <td>{(evento.empresa && typeof evento.empresa === 'object') ? (evento.empresa.nome_empresa || evento.empresa.nome || evento.empresa.name || evento.empresa.razao_social || '-') : (evento.empresa || '-')}</td>
+                          <td>{formatData(evento.data)}</td>
+                          <td>{formatHora(evento.horario)}</td>
+                          <td>{(() => {
+                            const resolved = evento._endereco_resolved;
+                            if (resolved) {
+                              if (typeof resolved === 'object') {
+                                if (resolved.endereco_completo) return resolved.endereco_completo;
+                                const rua = resolved.logradouro || resolved.rua || resolved.nome || resolved.address || '';
+                                const numero = resolved.numero || resolved.numero_endereco || resolved.n || '';
+                                const complemento = resolved.complemento || resolved.compl || '';
+                                const bairro = resolved.bairro || '';
+                                const cidade = resolved.cidade || resolved.localidade || '';
+                                const estado = resolved.estado || resolved.uf || '';
+                                const cep = resolved.cep || resolved.codigo_postal || '';
                                 const parts = [rua, numero, complemento, bairro, cidade, estado, cep].map(p => (p || '').toString().trim()).filter(Boolean);
                                 if (parts.length > 0) return parts.join(', ');
-                                return JSON.stringify(e);
+                                return JSON.stringify(resolved);
                               }
-                              return e;
-                            })()}</td>
-                            <td>
-                              <div className="action-buttons">
-                                <button className="btn-acao editar" onClick={() => handleOpenModal(evento)}>Editar</button>
-                                <button className="btn-acao excluir" onClick={() => handleDelete(evento.id_evento || evento.id)}>Excluir</button>
-                              </div>
-                            </td>
-                          </tr>
-                        );
-                      })
+                              return String(resolved);
+                            }
+                            const e = evento.endereco || evento.endereco_completo || evento.address || evento.id_endereco || null;
+                            if (!e) return '-';
+                            const isIdLike = typeof e === 'string' && /^[0-9a-fA-F\-]{8,}$/.test(e);
+                            if (isIdLike && !(e.includes(' ') || e.includes(','))) return `ID: ${e} (endereço não disponível)`;
+                            if (typeof e === 'object') {
+                              if (e.endereco_completo) return e.endereco_completo;
+                              const rua = e.logradouro || e.rua || e.nome || e.address || '';
+                              const numero = e.numero || e.numero_endereco || '';
+                              const complemento = e.complemento || '';
+                              const bairro = e.bairro || '';
+                              const cidade = e.cidade || e.localidade || '';
+                              const estado = e.estado || e.uf || '';
+                              const cep = e.cep || '';
+                              const parts = [rua, numero, complemento, bairro, cidade, estado, cep].map(p => (p || '').toString().trim()).filter(Boolean);
+                              if (parts.length > 0) return parts.join(', ');
+                              return JSON.stringify(e);
+                            }
+                            return e;
+                          })()}</td>
+                          <td>
+                            <div className="action-buttons">
+                              <button className="btn-acao editar" onClick={() => handleOpenModal(evento)}>Editar</button>
+                              <button className="btn-acao excluir" onClick={() => handleDelete(evento.id_evento || evento.id)}>Excluir</button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
                     )}
                   </tbody>
                 </table>
@@ -401,9 +414,15 @@ export function EmpresaEventos() {
                       <input type="time" value={formData.horario} onChange={e => setFormData({ ...formData, horario: e.target.value })} required />
                     </label>
                     <label>Endereço:
-                      <input type="text" value={formData.endereco} onChange={e => setFormData({ ...formData, endereco: e.target.value })} required />
+                      <input
+                        type="text"
+                        placeholder="Ex: R. Barbosa Lima, S/N, Centro, Igarassu, PE, 53615-000"
+                        value={formData.endereco}
+                        onChange={e => setFormData({ ...formData, endereco: e.target.value })}
+                        required
+                      />
                     </label>
-                    
+
                     <div className="modal-actions">
                       <button type="submit" className="btn-acao editar">{isEditing ? 'Salvar' : 'Adicionar'}</button>
                       <button type="button" className="btn-acao excluir" onClick={handleCloseModal}>Cancelar</button>

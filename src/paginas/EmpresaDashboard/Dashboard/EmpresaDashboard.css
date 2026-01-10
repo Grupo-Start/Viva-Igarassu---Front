@@ -1,9 +1,12 @@
 .empresa-dashboard, .admin-dashboard {
   padding: 24px;
   background-color: #f5f7fa;
-  min-height: 100vh;
+  min-height: 100%;
   flex: 1;
   overflow-x: hidden;
+  height: calc(100vh - 70px);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   width: 100%;
   box-sizing: border-box;
   min-width: 0;
@@ -79,7 +82,7 @@
 
 .total-visits {
   font-size: 14px;
-  color: #5FD6C3;
+  color: #0A3D62;
   font-weight: 600;
 }
 

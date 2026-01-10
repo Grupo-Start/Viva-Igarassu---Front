@@ -52,18 +52,72 @@ export function AdminDashboard() {
       setError(null);
       
       const data = await dashboardService.getStats();
-      
-      const [recompensasCount, resgatesCount] = await Promise.all([
-        dashboardService.getRecompensasCount(),
-        dashboardService.getResgatesCount(),
-      ]);
-      
+
+      const parseCount = (v) => {
+        if (v === undefined || v === null) return undefined;
+        if (Array.isArray(v)) return v.length;
+        if (typeof v === 'object') return Object.keys(v).length;
+        const n = Number(v);
+        return Number.isFinite(n) ? n : undefined;
+      };
+
+      const sumQuantities = (v) => {
+        if (v === undefined || v === null) return undefined;
+        if (typeof v === 'number') return v;
+        if (Array.isArray(v)) {
+          return v.reduce((acc, item) => {
+            if (!item) return acc;
+            const q = item.quantidade ?? item.quantidade_disponivel ?? item.quantity ?? item.qtd ?? item.stock ?? item.amount ?? item.available ?? 0;
+            const n = Number(q);
+            return acc + (Number.isFinite(n) ? n : 0);
+          }, 0);
+        }
+        if (typeof v === 'object') {
+          return Object.values(v).reduce((acc, item) => {
+            if (item == null) return acc;
+            if (typeof item === 'number') return acc + item;
+            const q = item.quantidade ?? item.quantidade_disponivel ?? item.quantity ?? item.qtd ?? item.stock ?? item.amount ?? item.available ?? 0;
+            const n = Number(q);
+            return acc + (Number.isFinite(n) ? n : 0);
+          }, 0);
+        }
+        const n = Number(v);
+        return Number.isFinite(n) ? n : undefined;
+      };
+
+      const redeemedFromData = parseCount(data.recompensas_resgatadas) ?? parseCount(data.resgates) ?? parseCount(data.recompensas) ?? undefined;
+      const availableFromData = (() => {
+        const summed = sumQuantities(data.recompensas_disponiveis) ?? sumQuantities(data.recompensasDisponiveis) ?? sumQuantities(data.recompensas);
+        if (summed !== undefined) return summed;
+        return parseCount(data.recompensas_disponiveis) ?? parseCount(data.recompensasDisponiveis) ?? parseCount(data.recompensas) ?? undefined;
+      })();
+
+      let redeemedCount = redeemedFromData;
+      let availableCount = availableFromData;
+
+      if (redeemedCount === undefined) {
+        try {
+          redeemedCount = await dashboardService.getResgatesCount();
+        } catch (e) {
+          redeemedCount = 0;
+        }
+      }
+
+      if (availableCount === undefined) {
+        try {
+          const fallback = await dashboardService.getRecompensasCount();
+          availableCount = Array.isArray(fallback) ? sumQuantities(fallback) : Number(fallback);
+        } catch (e) {
+          availableCount = 0;
+        }
+      }
+
       setStats({
         users: data.users || data.usuarios || data.totalUsuarios || data.countUsuarios || 0,
         companies: data.companies || data.empresas || data.totalEmpresas || data.countEmpresas || 0,
         events: data.events || data.eventos || data.totalEventos || data.countEventos || 0,
-        redeemedRewards: resgatesCount,
-        availableRewards: recompensasCount,
+        redeemedRewards: Number(redeemedCount) || 0,
+        availableRewards: Number(availableCount) || 0,
       });
     } catch (err) {
       setError(`Erro ao carregar os dados: ${err.response?.data?.message || err.message}`);
@@ -76,7 +130,7 @@ export function AdminDashboard() {
   return (
     <div>
       <DashboardHeader/>
-      <div style={{ display: 'flex', overflow: 'hidden' }}>
+      <div className="admin-layout">
         <SidebarAdmin/>
         <div className="admin-dashboard">
             <h1>Dashboard Administrativo</h1>

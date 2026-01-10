@@ -3,7 +3,7 @@ import "./EmpresaRecompensas.css";
 import { DashboardHeader } from "../../../components/dashboardHeader/DashboardHeader";
 import { Sidebar } from "../../../components/sidebar/Sidebar";
 import { FaGift } from "react-icons/fa";
-import { dashboardService } from "../../../services/api";
+import { dashboardService, API_BASE_URL } from "../../../services/api";
 
 export function EmpresaRecompensas() {
   const [empresas, setEmpresas] = useState([]);
@@ -26,6 +26,7 @@ export function EmpresaRecompensas() {
     valor: "",
     quantidade: "",
     imagem: "",
+    imagemPreview: null,
     empresa: ""
   });
 
@@ -38,7 +39,6 @@ export function EmpresaRecompensas() {
         const u = JSON.parse(localStorage.getItem('user') || 'null');
         setUsuario(u || {});
         setEmpresaPerfil(u ? (u.empresa || u.empresa_id || u.id_empresa || '') : '');
-        // reload rewards filtered for new empresa
         setTimeout(() => loadRecompensas(), 50);
       } catch (e) {}
     };
@@ -83,12 +83,21 @@ export function EmpresaRecompensas() {
         valor: recompensa.preco_moedas ?? recompensa.valor ?? "",
         quantidade: recompensa.quantidade_disponivel ?? recompensa.quantidade ?? "",
         imagem: "",
+        imagemPreview: (() => {
+          const imgField = recompensa.imagem_path ?? recompensa.imagem ?? null;
+          if (imgField && typeof imgField === 'string') {
+            if (imgField.startsWith('http')) return imgField;
+            if (imgField.startsWith('/')) return `${String(API_BASE_URL).replace(/\/$/, '')}${imgField}`;
+            return `${String(API_BASE_URL).replace(/\/$/, '')}/${String(imgField).replace(/^\/+/, '')}`;
+          }
+          return recompensa.imagem || null;
+        })(),
         empresa: recompensa?.empresa?.id_empresa || recompensa?.empresa || empresaPerfil || ""
       });
     } else {
       setIsEditing(false);
       setEditingId(null);
-      setFormData({ nome: "", descricao: "", valor: "", quantidade: "" });
+      setFormData({ nome: "", descricao: "", valor: "", quantidade: "", imagem: "", imagemPreview: null });
     }
     setShowModal(true);
   };
@@ -100,7 +109,7 @@ export function EmpresaRecompensas() {
     setFormData({ nome: "", descricao: "", valor: "", quantidade: "" });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
@@ -110,25 +119,89 @@ export function EmpresaRecompensas() {
     fd.append('valor', formData.valor);
     fd.append('quantidade', formData.quantidade);
     if (empresaPerfil) fd.append('empresa', empresaPerfil);
+    try {
+      if (formData.valor != null && formData.valor !== '') {
+        fd.append('preco_moedas', formData.valor);
+        fd.append('valor_moedas', formData.valor);
+      }
+      if (formData.quantidade != null && formData.quantidade !== '') {
+        fd.append('quantidade_disponivel', formData.quantidade);
+        fd.append('quantidade_disponive', formData.quantidade);
+        fd.append('qtd', formData.quantidade);
+        fd.append('quantidadeDisponivel', formData.quantidade);
+      }
+      if (empresaPerfil) {
+        fd.append('id_empresa', empresaPerfil);
+        fd.append('empresa_id', empresaPerfil);
+      }
+      if (!formData.imagem && formData.imagemPreview && typeof formData.imagemPreview === 'string') {
+        fd.append('imagem_path', formData.imagemPreview);
+        fd.append('imagemPath', formData.imagemPreview);
+      }
+    } catch (e) {}
+
     if (formData.imagem instanceof File) {
       fd.append('imagem', formData.imagem);
     }
-    if (isEditing) {
-      dashboardService.updateRecompensa(editingId, fd, true)
-        .then(() => {
+
+    
+    const payloadObj = {
+      nome: formData.nome,
+      descricao: formData.descricao,
+      valor: formData.valor,
+      preco_moedas: formData.valor,
+      quantidade: formData.quantidade,
+      quantidade_disponivel: formData.quantidade,
+      quantidade_disponive: formData.quantidade,
+      id_empresa: empresaPerfil,
+      empresa_id: empresaPerfil,
+    };
+    if (!formData.imagem && formData.imagemPreview && typeof formData.imagemPreview === 'string') {
+      payloadObj.imagem_path = formData.imagemPreview;
+    }
+
+    
+    try {
+      const entries = [];
+      for (const e of fd.entries()) entries.push([e[0], e[1] instanceof File ? `[File:${e[1].name}]` : e[1]]);
+      console.debug('[debug EmpresaRecompensas] FormData entries:', entries);
+      console.debug('[debug EmpresaRecompensas] JSON fallback payload:', payloadObj);
+    } catch (e) { console.debug('[debug EmpresaRecompensas] failed to log payload', e); }
+
+    try {
+      if (isEditing) {
+        const hasFile = formData.imagem instanceof File;
+        try {
+          if (hasFile) {
+            await dashboardService.updateRecompensa(editingId, fd, true);
+          } else {
+            await dashboardService.updateRecompensa(editingId, payloadObj, true);
+          }
           loadRecompensas();
           handleCloseModal();
-        })
-        .catch(err => setError("Erro ao editar recompensa: " + (err.response?.data?.message || err.message)))
-        .finally(() => setLoading(false));
-    } else {
-      dashboardService.createRecompensa(fd, true)
-        .then(() => {
+        } catch (err) {
+          console.error('EmpresaRecompensas: updateRecompensa erro', err);
+          setError('Erro ao atualizar recompensa: ' + (err.response?.data?.message || err.message));
+        }
+      } else {
+        const hasFile = formData.imagem instanceof File;
+        try {
+          if (hasFile) {
+            await dashboardService.createRecompensa(fd, true);
+          } else {
+            await dashboardService.createRecompensa(payloadObj, true);
+          }
           loadRecompensas();
           handleCloseModal();
-        })
-        .catch(err => setError("Erro ao criar recompensa: " + (err.response?.data?.message || err.message)))
-        .finally(() => setLoading(false));
+        } catch (err) {
+          console.error('EmpresaRecompensas: createRecompensa erro', err);
+          setError("Erro ao criar recompensa: " + (err.response?.data?.message || err.message));
+        }
+      }
+    } catch (finalErr) {
+      setError("Erro ao enviar recompensa: " + (finalErr.response?.data?.message || finalErr.message));
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -142,7 +215,6 @@ export function EmpresaRecompensas() {
     if (!window.confirm("Tem certeza que deseja excluir esta recompensa?")) return;
     setLoading(true);
     setError(null);
-    console.debug('Excluindo recompensa id:', id);
     dashboardService.deleteRecompensa(id)
       .then(() => loadRecompensas())
       .catch(err => setError("Erro ao excluir recompensa: " + (err.response?.data?.message || err.message)))
@@ -166,6 +238,7 @@ export function EmpresaRecompensas() {
                 + Adicionar Recompensa
               </button>
             </div>
+            
             {loading && <p className="loading">Carregando recompensas...</p>}
             {error && <p className="error">{error}</p>}
             {!loading && !error && (
@@ -184,19 +257,25 @@ export function EmpresaRecompensas() {
                   </thead>
                   <tbody>
                       {recompensas.length === 0 ? (
-                      <tr><td colSpan="5">Nenhuma recompensa encontrada.</td></tr>
-                    ) : (
+                        <tr><td colSpan="7">Nenhuma recompensa encontrada.</td></tr>
+                      ) : (
                       recompensas.map((recompensa, idx) => (
                         <tr key={recompensa.id ?? recompensa._id ?? recompensa.nome ?? idx}>
                           <td>{recompensa.nome || recompensa.titulo || recompensa.descricao}</td>
                           <td>{recompensa.descricao || recompensa.titulo || recompensa.nome}</td>
                           <td>{recompensa.empresa?.nome_empresa || recompensa.empresa || ''}</td>
                           <td>
-                            {recompensa.imagem ? (
-                              <img src={recompensa.imagem} alt="Imagem da recompensa" style={{ maxWidth: 60, maxHeight: 60, objectFit: 'cover' }} />
-                            ) : (
-                              <span style={{ color: '#aaa' }}>Sem imagem</span>
-                            )}
+                            {(() => {
+                              const imgField = recompensa.imagem_path ?? recompensa.imagem ?? null;
+                              if (!imgField) return <span style={{ color: '#aaa' }}>Sem imagem</span>;
+                              let src = null;
+                              if (typeof imgField === 'string') {
+                                if (imgField.startsWith('http')) src = imgField;
+                                else if (imgField.startsWith('/')) src = `${String(API_BASE_URL).replace(/\/$/, '')}${imgField}`;
+                                else src = `${String(API_BASE_URL).replace(/\/$/, '')}/${String(imgField).replace(/^\/+/, '')}`;
+                              }
+                              return <img src={src} alt="Imagem da recompensa" style={{ maxWidth: 60, maxHeight: 60, objectFit: 'cover' }} />;
+                            })()}
                           </td>
                           <td>{recompensa.quantidade_disponivel ?? recompensa.quantidade ?? ''}</td>
                           <td>{recompensa.preco_moedas ?? recompensa.valor ?? ''}</td>
@@ -232,7 +311,20 @@ export function EmpresaRecompensas() {
                     <input type="number" value={formData.valor} onChange={e => setFormData({ ...formData, valor: e.target.value })} required />
                   </label>
                   <label>Imagem:
-                    <input type="file" accept="image/*" onChange={e => setFormData({ ...formData, imagem: e.target.files[0] })} />
+                    <input type="file" accept="image/*" onChange={e => {
+                      const f = e.target.files[0];
+                      try {
+                        const preview = f ? URL.createObjectURL(f) : null;
+                        setFormData({ ...formData, imagem: f, imagemPreview: preview });
+                      } catch (err) {
+                        setFormData({ ...formData, imagem: f });
+                      }
+                    }} />
+                    {formData.imagemPreview && (
+                      <div style={{ marginTop: 8 }}>
+                        <img src={formData.imagemPreview} alt="preview" style={{ maxWidth: 120, maxHeight: 80, objectFit: 'cover', borderRadius: 6 }} />
+                      </div>
+                    )}
                   </label>
                   <div className="modal-actions">
                     <button type="submit" className="btn-acao editar">{isEditing ? "Salvar" : "Adicionar"}</button>

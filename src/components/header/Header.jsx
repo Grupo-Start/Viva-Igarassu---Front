@@ -1,5 +1,5 @@
 import './Header.css';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import React, { useEffect, useState, useRef } from 'react';
 import { dashboardService } from '../../services/api';
 
@@ -14,12 +14,17 @@ export function Header() {
     } catch (e) {
       setUser(null);
     }
-    // if the stored user lacks empresa info, try to resolve it from API and merge
     const tryAttachCompany = async () => {
       try {
         const r = localStorage.getItem('user');
         if (!r) return;
         const u = JSON.parse(r);
+        
+        const tipo = (u.tipo || u.role || '').toString().toLowerCase();
+        const isEmpresa = u.isEmpresa || u.is_empresa || u.isCompany || 
+                          tipo.includes('empresa') || tipo.includes('empreendedor');
+        if (!isEmpresa) return;
+        
         const hasCompany = u && (u.nome_empresa || u.empresa || u.id_empresa || u.empresa_id || (u.empresa && (u.empresa.nome_empresa || u.empresa.nome)));
         if (hasCompany) return;
         const token = localStorage.getItem('token');
@@ -66,6 +71,8 @@ export function Header() {
 
   const [open, setOpen] = useState(false);
   const ref = useRef();
+  const location = useLocation();
+  const isHome = (location && location.pathname === '/');
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -90,12 +97,29 @@ export function Header() {
     } catch (e) { return null; }
   };
 
+  const getUserRole = (u) => {
+    const userObj = u || getStoredUser();
+    if (!userObj) return 'comum';
+    const tipo = (userObj.tipo || userObj.role || '').toString().toLowerCase();
+    if (userObj.isAdmin || tipo.includes('admin')) return 'admin';
+    const isEmpresa = userObj.isEmpresa || userObj.is_empresa || userObj.isCompany || tipo.includes('empresa') || tipo.includes('empreendedor');
+    if (isEmpresa) return 'empresa';
+    return 'comum';
+  };
+
+  const goToProfile = () => {
+    const role = getUserRole(user);
+    if (role === 'admin') navigate('/admin-dashboard');
+    else if (role === 'empresa') navigate('/empresa-dashboard/meus-dados');
+    else navigate('/usuarioDashboard');
+    setOpen(false);
+  };
+
   const computeDisplayName = (u) => {
     if (!u) {
       u = getStoredUser();
     }
     if (!u) return null;
-    // Prefer company fields when available, regardless of role
     try {
       const companyName = u.nome_empresa
         || (u.empresa_obj && (u.empresa_obj.nome_empresa || u.empresa_obj.nome || u.empresa_obj.razao_social))
@@ -125,49 +149,65 @@ export function Header() {
     return null;
   };
   const displayName = (user && (user.nome_empresa || (user.empresa_obj && (user.empresa_obj.nome_empresa || user.empresa_obj.nome)) || (user.empresa && (user.empresa.nome_empresa || user.empresa.nome)))) || computeDisplayName(user);
-
   return (
     <header className="header">
       <div className="header-logo">
-       <img src="header-logo.png" alt="logo viva igarassu" />
+        <Link to="/">
+          <img src="/header-logo.png" alt="logo viva igarassu" />
+        </Link>
       </div>
 
       <nav className="header-nav">
-        <Link to="/home">Home</Link>
-        <p>|</p>
-        <Link to="/quem-somos">Quem somos</Link>
-        <p>|</p>
-        <Link to="/cidade">A cidade</Link>
-        <p>|</p>
-        <Link to="/contato">Contato</Link>
+        {(() => {
+          const items = [
+            { to: '/', label: 'Home' },
+            { to: '/quem-somos', label: 'Quem somos' },
+            { to: '/cidade', label: 'A cidade' },
+          ];
+          return items.map((it, idx) => (
+            <React.Fragment key={it.to}>
+              {idx > 0 && <p className="sep">|</p>}
+              <NavLink to={it.to} className={({isActive}) => isActive ? 'active' : ''}>{it.label}</NavLink>
+            </React.Fragment>
+          ));
+        })()}
       </nav>
 
-      <div className="header-actions">
-        <input 
-          type="text" 
-          placeholder="Pesquisar" 
-          className="search-input"
-        />
-
+      <div className="header-actions" ref={ref}>
         {!user ? (
-          <Link to="/login" className="login">
+          <NavLink to="/login" className={({isActive}) => isActive ? 'login active' : 'login'}>
             <span>Login</span>
             <img src="/icone-login.png" alt="Login" />
-          </Link>
+          </NavLink>
         ) : (
-          <div className="user-info" ref={ref}>
+          <div className="user-info">
             {displayName && <div className="header-company"><span>{displayName}</span></div>}
 
             <button className="admin-trigger" onClick={() => setOpen(s => !s)} aria-haspopup="true" aria-expanded={open}>
               <img src="/icone-login.png" alt="Menu" />
             </button>
+          </div>
+        )}
+
+        {user && (
+          <>
+            <button className="mobile-user-btn" onClick={() => setOpen(s => !s)} aria-haspopup="true" aria-expanded={open}>
+              <img src="/icone-login.png" alt="Menu" />
+            </button>
+
+            {getUserRole(user) === 'admin' && (
+              <button className="mobile-admin-btn" onClick={() => { navigate('/admin-dashboard'); setOpen(false); }} aria-label="Admin">
+                <img src="/icone-login.png" alt="Admin" />
+              </button>
+            )}
 
             {open && (
               <div className="admin-menu">
+                <button className="admin-menu-item" onClick={goToProfile}>Meu perfil</button>
                 <button className="admin-menu-item" onClick={handleLogout}>Sair</button>
               </div>
             )}
-          </div>
+          </>
         )}
       </div>
     </header>

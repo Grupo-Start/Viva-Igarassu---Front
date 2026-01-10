@@ -17,7 +17,6 @@ export function RegisterPerson() {
     const [senha, setSenha] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-    const [debugInfo, setDebugInfo] = useState(null);
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -71,12 +70,7 @@ export function RegisterPerson() {
                 </div>
 
                 {error && <p style={{ color: 'crimson' }}>{error}</p>}
-                {debugInfo && (
-                    <details style={{ marginTop: 12, background: '#fff7f7', padding: 10, borderRadius: 6 }}>
-                        <summary style={{ cursor: 'pointer', color: '#b00' }}>Mostrar detalhes do erro</summary>
-                        <pre style={{ whiteSpace: 'pre-wrap', marginTop: 8 }}>{JSON.stringify(debugInfo, null, 2)}</pre>
-                    </details>
-                )}
+                
 
                 <Button disabled={loading} text={loading ? 'Enviando...' : 'Enviar'} onClick={async (e) => {
                     e.preventDefault();
@@ -85,24 +79,19 @@ export function RegisterPerson() {
                     try {
                         const role = location?.state?.role || 'comum';
                         const payload = { nome_completo: nome || undefined, email, senha, role };
-                        // tentar registrar via authService.register (tenta múltiplos formatos/endpoints)
                         const created = await authService.register(payload);
-                        console.debug('Registro criado:', created);
-                        // tentar logar automaticamente para obter token (necessário para /empresa)
                         let tokenObtained = null;
                         try {
                             const authResp = await authService.login({ email, password: senha });
-                            // aceitar vários formatos de token retornado
                             const maybeToken = authResp?.token || authResp?.accessToken || authResp?.jwt || authResp?.data?.token;
                             if (maybeToken) {
                                 tokenObtained = maybeToken;
                                 localStorage.setItem('token', maybeToken);
-                                // aplicar no axios instance imediatamente (configurar common Authorization)
                                 try {
                                   if (!api.defaults.headers) api.defaults.headers = {};
                                   if (!api.defaults.headers.common) api.defaults.headers.common = {};
                                   api.defaults.headers.common.Authorization = `Bearer ${maybeToken}`;
-                                } catch (e) { /* ignore */ }
+                                } catch (e) { }
                             } else {
                                 console.warn('Login automático retornou sem token:', authResp);
                             }
@@ -112,7 +101,6 @@ export function RegisterPerson() {
                             console.warn('Login automático falhou após cadastro:', loginErr, loginErr?.response?.data || loginErr?.message);
                         }
 
-                        // após cadastro, prosseguir apenas se obtivemos token automático
                         const next = location?.state?.next;
                         if (tokenObtained) {
                             if (next) navigate(next);
@@ -123,13 +111,6 @@ export function RegisterPerson() {
                     } catch (err) {
                         const msg = err?.response?.data?.message || err?.message || 'Erro ao cadastrar';
                         setError(String(msg));
-                        const info = {
-                            message: err?.message,
-                            status: err?.response?.status,
-                            responseData: err?.response?.data,
-                            stack: err?.stack
-                        };
-                        setDebugInfo(info);
                     } finally {
                         setLoading(false);
                     }

@@ -4,7 +4,8 @@ import "./PageEventos.css";
 import { DashboardHeader } from "../../../components/dashboardHeader/DashboardHeader";
 import { SidebarAdmin } from "../../../components/sidebarAdmin/SidebarAdmin";
 import { MdEvent } from "react-icons/md";
-import { dashboardService } from "../../../services/api";
+import { dashboardService, API_BASE_URL } from "../../../services/api";
+import { Pagination } from "../../../components/pagination/Pagination";
 
 export function PageEventos() {
   const [eventos, setEventos] = useState([]);
@@ -13,14 +14,19 @@ export function PageEventos() {
   const [showModal, setShowModal] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editingId, setEditingId] = useState(null);
-  const [formData, setFormData] = useState({
+  const initialForm = {
     nome: '',
     data: '',
     horario: '',
     endereco: '',
     descricao: '',
-    imagem: null
-  });
+    imagem: null,
+    imagemPreview: null,
+    imagem_path: null
+  };
+  const [formData, setFormData] = useState(initialForm);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   useEffect(() => {
     loadEventos();
@@ -147,21 +153,58 @@ export function PageEventos() {
     }
   };
 
+  const resolveEventImage = (ev) => {
+    const imgField = ev.imagem_path || ev.imagem || ev.image || ev.imagemPath || null;
+    if (!imgField) return null;
+    if (typeof imgField === 'string') {
+      if (imgField.startsWith('http')) return imgField;
+      if (imgField.startsWith('/')) return `${String(API_BASE_URL).replace(/\/$/, '')}${imgField}`;
+      return `${String(API_BASE_URL).replace(/\/$/, '')}/${String(imgField).replace(/^\/+/, '')}`;
+    }
+    return null;
+  };
+
+  function normalizeTime(h) {
+    if (!h) return '';
+    try {
+      if (typeof h === 'string') {
+        if (/^\d{2}:\d{2}(:\d{2})?$/.test(h)) return h.substring(0,5);
+        if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(h)) return h.substring(h.indexOf('T') + 1, h.indexOf('T') + 6);
+      }
+      const d = new Date(h);
+      if (!isNaN(d)) {
+        const hh = String(d.getHours()).padStart(2, '0');
+        const mm = String(d.getMinutes()).padStart(2, '0');
+        return `${hh}:${mm}`;
+      }
+    } catch (e) {}
+    return '';
+  }
+
   const handleOpenModal = (evento = null) => {
     if (evento) {
       setIsEditing(true);
-      setEditingId(evento.id_evento || evento.id);
+      setEditingId(evento.id_evento || evento.id || evento._id || evento.idEvento || evento.id_evento || evento.codigo || null);
+      const horaVal = normalizeTime(evento.horario || evento.hora || evento.horario_evento || evento.data_hora || evento.dataHora || '');
+      const enderecoResolved = evento.endereco_completo || evento.endereco || evento.endereco_evento || evento.address || '';
+      const rawImg = evento.imagem_path ?? evento.imagem ?? null;
+      const imgPreview = (typeof rawImg === 'string' && rawImg)
+        ? (rawImg.startsWith('http') ? rawImg : (rawImg.startsWith('/') ? `${String(API_BASE_URL).replace(/\/$/, '')}${rawImg}` : `${String(API_BASE_URL).replace(/\/$/, '')}/${String(rawImg).replace(/^\/+/, '')}`))
+        : null;
       setFormData({
         nome: evento.nome || evento.titulo || evento.name || '',
-        data: evento.data || evento.data_evento || evento.date || '',
-        horario: evento.horario || evento.horario_evento || evento.hora || evento.horarioInicio || '',
-        endereco: evento.endereco_completo || evento.endereco || evento.endereco_evento || evento.address || '',
-        descricao: evento.descricao || evento.description || ''
+        data: evento.data ? String(evento.data).substring(0, 10) : (evento.data_evento ? String(evento.data_evento).substring(0,10) : ''),
+        horario: horaVal,
+        endereco: enderecoResolved || '',
+        descricao: evento.descricao || evento.description || '',
+        imagem: rawImg,
+        imagemPreview: imgPreview,
+        imagem_path: rawImg
       });
     } else {
       setIsEditing(false);
       setEditingId(null);
-      setFormData({ nome: '', data: '', horario: '', endereco: '', descricao: '' });
+      setFormData(initialForm);
     }
     setShowModal(true);
   };
@@ -170,7 +213,7 @@ export function PageEventos() {
     setShowModal(false);
     setIsEditing(false);
     setEditingId(null);
-    setFormData({ nome: '', data: '', horario: '', endereco: '', descricao: '' });
+    setFormData(initialForm);
   };
 
   const handleSubmit = (e) => {
@@ -183,6 +226,11 @@ export function PageEventos() {
           setError('Campos obrigatórios não preenchidos: ' + missing.join(', '));
           return;
         }
+        const computedISO = (() => {
+          try { if (formData.data && formData.horario) return new Date(`${formData.data}T${formData.horario}`).toISOString(); } catch (e) { }
+          return null;
+        })();
+
         let body;
         if (formData.imagem instanceof File) {
           const fd = new FormData();
@@ -232,6 +280,7 @@ export function PageEventos() {
             endereco: formData.endereco,
             endereco_evento: formData.endereco,
             endereco_completo: formData.endereco,
+            imagem_path: (typeof formData.imagem === 'string') ? formData.imagem : (formData.imagem_path || undefined),
 
             descricao: formData.descricao,
             description: formData.descricao
@@ -247,16 +296,14 @@ export function PageEventos() {
         }
 
         try {
-          console.group('Evento payload');
-          if (body instanceof FormData) {
-            for (const pair of body.entries()) console.debug('form:', pair[0], pair[1]);
-          } else {
-            console.debug('json body:', body);
-          }
-          console.groupEnd();
         } catch (e) { console.warn('Falha ao logar payload', e); }
 
         try {
+          console.debug('[PageEventos] submit payload', { isEditing, editingId, imagemType: (formData.imagem instanceof File) ? 'File' : typeof formData.imagem });
+          if (isEditing && !editingId) {
+            setError('ID do evento para editar não foi definido.');
+            return;
+          }
           let id_endereco = formData.id_endereco || null;
           if (!id_endereco) {
             if (body instanceof FormData) {
@@ -293,7 +340,6 @@ export function PageEventos() {
                   body.endereco = raw;
                   body.address = raw;
                 }
-                console.debug('Fallback: anexado endereco_completo ao payload', raw);
               }
             } catch (e) { console.warn('Falha ao anexar fallback de endereco:', e); }
           } else {
@@ -350,7 +396,6 @@ export function PageEventos() {
     (async () => {
       if (!window.confirm('Tem certeza que deseja excluir este evento?')) return;
       try {
-        console.debug('Deletando evento id (frontend):', id);
         await dashboardService.deleteEvento(id);
         await loadEventos();
       } catch (err) {
@@ -389,7 +434,7 @@ export function PageEventos() {
   return (
     <div>
       <DashboardHeader />
-      <div style={{ display: 'flex', overflow: 'hidden' }}>
+      <div className="admin-layout">
         <SidebarAdmin />
         <div className="admin-dashboard">
           <h1>Eventos</h1>
@@ -411,6 +456,7 @@ export function PageEventos() {
                   <thead>
                     <tr>
                       <th>Nome</th>
+                      <th>Imagem</th>
                       <th>Empresa</th>
                       <th>Data</th>
                       <th>Horário</th>
@@ -420,11 +466,20 @@ export function PageEventos() {
                   </thead>
                   <tbody>
                     {eventos.length === 0 ? (
-                      <tr><td colSpan="6">Nenhum evento encontrado.</td></tr>
+                      <tr><td colSpan="7">Nenhum evento encontrado.</td></tr>
                     ) : (
-                      eventos.map(evento => (
+                      (() => {
+                        const totalPages = Math.max(1, Math.ceil(eventos.length / itemsPerPage));
+                        const start = (currentPage - 1) * itemsPerPage;
+                        const paged = eventos.slice(start, start + itemsPerPage);
+                        return paged.map(evento => (
                         <tr key={evento.id_evento || evento.id}>
                           <td>{evento.nome}</td>
+                          <td>{(() => {
+                            const src = resolveEventImage(evento);
+                            if (!src) return <span style={{ color: '#aaa' }}>Sem imagem</span>;
+                            return <img src={src} alt={evento.nome || 'imagem'} style={{ maxWidth: 80, maxHeight: 60, objectFit: 'cover', borderRadius: 4 }} />;
+                          })()}</td>
                           <td>{evento.empresa || '-'}</td>
                           <td>{formatData(evento.data)}</td>
                           <td>{formatHora(evento.horario)}</td>
@@ -436,10 +491,18 @@ export function PageEventos() {
                             </div>
                           </td>
                         </tr>
-                      ))
+                        ));
+                      })()
                     )}
                   </tbody>
                 </table>
+                {Math.ceil(eventos.length / itemsPerPage) > 1 && (
+                  <Pagination
+                    currentPage={currentPage}
+                    totalPages={Math.max(1, Math.ceil(eventos.length / itemsPerPage))}
+                    onPageChange={(p) => setCurrentPage(p)}
+                  />
+                )}
               </div>
             )}
             {showModal && (
@@ -454,7 +517,16 @@ export function PageEventos() {
                       <input type="text" value={formData.descricao} onChange={e => setFormData({ ...formData, descricao: e.target.value })} required />
                     </label>
                     <label>Imagem:
-                      <input type="file" accept="image/*" onChange={e => setFormData({ ...formData, imagem: e.target.files[0] || null })} />
+                      <input type="file" accept="image/*" onChange={e => setFormData({ ...formData, imagem: e.target.files[0] || null, imagemPreview: e.target.files[0] ? URL.createObjectURL(e.target.files[0]) : formData.imagemPreview })} />
+                      {(formData.imagemPreview || (typeof formData.imagem === 'string' && formData.imagem)) && (
+                        <div style={{ marginTop: 8 }}>
+                          <img
+                            src={formData.imagemPreview ? formData.imagemPreview : (formData.imagem && (formData.imagem.startsWith('http') ? formData.imagem : (formData.imagem.startsWith('/') ? `${String(API_BASE_URL).replace(/\/$/, '')}${formData.imagem}` : `${String(API_BASE_URL).replace(/\/$/, '')}/${String(formData.imagem).replace(/^\/+/, '')}`)))}
+                            alt="preview"
+                            style={{ maxWidth: 120, maxHeight: 90, objectFit: 'cover', borderRadius: 4 }}
+                          />
+                        </div>
+                      )}
                     </label>
                     <label>Data:
                       <input type="date" value={formData.data} onChange={e => setFormData({ ...formData, data: e.target.value })} required />

@@ -5,16 +5,23 @@ import { DashboardHeader } from "../../../components/dashboardHeader/DashboardHe
 import { SidebarAdmin } from "../../../components/sidebarAdmin/SidebarAdmin";
 import { HiOutlineOfficeBuilding } from "react-icons/hi";
 import { dashboardService } from "../../../services/api";
+import { Pagination } from "../../../components/pagination/Pagination";
 
 export function PageEmpresas() {
   const [empresas, setEmpresas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [filterTipoServico, setFilterTipoServico] = useState('todos');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   useEffect(() => {
     loadEmpresas();
   }, []);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filterTipoServico]);
 
   const loadEmpresas = async () => {
     try {
@@ -79,7 +86,7 @@ export function PageEmpresas() {
     return (
       <div>
         <DashboardHeader/>
-        <div style={{ display: 'flex', overflow: 'hidden' }}>
+        <div className="admin-layout">
           <SidebarAdmin/>
           <div className="admin-dashboard">
             <h1>Empresas</h1>
@@ -94,7 +101,7 @@ export function PageEmpresas() {
     return (
       <div>
         <DashboardHeader/>
-        <div style={{ display: 'flex', overflow: 'hidden' }}>
+        <div className="admin-layout">
           <SidebarAdmin/>
           <div className="admin-dashboard">
             <h1>Empresas</h1>
@@ -120,6 +127,13 @@ export function PageEmpresas() {
     return normalizeString(empresa.tipoServico) === normalizeString(filterTipoServico);
   });
 
+  const sortedEmpresas = filteredEmpresas.slice().sort((a, b) => {
+    const na = (a.nome || '').toString();
+    const nb = (b.nome || '').toString();
+    return na.localeCompare(nb, 'pt', { sensitivity: 'base' });
+  });
+
+
   const tiposServico = ['hospedagem', 'artesanato', 'alimentação', 'transporte', 'guia de turismo', 'outros'];
 
   const countByTipo = (tipo) => {
@@ -131,12 +145,12 @@ export function PageEmpresas() {
     return str.charAt(0).toUpperCase() + str.slice(1);
   };
  
-  return (
-    <div>
-      <DashboardHeader/>
-      <div style={{ display: 'flex', overflow: 'hidden' }}>
-        <SidebarAdmin/>
-        <div className="admin-dashboard">
+    return (
+      <div>
+        <DashboardHeader/>
+        <div className="admin-layout">
+          <SidebarAdmin/>
+          <div className="admin-dashboard">
           <h1>Empresas</h1>
           <div className="dashboard-content">
             <div className="empresas-header">
@@ -176,7 +190,15 @@ export function PageEmpresas() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredEmpresas.map((empresa, idx) => (
+                  {(
+                    (() => {
+                      const total = sortedEmpresas.length;
+                      const totalPages = Math.max(1, Math.ceil(total / itemsPerPage));
+                      const start = (currentPage - 1) * itemsPerPage;
+                      const end = start + itemsPerPage;
+                      return sortedEmpresas.slice(start, end);
+                    })()
+                  ).map((empresa, idx) => (
                     <tr key={empresa.id ?? empresa.cnpj ?? empresa.nome ?? idx}>
                       <td>{empresa.nome}</td>
                       <td>{empresa.cnpj}</td>
@@ -201,6 +223,11 @@ export function PageEmpresas() {
                 </tbody>
               </table>
             </div>
+              {Math.ceil(filteredEmpresas.length / itemsPerPage) > 1 && (
+                <div className="pagination-container">
+                  <Pagination currentPage={currentPage} totalPages={Math.max(1, Math.ceil(filteredEmpresas.length / itemsPerPage))} onPageChange={(p) => setCurrentPage(p)} />
+                </div>
+              )}
           </div>
         </div>
       </div>

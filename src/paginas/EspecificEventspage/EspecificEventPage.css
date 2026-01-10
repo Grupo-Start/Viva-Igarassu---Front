@@ -1,0 +1,53 @@
+.carnival-page main {
+    padding: 30px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.carnival-page h2 {
+    font-size: 40px;
+    margin-bottom: 20px;
+    color: #0a3d62;
+    text-align: center;
+}
+
+.event-details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    margin-top: 28px;
+}
+
+.event-details {
+    align-items: stretch;
+}
+
+
+@media (max-width: 1024px) {
+    .carnival-page main {
+        padding: 20px;
+    }
+
+    .carnival-page h2 {
+        font-size: 24px;
+    }
+}
+
+@media (max-width: 768px) {
+    .event-details {
+        flex-direction: column;
+    }
+
+    .carnival-page h2 {
+        font-size: 20px;
+        text-align: center;
+    }
+}
+
+.main-event {
+  margin-bottom: 32px;
+}
+
+.carnival-page .main-event-text h3 {
+        text-align: left;
+}

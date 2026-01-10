@@ -5,12 +5,15 @@ import { DashboardHeader } from "../../../components/dashboardHeader/DashboardHe
 import { SidebarAdmin } from "../../../components/sidebarAdmin/SidebarAdmin";
 import { IoMdPeople } from "react-icons/io";
 import { dashboardService } from "../../../services/api";
+import { Pagination } from "../../../components/pagination/Pagination";
 
 export function PageUsers() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [filterType, setFilterType] = useState('todos');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   useEffect(() => {
     loadUsers();
@@ -80,11 +83,21 @@ export function PageUsers() {
     return true;
   });
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filterType]);
+
+  const sortedUsers = filteredUsers.slice().sort((a, b) => {
+    const na = (a.nome || '').toString();
+    const nb = (b.nome || '').toString();
+    return na.localeCompare(nb, 'pt', { sensitivity: 'base' });
+  });
+
   if (loading) {
     return (
       <div>
         <DashboardHeader/>
-        <div style={{ display: 'flex', overflow: 'hidden' }}>
+        <div className="admin-layout">
           <SidebarAdmin/>
           <div className="admin-dashboard">
             <h1>Usuários</h1>
@@ -99,7 +112,7 @@ export function PageUsers() {
     return (
       <div>
         <DashboardHeader/>
-        <div style={{ display: 'flex', overflow: 'hidden' }}>
+        <div className="admin-layout">
           <SidebarAdmin/>
           <div className="admin-dashboard">
             <h1>Usuários</h1>
@@ -111,12 +124,12 @@ export function PageUsers() {
     );
   }
 
-  return (
-    <div>
-      <DashboardHeader/>
-      <div style={{ display: 'flex', overflow: 'hidden' }}>
-        <SidebarAdmin/>
-        <div className="admin-dashboard">
+    return (
+      <div>
+        <DashboardHeader/>
+        <div className="admin-layout">
+          <SidebarAdmin/>
+          <div className="admin-dashboard">
           <h1>Usuários</h1>
           <div className="dashboard-content">
             <div className="users-header">
@@ -159,7 +172,14 @@ export function PageUsers() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredUsers.map((user, idx) => (
+                  {(
+                    (() => {
+                      const total = sortedUsers.length;
+                      const start = (currentPage - 1) * itemsPerPage;
+                      const end = start + itemsPerPage;
+                      return sortedUsers.slice(start, end);
+                    })()
+                  ).map((user, idx) => (
                     <tr key={user.id ?? user.email ?? idx}>
                       <td>{user.nome}</td>
                       <td>{user.email}</td>
@@ -191,6 +211,11 @@ export function PageUsers() {
                 </tbody>
               </table>
             </div>
+              {Math.ceil(filteredUsers.length / itemsPerPage) > 1 && (
+                <div className="pagination-container">
+                  <Pagination currentPage={currentPage} totalPages={Math.max(1, Math.ceil(filteredUsers.length / itemsPerPage))} onPageChange={(p) => setCurrentPage(p)} />
+                </div>
+              )}
           </div>
         </div>
       </div>

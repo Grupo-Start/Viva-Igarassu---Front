@@ -40,7 +40,7 @@ export function VisitsChart({ data = defaultData }) {
           <Line 
             type="monotone" 
             dataKey="total_visitas" 
-            stroke="#5FD6C3" 
+            stroke="#46c7c2" 
             strokeWidth={2}
             activeDot={{ r: 8 }}
           />

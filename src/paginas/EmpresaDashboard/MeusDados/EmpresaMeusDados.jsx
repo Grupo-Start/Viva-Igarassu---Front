@@ -27,28 +27,23 @@ export function EmpresaMeusDados() {
 
     (async () => {
       try {
-        console.debug('EmpresaMeusDados - usuário localStorage:', u);
         let empresaObj = null;
 
         if (empresaId) {
           try {
             const res = await dashboardService.getEmpresaById(empresaId);
-            // normalize possible shapes: array, { empresa: {...} }, object
             if (Array.isArray(res)) empresaObj = res[0] || null;
             else if (res?.empresa) empresaObj = res.empresa;
             else empresaObj = res || null;
-            console.debug('EmpresaMeusDados - getEmpresasByID result:', res);
           } catch (err) {
             console.warn('EmpresaMeusDados - getEmpresasByID falhou para id', empresaId, err);
             empresaObj = null;
           }
         }
-        // only fall back to list-search if id lookup failed
         if (!empresaObj) {
           try {
             const list = await dashboardService.getEmpresas();
             const arr = Array.isArray(list) ? list : (list?.data || list?.empresas || []);
-            console.debug('EmpresaMeusDados - getEmpresas length', arr.length);
             const possibleIds = [empresaId, u.id, u._id, u.usuario, u.userId];
             const found = arr.find(e => {
               const idFields = [e.id, e._id, e.id_empresa, e.idUsuario, e.id_usuario, e.usuario, e.usuario_id];
@@ -59,7 +54,6 @@ export function EmpresaMeusDados() {
               return false;
             });
             empresaObj = found || null;
-            console.debug('EmpresaMeusDados - empresa encontrada por lista:', empresaObj);
           } catch (err) {
             console.warn('EmpresaMeusDados - falha ao listar empresas', err);
           }
@@ -70,7 +64,6 @@ export function EmpresaMeusDados() {
               try {
                 const q = await dashboardService.getEmpresaByQuery(`id=${encodeURIComponent(empresaId)}`);
                 empresaObj = Array.isArray(q) ? q[0] : (q?.empresa || q || null);
-                console.debug('EmpresaMeusDados - tentativa /empresa?id= result:', empresaObj);
               } catch (err) {
                 console.warn('EmpresaMeusDados - /empresa?id= falhou', err);
               }
@@ -80,7 +73,6 @@ export function EmpresaMeusDados() {
               try {
                 const q2 = await dashboardService.getEmpresaByQuery(`usuario=${encodeURIComponent(uid)}`);
                 empresaObj = Array.isArray(q2) ? q2[0] : (q2?.empresa || q2 || null);
-                console.debug('EmpresaMeusDados - tentativa /empresa?usuario= result:', empresaObj);
               } catch (err) {
                 console.warn('EmpresaMeusDados - /empresa?usuario= falhou', err);
               }
@@ -89,7 +81,6 @@ export function EmpresaMeusDados() {
               try {
                 const q3 = await dashboardService.getEmpresaByQuery(`email=${encodeURIComponent(u.email)}`);
                 empresaObj = Array.isArray(q3) ? q3[0] : (q3?.empresa || q3 || null);
-                console.debug('EmpresaMeusDados - tentativa /empresa?email= result:', empresaObj);
               } catch (err) {
                 console.warn('EmpresaMeusDados - /empresa?email= falhou', err);
               }
@@ -100,7 +91,6 @@ export function EmpresaMeusDados() {
         }
         if (!empresaObj) {
           empresaObj = u.empresa || u;
-          console.debug('EmpresaMeusDados - fallback para user.empresa ou user direto:', empresaObj);
         }
 
         if (!empresaObj) {

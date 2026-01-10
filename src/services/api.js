@@ -1,13 +1,11 @@
 import axios from 'axios';
 
-// Resolve API base URL from environment (Vite: import.meta.env.VITE_API_URL, CRA: REACT_APP_API_URL)
 let API_BASE_URL = 'http://localhost:3001';
 try {
   if (typeof import.meta !== 'undefined' && import.meta && import.meta.env && import.meta.env.VITE_API_URL) {
     API_BASE_URL = import.meta.env.VITE_API_URL;
   }
 } catch (e) {
-  // import.meta may not be available in some bundlers; fall back to process.env check
   try {
     if (typeof process !== 'undefined' && process && process.env && process.env.REACT_APP_API_URL) {
       API_BASE_URL = process.env.REACT_APP_API_URL;
@@ -26,6 +24,12 @@ const api = axios.create({
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) config.headers = { ...(config.headers || {}), Authorization: `Bearer ${token}` };
+  try {
+    if (config && config.data && (typeof FormData !== 'undefined') && config.data instanceof FormData) {
+      config.headers = config.headers || {};
+      if (Object.prototype.hasOwnProperty.call(config.headers, 'Content-Type')) delete config.headers['Content-Type'];
+    }
+  } catch (e) { }
   return config;
 });
 
@@ -35,7 +39,6 @@ api.interceptors.response.use(
     try {
       const cfg = error?.config || {};
       const headers = cfg.headers || {};
-      // merge possible nested header containers (axios sometimes uses headers.common)
       const combined = { ...(headers.common || {}), ...headers };
       let skipHeader = false;
       for (const k of Object.keys(combined)) {
@@ -46,15 +49,37 @@ api.interceptors.response.use(
           }
         } catch (e) {}
       }
+      
+      try {
+        const hdrs = cfg.headers || {};
+        for (const key of Object.keys(hdrs || {})) {
+          try {
+            if (String(key).toLowerCase() === 'x-skip-auth-redirect') { skipHeader = true; break; }
+            const val = hdrs[key];
+            if (typeof val === 'string' && val.toLowerCase() === '1') { skipHeader = true; break; }
+            if (typeof val === 'number' && Number(val) === 1) { skipHeader = true; break; }
+          } catch (e) {}
+        }
+      } catch (e) {}
+      
+      try {
+        const publicPaths = ['/eventos', '/pontos-turisticos', '/pontos', '/recompensas', '/recompensa'];
+        const reqUrl = String(cfg.url || '').toLowerCase();
+        for (const p of publicPaths) {
+          if (reqUrl.includes(p)) { skipHeader = true; break; }
+        }
+      } catch (e) {}
       const status = error.response?.status;
       console.warn('api.interceptor.response: request error', { url: cfg.url, method: cfg.method, status, skipHeader });
       if (status === 401 && !skipHeader) {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        window.location.href = '/login';
+        try { localStorage.removeItem('token'); } catch (e) {}
+        try { localStorage.removeItem('user'); } catch (e) {}
+        try {
+          
+          window.dispatchEvent(new CustomEvent('auth:unauthorized', { detail: { url: cfg.url, method: cfg.method, status } }));
+        } catch (e) {}
       }
     } catch (e) {
-      // ignore
     }
     return Promise.reject(error);
   }
@@ -63,104 +88,93 @@ api.interceptors.response.use(
 export const dashboardService = {
   getRecompensas: async () => {
     try {
-      const response = await api.get('/recompensas');
+      const response = await api.get('/recompensas', { headers: { 'X-Skip-Auth-Redirect': '1' } });
       return response.data;
     } catch (error) {
       throw error;
     }
   },
 
-  createRecompensa: async (dados) => {
+  getResgatesCountEmpresa: async (empresaIdInput) => {
     try {
-      let config = {};
-      let body = dados;
-      const isFormData = dados instanceof FormData;
-      if (isFormData) {
-      } else {
-        body = {
-          nome: dados.nome,
-          descricao: dados.descricao,
-          quantidade: dados.quantidade,
-          quantidade_disponivel: dados.quantidade || dados.quantidade_disponivel || dados.qtde || dados.estoque,
-          valor: dados.valor,
-          preco_moedas: dados.valor || dados.preco_moedas || dados.preco || dados.preco_moeda,
-          valor_em_moedas: dados.valor || dados.preco_moedas,
-          empresa: dados.empresa || dados.id_empresa || dados.empresa_id || dados.empresaId,
-        };
-      }
-      if (isFormData) {
-        try {
-          const ensure = (key, alias) => {
-            const v = body.get(key) || body.get(alias);
-            if (v != null && v !== '') {
-              if (!body.get(alias)) body.append(alias, v);
-            }
-          };
-          ensure('quantidade', 'quantidade_disponivel');
-          ensure('quantidade', 'qtde');
-          ensure('valor', 'preco_moedas');
-          ensure('valor', 'valor_em_moedas');
-          ensure('empresa', 'id_empresa');
-          ensure('empresa', 'empresa_id');
-        } catch (e) {
-          console.warn('createRecompensa: falha ao normalizar FormData', e);
-        }
-      }
+      
+      let empresaId = empresaIdInput;
       try {
-        if (isFormData) {
-          const entries = [];
-          for (const p of body.entries()) entries.push([p[0], p[1]]);
-          console.debug('createRecompensa: enviando FormData entries ->', entries, 'config:', config);
-        } else {
-          console.debug('createRecompensa: enviando JSON ->', body, 'config:', config);
+        if (empresaId && typeof empresaId === 'object') {
+          empresaId = empresaId.id || empresaId._id || empresaId.id_empresa || empresaId.empresaId || empresaId.idEmpresa || null;
         }
-      } catch (e) {
-        console.warn('createRecompensa: erro ao serializar payload para log', e);
+        if (empresaId != null) empresaId = String(empresaId);
+      } catch (e) { empresaId = empresaIdInput; }
+
+      const endpoints = [];
+      if (empresaId) {
+        
+        endpoints.push(`/resgates?empresa=${encodeURIComponent(empresaId)}`);
+        endpoints.push(`/resgates?empresa_id=${encodeURIComponent(empresaId)}`);
+        endpoints.push(`/resgates?id_empresa=${encodeURIComponent(empresaId)}`);
+        endpoints.push(`/resgates?empresaId=${encodeURIComponent(empresaId)}`);
+        endpoints.push(`/empresa/${encodeURIComponent(empresaId)}/resgates`);
+        endpoints.push(`/resgates/empresa/${encodeURIComponent(empresaId)}`);
       }
 
-      const response = await api.post('/recompensas', body, config);
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
-  },
+      
+      endpoints.push('/empresa/me/resgates');
+      endpoints.push('/resgates/meus');
+      endpoints.push('/resgates');
 
-  updateRecompensa: async (id, dados) => {
-    try {
-      let config = {};
-      let body = dados;
-      const isFormData = dados instanceof FormData;
-      if (isFormData) {
+      for (const ep of endpoints) {
         try {
-          const ensure = (key, alias) => {
-            const v = body.get(key) || body.get(alias);
-            if (v != null && v !== '') {
-              if (!body.get(alias)) body.append(alias, v);
+          const res = await api.get(ep, { headers: { 'X-Skip-Auth-Redirect': '1' } });
+          const data = res.data;
+
+          if (Array.isArray(data)) {
+            if (!empresaId) return data.length;
+            
+            const filtered = data.filter(item => {
+              try {
+                
+                const candidates = [];
+                if (item.empresa) candidates.push(item.empresa);
+                if (item.recompensa && item.recompensa.empresa) candidates.push(item.recompensa.empresa);
+                if (item.recompensa && item.recompensa.id_empresa) candidates.push(item.recompensa.id_empresa);
+                if (item.id_empresa) candidates.push(item.id_empresa);
+                if (item.empresa_id) candidates.push(item.empresa_id);
+                for (const c of candidates) {
+                  if (!c) continue;
+                  const s = String(c.id ?? c._id ?? c.id_empresa ?? c.empresaId ?? c).trim();
+                  if (s === empresaId) return true;
+                }
+                return false;
+              } catch (e) { return false; }
+            });
+            return filtered.length;
+          }
+
+          if (data && typeof data === 'object') {
+            
+            const possible = data.count ?? data.total ?? data.length ?? 0;
+            if (possible) return Number(possible);
+            
+            const items = Array.isArray(data.items) ? data.items : (Array.isArray(data.data) ? data.data : null);
+            if (Array.isArray(items)) {
+              if (!empresaId) return items.length;
+              const filtered = items.filter(it => {
+                try {
+                  const id = String(it.empresa?.id_empresa || it.empresa_id || it.id_empresa || it.recompensa?.empresa || it.recompensa?.id_empresa || '').trim();
+                  return id === empresaId;
+                } catch (e) { return false; }
+              });
+              return filtered.length;
             }
-          };
-          ensure('quantidade', 'quantidade_disponivel');
-          ensure('valor', 'preco_moedas');
-          ensure('valor', 'valor_em_moedas');
-          ensure('empresa', 'id_empresa');
+          }
         } catch (e) {
-          console.warn('updateRecompensa: falha ao normalizar FormData', e);
+          
+          continue;
         }
-      } else {
-        body = {
-          nome: dados.nome,
-          descricao: dados.descricao,
-          quantidade: dados.quantidade,
-          quantidade_disponivel: dados.quantidade || dados.quantidade_disponivel,
-          valor: dados.valor,
-          preco_moedas: dados.valor || dados.preco_moedas,
-          valor_em_moedas: dados.valor || dados.preco_moedas,
-          empresa: dados.empresa || dados.id_empresa || dados.empresa_id,
-        };
       }
-      const response = await api.put(`/recompensas/${id}`, body, config);
-      return response.data;
+      return 0;
     } catch (error) {
-      throw error;
+      return 0;
     }
   },
   deleteRecompensa: async (id) => {
@@ -169,7 +183,6 @@ export const dashboardService = {
       const resolvedId = (typeof id === 'object' && id !== null)
         ? (id.id || id._id || id.id_recompensas || id.idRecompensas || id.id_recompensa || id.recompensaId || id.uuid || id.toString && id.toString())
         : id;
-      console.debug('deleteRecompensa: resolved id ->', resolvedId);
       if (!resolvedId) throw new Error('deleteRecompensa: não foi possível extrair id da recompensa');
 
       try {
@@ -179,7 +192,6 @@ export const dashboardService = {
         const msg = err?.response?.data?.message || err?.message || '';
         console.warn('deleteRecompensa: primeira tentativa falhou', err?.response?.status, msg);
         if (msg && String(msg).includes('id_recompensas')) {
-          console.debug('deleteRecompensa: tentando fallback DELETE /recompensas com body { id_recompresas }');
           const response2 = await api.delete('/recompensas', { data: { id_recompresas: resolvedId } });
           return response2.data;
         }
@@ -187,6 +199,152 @@ export const dashboardService = {
       }
     } catch (error) {
       console.warn('deleteRecompensa: erro ao chamar DELETE /recompensas/:id', error?.response?.status, error?.response?.data);
+      throw error;
+    }
+  },
+
+  createRecompensa: async (dados, empresaOnly = false) => {
+    try {
+      try {
+        const isDev = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.MODE !== 'production') || (typeof process !== 'undefined' && process.env && process.env.NODE_ENV !== 'production');
+        if (isDev) {
+          try {
+            if (dados instanceof FormData) {
+              const entries = [];
+              for (const e of dados.entries()) entries.push([e[0], e[1] instanceof File ? `[File:${e[1].name}]` : e[1]]);
+              console.debug('[debug createRecompensa] FormData entries:', entries);
+            } else {
+              console.debug('[debug createRecompensa] JSON body:', dados);
+            }
+          } catch (e) { console.debug('[debug createRecompensa] failed to log payload', e); }
+        }
+      } catch (e) {}
+      let config = {};
+      let body = dados;
+      const defaultEndpoints = ['/recompensas', '/empresa/me/recompensas', '/empresa/recompensas', '/recompensas/me'];
+      const endpoints = empresaOnly ? ['/empresa/me/recompensas', '/empresa/recompensas', '/recompensas'] : defaultEndpoints;
+
+      const isFormData = (typeof FormData !== 'undefined') && (body instanceof FormData);
+      
+      let formHasFile = false;
+      try {
+        if (isFormData) {
+          const fileCandidates = ['imagem', 'image', 'file', 'foto'];
+          for (const k of fileCandidates) {
+            try {
+              const v = body.get(k);
+              if (v && (typeof File !== 'undefined' && v instanceof File)) { formHasFile = true; break; }
+            } catch (e) {}
+          }
+        }
+      } catch (e) { formHasFile = false; }
+      if (isFormData) {
+        config.headers = config.headers || {};
+        if (Object.prototype.hasOwnProperty.call(config.headers, 'Content-Type')) delete config.headers['Content-Type'];
+      }
+
+      
+
+      
+      if (isFormData && formHasFile) {
+        
+        const idx = endpoints.indexOf('/recompensas');
+        if (idx > 0) endpoints.splice(idx, 1);
+        if (endpoints[0] !== '/recompensas') endpoints.unshift('/recompensas');
+      }
+
+      let lastErr = null;
+      for (const ep of endpoints) {
+        try {
+          const res = await api.post(ep, body, config);
+          return res.data;
+        } catch (err) {
+          lastErr = err;
+          console.warn('createRecompensa: tentativa', ep, 'falhou', err?.response?.status, err?.response?.data || err?.message);
+        }
+      }
+
+      
+      if (!isFormData) {
+        const wrappers = ['recompensa', 'data', 'body'];
+        for (const w of wrappers) {
+          try {
+            const wrapped = { [w]: body };
+            const res = await api.post('/recompensas', wrapped, config);
+            return res.data;
+          } catch (e) {
+            lastErr = e;
+            console.warn('createRecompensa: envelope', w, 'falhou', e?.response?.status, e?.response?.data || e?.message);
+          }
+        }
+      }
+
+      throw lastErr || new Error('createRecompensa: nenhum endpoint disponível');
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  updateRecompensa: async (id, dados, empresaOnly = false) => {
+    try {
+      try {
+        const isDev = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.MODE !== 'production') || (typeof process !== 'undefined' && process.env && process.env.NODE_ENV !== 'production');
+        if (isDev) {
+          try {
+            if (dados instanceof FormData) {
+              const entries = [];
+              for (const e of dados.entries()) entries.push([e[0], e[1] instanceof File ? `[File:${e[1].name}]` : e[1]]);
+              console.debug('[debug updateRecompensa] FormData entries:', entries);
+            } else {
+              console.debug('[debug updateRecompensa] JSON body:', dados);
+            }
+          } catch (e) { console.debug('[debug updateRecompensa] failed to log payload', e); }
+        }
+      } catch (e) {}
+      if (!id) throw new Error('updateRecompensa: id ausente');
+      let config = {};
+      let body = dados;
+      const isFormData = (typeof FormData !== 'undefined') && (body instanceof FormData);
+      if (isFormData) {
+        config.headers = config.headers || {};
+        if (Object.prototype.hasOwnProperty.call(config.headers, 'Content-Type')) delete config.headers['Content-Type'];
+      }
+
+      const endpoints = empresaOnly ? [`/empresa/recompensas/${encodeURIComponent(id)}`, `/empresa/me/recompensas/${encodeURIComponent(id)}`] : [`/recompensas/${encodeURIComponent(id)}`];
+
+      
+      try {
+        const resp = await api.put(`/recompensas/${encodeURIComponent(id)}`, body, config);
+        return resp.data;
+      } catch (err) {
+        
+      }
+
+      
+      try {
+        if (isFormData) {
+          try { if (!body.get('_method')) body.append('_method', 'PUT'); } catch (e) {}
+          const respPost = await api.post(`/recompensas/${encodeURIComponent(id)}`, body, config);
+          return respPost.data;
+        }
+      } catch (postErr) {
+        try {
+          const cfg2 = { ...(config || {}) };
+          cfg2.headers = { ...(cfg2.headers || {}), 'X-HTTP-Method-Override': 'PUT' };
+          const respPost2 = await api.post(`/recompensas/${encodeURIComponent(id)}`, body, cfg2);
+          return respPost2.data;
+        } catch (postErr2) {
+          
+        }
+      }
+
+      try {
+        const respPatch = await api.patch(`/recompensas/${encodeURIComponent(id)}`, body, config);
+        return respPatch.data;
+      } catch (patchErr) {
+        throw patchErr || new Error('updateRecompensa: falha ao atualizar');
+      }
+    } catch (error) {
       throw error;
     }
   },
@@ -231,6 +389,264 @@ export const dashboardService = {
       return Array.isArray(data) ? data.length : data.count || data.total || 0;
     } catch (error) {
       return 0;
+    }
+  },
+
+  getResgatesCountEmpresa: async (empresaId) => {
+    try {
+      const endpoints = [];
+      if (empresaId) {
+        endpoints.push(`/resgates?empresa=${encodeURIComponent(empresaId)}`);
+        endpoints.push(`/empresa/${encodeURIComponent(empresaId)}/resgates`);
+        endpoints.push(`/resgates/empresa/${encodeURIComponent(empresaId)}`);
+      }
+      
+      endpoints.push('/empresa/me/resgates');
+      endpoints.push('/resgates/meus');
+      endpoints.push('/resgates');
+
+      for (const ep of endpoints) {
+        try {
+          const res = await api.get(ep, { headers: { 'X-Skip-Auth-Redirect': '1' } });
+          const data = res.data;
+          if (Array.isArray(data)) {
+            if (!empresaId) return data.length;
+            
+            const filtered = data.filter(item => {
+              try {
+                const id1 = String(item.empresa?.id_empresa || item.empresa_id || item.id_empresa || item.empresa?._id || item.empresa || '');
+                const id2 = String(item.id_empresa || item.empresa_id || item.empresaId || item.empresa || '');
+                return id1 === String(empresaId) || id2 === String(empresaId);
+              } catch (e) { return false; }
+            });
+            return filtered.length;
+          }
+          if (data && (typeof data === 'object')) {
+            const possible = data.count || data.total || data.length || 0;
+            if (possible) return Number(possible);
+          }
+        } catch (e) {
+          
+          continue;
+        }
+      }
+      return 0;
+    } catch (error) {
+      return 0;
+    }
+  },
+
+  resgatarRecompensa: async (recompensaId, extra = {}) => {
+    try {
+
+      const endpoints = [];
+
+      if (recompensaId) endpoints.push(`/resgates/${encodeURIComponent(recompensaId)}`);
+
+      if (!recompensaId && extra && extra.codigo) endpoints.push(`/resgates/${encodeURIComponent(extra.codigo)}`);
+
+      endpoints.push('/resgates');
+      if (recompensaId) endpoints.push(`/recompensas/${encodeURIComponent(recompensaId)}/resgatar`, `/recompensas/${encodeURIComponent(recompensaId)}/resgate`);
+      endpoints.push('/recompensas/resgatar');
+      endpoints.push('/resgates/meus');
+
+      const payloadOptions = [];
+      if (recompensaId) {
+        payloadOptions.push({ id_recompensa: recompensaId });
+        payloadOptions.push({ id_recompresas: recompensaId });
+        payloadOptions.push({ id_recompensas: recompensaId });
+        payloadOptions.push({ recompensa_id: recompensaId });
+        payloadOptions.push({ id: recompensaId });
+        payloadOptions.push({ idRecompensa: recompensaId });
+        payloadOptions.push({ recompensa: recompensaId });
+      }
+
+      payloadOptions.push({});
+
+      let lastErr = null;
+      for (const ep of endpoints) {
+        for (const payload of payloadOptions) {
+          try {
+            const body = Object.keys(payload).length ? { ...payload, ...extra } : { ...extra };
+            const res = await api.post(ep, body);
+
+            try {
+              const me = await dashboardService.getMeusDados();
+              try {
+
+                const latestSaldo = await dashboardService.getSaldo().catch(() => null);
+                if (me && typeof me === 'object') {
+                  if (latestSaldo != null) me.saldo = latestSaldo;
+                  try { localStorage.setItem('user', JSON.stringify(me)); } catch (e) { }
+                          try { 
+                            console.debug('[api] resgatarRecompensa: dispatch user:updated', { me, latestSaldo });
+                            window.dispatchEvent(new CustomEvent('user:updated', { detail: me }));
+                          } catch (e) { console.warn('[api] resgatarRecompensa: dispatch failed', e); }
+                } else if (latestSaldo != null) {
+
+                          try { localStorage.setItem('saldo', String(latestSaldo)); } catch (e) {}
+                          try { 
+                            console.debug('[api] resgatarRecompensa: dispatch user:updated saldo', { latestSaldo });
+                            window.dispatchEvent(new CustomEvent('user:updated', { detail: { saldo: latestSaldo } })); 
+                          } catch (e) { console.warn('[api] resgatarRecompensa: dispatch failed', e); }
+                }
+              } catch (e) {
+
+              }
+            } catch (e) {
+
+            }
+            return res.data;
+          } catch (err) {
+            lastErr = err;
+          }
+        }
+      }
+      throw lastErr || new Error('resgatarRecompensa: nenhum endpoint disponível');
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  getMinhasFigurinhas: async () => {
+    try {
+      const response = await api.get('/meu-album-de-figurinhas');
+      return response.data;
+    } catch (error) {
+      console.error("Erro ao buscar figurinhas:", error);
+      return [];
+    }
+  },
+
+  getDashboardUsuario: async () => {
+    try {
+      const response = await api.get('/dashboard/usuario');
+      return response.data;
+    } catch (error) {
+      console.error("Erro ao buscar dashboard:", error);
+      throw error;
+    }
+  },
+
+  getMinhasFigurinhasCount: async () => {
+    try {
+      const dashboard = await dashboardService.getDashboardUsuario();
+      return dashboard.totalFigurinhas || dashboard.figurinhas || dashboard.count || 0;
+    } catch (error) {
+      return 0;
+    }
+  },
+
+  getMeusResgates: async () => {
+    try {
+      const dashboard = await dashboardService.getDashboardUsuario();
+      return dashboard.resgates || dashboard.recompensas || [];
+    } catch (error) {
+      return [];
+    }
+  },
+
+  getSaldo: async () => {
+    try {
+      const dashboard = await dashboardService.getDashboardUsuario();
+      
+      try { console.debug('[api] getSaldo: dashboard result', dashboard); } catch (e) {}
+      const result = dashboard?.saldo ?? dashboard?.saldo_moedas ?? dashboard?.estelitas ?? dashboard?.usuario?.saldo ?? 0;
+      try { console.debug('[api] getSaldo: resolved', { result }); } catch (e) {}
+      return result;
+    } catch (error) {
+      try { console.warn('[api] getSaldo: error', error); } catch (e) {}
+      return 0;
+    }
+  },
+
+  getMeusDados: async () => {
+    try {
+      const endpoints = [
+        '/me',
+        '/usuarios/updateMe',
+        '/usuarios/update-me',
+        '/usuarios/atualizar-me',
+        '/usuarios/me',
+        '/auth/me',
+        '/usuarios/perfil',
+      ];
+      for (const ep of endpoints) {
+        try {
+          const response = await api.get(ep);
+          return response.data;
+        } catch (e) {
+          if (e?.response?.status !== 404) throw e;
+        }
+      }
+      const stored = localStorage.getItem('user');
+      return stored ? JSON.parse(stored) : null;
+    } catch (error) {
+      const stored = localStorage.getItem('user');
+      return stored ? JSON.parse(stored) : null;
+    }
+  },
+
+  getHistoricoUsuario: async () => {
+    try {
+      const tryEndpoints = [
+        '/atividades/me',
+        '/atividades',
+        '/usuarios/me/atividades',
+        '/usuarios/atividades',
+        '/resgates/meus',
+        '/resgates',
+      ];
+      for (const ep of tryEndpoints) {
+        try {
+          const res = await api.get(ep);
+          const data = res.data;
+          if (Array.isArray(data)) return data;
+          if (data && Array.isArray(data.items)) return data.items;
+        } catch (e) {
+          if (e?.response?.status === 404) continue;
+          
+        }
+      }
+      return [];
+    } catch (error) {
+      return [];
+    }
+  },
+
+  atualizarMeusDados: async (dados) => {
+    try {
+      
+      const endpoint = '/usuarios/me';
+      try {
+        console.debug('[api] PUT', endpoint, dados);
+        const response = await api.put(endpoint, dados);
+        console.debug('[api] PUT response', response.status, response.data);
+        const updatedUser = response.data;
+
+        const stored = localStorage.getItem('user');
+        if (stored) {
+          try {
+            const user = JSON.parse(stored);
+            const merged = {
+              ...user,
+              ...updatedUser,
+              nome: dados.nome || dados.nome_completo || user.nome,
+              nome_completo: dados.nome_completo || dados.nome || user.nome_completo,
+            };
+            localStorage.setItem('user', JSON.stringify(merged));
+          } catch (e) {
+            
+          }
+        }
+        return updatedUser;
+      } catch (err) {
+        console.error('[api] PUT error', err?.response?.status, err?.response?.data || err.message);
+        throw err;
+      }
+      
+    } catch (error) {
+      throw error;
     }
   },
 
@@ -368,10 +784,25 @@ export const dashboardService = {
     }
   },
 
-  getPontosTuristicos: async () => {
+  getPontosTuristicos: async (options = {}) => {
     try {
-      const response = await api.get('/pontos-turisticos');
+      
+      const requestConfig = {};
+      if (options.forceReload) {
+        requestConfig.params = { _: Date.now() };
+      }
+      const response = await api.get('/pontos-turisticos', requestConfig);
       return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  getPontoTuristico: async (pontoId) => {
+    try {
+      if (!pontoId) throw new Error('getPontoTuristico: pontoId ausente');
+      const resp = await api.get(`/pontos-turisticos/${encodeURIComponent(pontoId)}`);
+      return resp.data;
     } catch (error) {
       throw error;
     }
@@ -429,11 +860,9 @@ export const dashboardService = {
           const resp = await api.get(p);
           return resp.data;
         } catch (e) {
-          // tentar próximo
         }
       }
     } catch (error) {
-      // tentar outros caminhos comuns
       try {
         const resp2 = await api.get(`/qrcodes/resolve?token=${encodeURIComponent(token)}`);
         return resp2.data;
@@ -446,23 +875,17 @@ export const dashboardService = {
   visitarViaQr: async (token) => {
     try {
       if (!token) throw new Error('visitarViaQr: token ausente');
-      // Primeiro tentar o endpoint que o backend tem: POST /visitas/qr?token=...
       try {
-        console.debug('visitarViaQr: tentando primeiro POST /visitas/qr?token=...');
         const respDirect = await api.post(`/visitas/qr?token=${encodeURIComponent(token)}`, {});
-        console.debug('visitarViaQr: POST /visitas/qr OK', respDirect?.status, respDirect?.data);
         return respDirect.data;
       } catch (firstErr) {
         const statusFirst = firstErr?.response?.status || null;
-        // se já possui figurinha (409), retornar a resposta do servidor como sucesso sem lançar
         if (statusFirst === 409) {
-          try { return firstErr.response.data; } catch (e) { /* fallthrough */ }
+          try { return firstErr.response.data; } catch (e) { }
         }
         console.warn('visitarViaQr: POST /visitas/qr inicial falhou, seguindo para outros endpoints', statusFirst, firstErr?.response?.data || firstErr?.message || firstErr);
-        // continuar com tentativas alternativas
       }
 
-      // Priorizar POST /qr com payload { token } (ou chaves similares). Depois tentar GET /qr?token=...
       const endpoint = '/qr';
       const payloadKeys = ['token', 'id_qr_code', 'id_qrcode', 'id', 'codigo', 'code', 'qr'];
       const headersJson = { 'Content-Type': 'application/json' };
@@ -475,13 +898,10 @@ export const dashboardService = {
         if (t) authHeader.Authorization = `Bearer ${t}`;
       } catch (e) {}
 
-      // tentar POST /qr com várias chaves (JSON e form)
       for (const key of payloadKeys) {
         const body = { [key]: token };
         try {
-          console.debug('visitarViaQr: tentando POST', endpoint, 'payloadKey:', key, 'body:', body);
           const res = await api.post(endpoint, body, { headers: { ...headersJson, ...authHeader } });
-          console.debug('visitarViaQr: resposta OK', endpoint, res?.status, res?.data);
           return res.data;
         } catch (e) {
           lastErr = e;
@@ -490,9 +910,7 @@ export const dashboardService = {
         try {
           const params = new URLSearchParams();
           params.append(key, token);
-          console.debug('visitarViaQr: tentando POST form', endpoint, 'field:', key, 'params:', params.toString());
           const res2 = await api.post(endpoint, params.toString(), { headers: { ...headersForm, ...authHeader } });
-          console.debug('visitarViaQr: resposta OK (form)', endpoint, res2?.status, res2?.data);
           return res2.data;
         } catch (e) {
           lastErr = e;
@@ -500,7 +918,6 @@ export const dashboardService = {
         }
       }
 
-      // tentar GET /qr?token=...
       try {
         const resg = await api.get(`${endpoint}?token=${encodeURIComponent(token)}`, { headers: { ...authHeader } });
         return resg.data;
@@ -508,24 +925,18 @@ export const dashboardService = {
         lastErr = eg;
       }
 
-      // Fallback: algumas versões do backend expõem POST em /visitas/qr?token=... (sem corpo)
       try {
-        console.debug('visitarViaQr: tentando fallback POST /visitas/qr?token=...');
         const respFallback = await api.post(`/visitas/qr?token=${encodeURIComponent(token)}`, {}, { headers: { ...authHeader } });
-        console.debug('visitarViaQr: fallback /visitas/qr OK', respFallback?.status, respFallback?.data);
         return respFallback.data;
       } catch (efb) {
         lastErr = efb;
         console.warn('visitarViaQr: fallback POST /visitas/qr falhou', efb?.response?.status, efb?.response?.data || efb?.message || efb);
       }
 
-      // Último recurso: tentar com chamada absoluta (algumas configurações do axios/baseURL conflitantes)
       try {
         const jwt = (typeof localStorage !== 'undefined') ? localStorage.getItem('token') : null;
         const headersAbs = jwt ? { Authorization: `Bearer ${jwt}` } : {};
-        console.debug('visitarViaQr: tentando fallback absoluto', API_BASE_URL + `/visitas/qr?token=${encodeURIComponent(token)}`);
         const absResp = await axios.post(`${API_BASE_URL}/visitas/qr?token=${encodeURIComponent(token)}`, {}, { headers: headersAbs });
-        console.debug('visitarViaQr: fallback absoluto OK', absResp?.status, absResp?.data);
         return absResp.data;
       } catch (eabs) {
         lastErr = eabs;
@@ -572,8 +983,6 @@ export const dashboardService = {
         }
       } catch (e) {}
 
-      console.log('createPontoTuristico: payload final (antes de filtrar) ->', jsonPayload);
-
       if (!jsonPayload.nome || String(jsonPayload.nome).trim() === '') {
         throw new Error('createPontoTuristico: campo "nome" é obrigatório');
       }
@@ -594,15 +1003,12 @@ export const dashboardService = {
         if (allowed.has(k)) finalPayload[k] = jsonPayload[k];
       }
 
-      console.log('createPontoTuristico: payload enviado ->', finalPayload);
-
       const endpoints = ['/pontos-turisticos'];
       const config = { headers: { 'Content-Type': 'application/json' } };
       let lastErr = null;
       for (const ep of endpoints) {
         try {
           const res = await api.post(ep, finalPayload, config);
-          console.log('createPontoTuristico: resposta OK', ep, res.status, res.data);
           return res.data;
         } catch (err) {
           lastErr = err;
@@ -686,7 +1092,7 @@ export const dashboardService = {
 
   getEventos: async () => {
     try {
-      const response = await api.get('/eventos');
+      const response = await api.get('/eventos', { headers: { 'X-Skip-Auth-Redirect': '1' } });
       return response.data;
     } catch (error) {
       throw error;
@@ -745,18 +1151,20 @@ export const dashboardService = {
       let config = {};
       let body = dados;
       const endpoints = ['/eventos', '/empresa/me/eventos', '/empresa/eventos', '/eventos/me'];
+      const isFormData = body instanceof FormData;
+      if (isFormData) {
+        config.headers = config.headers || {};
+        if (Object.prototype.hasOwnProperty.call(config.headers, 'Content-Type')) delete config.headers['Content-Type'];
+      }
       let lastError = null;
       for (const ep of endpoints) {
         try {
           if (body instanceof FormData) {
             const entries = [];
             for (const p of body.entries()) entries.push([p[0], p[1]]);
-            console.debug('createEvento: tentando endpoint', ep, 'com FormData:', entries);
           } else {
-            console.debug('createEvento: tentando endpoint', ep, 'com JSON:', body);
           }
           const response = await api.post(ep, body, config);
-          console.debug('createEvento: resposta OK', ep, response?.status, response?.data);
           return response.data;
         } catch (err) {
           lastError = err;
@@ -771,9 +1179,7 @@ export const dashboardService = {
           for (const w of wrappers) {
             try {
               const wrapped = { [w]: body };
-              console.debug('createEvento: tentando envelope', w, '->', wrapped);
               const res = await api.post('/eventos', wrapped, config);
-              console.debug('createEvento: resposta envelope OK', res?.status, res?.data);
               return res.data;
             } catch (e) {
               lastError = e;
@@ -825,8 +1231,70 @@ export const dashboardService = {
     try {
       let config = {};
       let body = dados;
-      const response = await api.put(`/eventos/${id}`, body, config);
-      return response.data;
+      const isFormData = (typeof FormData !== 'undefined') && (body instanceof FormData);
+      if (isFormData) {
+        config.headers = config.headers || {};
+        if (Object.prototype.hasOwnProperty.call(config.headers, 'Content-Type')) delete config.headers['Content-Type'];
+      }
+
+
+      try {
+        const response = await api.put(`/eventos/${encodeURIComponent(id)}`, body, config);
+        return response.data;
+      } catch (err) {
+
+
+        if (isFormData) {
+          try {
+
+            try {
+              if (!body.get('_method')) body.append('_method', 'PUT');
+            } catch (e) {}
+            const respPost = await api.post(`/eventos/${encodeURIComponent(id)}`, body, config);
+            return respPost.data;
+          } catch (postErr) {
+
+            try {
+              const cfg2 = { ...(config || {}) };
+              cfg2.headers = { ...(cfg2.headers || {}), 'X-HTTP-Method-Override': 'PUT' };
+              const respPost2 = await api.post(`/eventos/${encodeURIComponent(id)}`, body, cfg2);
+              return respPost2.data;
+            } catch (postErr2) {
+
+              try {
+                try { if (!body.get('_method')) body.append('_method', 'PUT'); } catch(e){}
+                try { if (!body.get('id')) body.append('id', String(id)); } catch(e){}
+                const respPost3 = await api.post('/eventos', body, config);
+                return respPost3.data;
+              } catch (postErr3) {
+
+                try {
+                  const respPost4 = await api.post(`/eventos?_method=PUT`, body, config);
+                  return respPost4.data;
+                } catch (postErr4) {
+                  console.warn('updateEvento: multiple POST fallbacks failed', postErr4?.response?.status);
+
+                  try {
+                    const respPatch = await api.patch(`/eventos/${encodeURIComponent(id)}`, body, config);
+                    return respPatch.data;
+                  } catch (patchErr) {
+                    console.warn('updateEvento: PATCH also failed', patchErr?.response?.status);
+                    throw postErr4 || postErr3 || postErr2 || postErr || patchErr || err;
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        try {
+          const resp2 = await api.patch(`/eventos/${encodeURIComponent(id)}`, body, config);
+          return resp2.data;
+        } catch (err2) {
+          console.warn('updateEvento: falha ao atualizar evento em /eventos/:id', err?.response?.status, err2?.response?.status);
+          throw err2 || err;
+        }
+      }
     } catch (error) {
       throw error;
     }
@@ -845,13 +1313,11 @@ export const authService = {
   register: async (user) => {
     try {
       if (!user) throw new Error('register: payload ausente');
-      // Try the canonical public registration endpoint first and only
       const nome = user.nome || user.name || user.nome_completo || user.nomeCompleto;
       const email = user.email || user.usuario || user.emailAddress;
       const senha = user.senha || user.password || user.pwd;
       const role = user.role || user.tipo || user.type || 'comum';
 
-      // backend expects exactly: nome_completo, email, senha
       const body = {
         ...(nome ? { nome_completo: nome } : {}),
         ...(email ? { email } : {}),
@@ -861,10 +1327,8 @@ export const authService = {
 
       try {
         const res = await api.post('/usuarios/cadastrar', body, { headers: { 'X-Skip-Auth-Redirect': '1' } });
-        console.debug('authService.register: /usuarios/cadastrar sucesso', res?.data);
         return res.data;
       } catch (err) {
-        // If backend returns 401 with message 'Token não fornecido', surface a clearer error
         const status = err?.response?.status;
         const respData = err?.response?.data;
         console.warn('authService.register: /usuarios/cadastrar falhou', status, respData);
@@ -899,7 +1363,6 @@ export const authService = {
         lastErr = error;
       }
     }
-    // if we have an axios error with response, throw it so callers can inspect status/data
     if (lastErr) throw lastErr;
     throw new Error('Todas as tentativas falharam. Verifique email/senha ou backend.');
   },
@@ -907,7 +1370,6 @@ export const authService = {
     try {
       if (!emailOrPayload) throw new Error('requestPasswordReset: email ausente');
       const email = typeof emailOrPayload === 'string' ? emailOrPayload : (emailOrPayload.email || emailOrPayload.usuario || emailOrPayload.emailAddress);
-      // Backend esperado: forgotPassword(email) com body { email }
       const payloads = [ { email } ];
       const endpoints = [
         '/auth/forgot-password',
@@ -934,7 +1396,6 @@ export const authService = {
   verifyResetToken: async (token) => {
     try {
       if (!token) throw new Error('verifyResetToken: token ausente');
-      // Se o backend não expõe validação separada, apenas retorna sucesso direto.
       const tryPaths = [
         `/auth/validate-reset-token?token=${encodeURIComponent(token)}`,
       ];
@@ -943,7 +1404,6 @@ export const authService = {
           const resp = await api.get(p, { headers: { 'X-Skip-Auth-Redirect': '1' } });
           return resp.data;
         } catch (e) {
-          // se não existir, seguimos para reset direto
         }
       }
       return { ok: true };
@@ -985,6 +1445,47 @@ export const authService = {
       }
       if (lastErr) throw lastErr;
       throw new Error('resetPassword: nenhum endpoint respondeu');
+    } catch (error) {
+      throw error;
+    }
+  },
+  changePassword: async (senhaAtual, novaSenha) => {
+    try {
+      if (!senhaAtual || !novaSenha) throw new Error('changePassword: senhas ausentes');
+      const endpoints = [
+        '/usuarios/me/senha',
+        '/auth/change-password',
+        '/usuarios/change-password',
+        '/usuarios/alterar-senha',
+        '/auth/alterar-senha',
+      ];
+      const bodies = [
+        { senhaAtual, novaSenha },
+        { senha_atual: senhaAtual, nova_senha: novaSenha },
+        { currentPassword: senhaAtual, newPassword: novaSenha },
+      ];
+      let lastErr = null;
+      for (const ep of endpoints) {
+        for (const b of bodies) {
+          try {
+            const res = await api.put(ep, b);
+            return res.data;
+          } catch (err) {
+            if (err?.response?.status === 404 || err?.response?.status === 405) {
+              try {
+                const resPost = await api.post(ep, b);
+                return resPost.data;
+              } catch (errPost) {
+                lastErr = errPost;
+              }
+            } else {
+              lastErr = err;
+            }
+          }
+        }
+      }
+      if (lastErr) throw lastErr;
+      throw new Error('changePassword: nenhum endpoint respondeu');
     } catch (error) {
       throw error;
     }

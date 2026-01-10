@@ -1,6 +1,5 @@
 /* ===============================
    RESET LOCAL (ANTI CSS GLOBAL)
-================================ */
 .quem-somos p,
 .quem-somos strong {
   display: block;
@@ -9,7 +8,20 @@
 
 /* ===============================
    CONTEÚDO
-================================ */
+.quemsomos-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.quemsomos-page .conteudo {
+  flex: 1;
+}
+
+.quemsomos-page .footer {
+  margin-top: auto;
+}
+
 .conteudo {
   padding: 24px 0 56px;
   background-color: #ffffff;
@@ -52,11 +64,6 @@
 
 /* ===============================
    MISSÃO
-================================ */
-.missao {
-  background-color: #0a3d62;
-  color: #ffffff;
-  padding: 28px 16px;
   text-align: center;
   margin-bottom: 40px;
 }
@@ -74,9 +81,6 @@
 
 /* ===============================
    VALORES
-================================ */
-.valores {
-  padding: 0 12px;
 }
 
 .valores h2 {
@@ -88,11 +92,6 @@
 
 /* ===============================
    CARDS (SEM CONFLITO)
-================================ */
-.valores-cards {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
 }
 
 .valor-card {
@@ -120,11 +119,6 @@
 
 /* ===============================
    DESKTOP
-================================ */
-@media (min-width: 768px) {
-  .texto-projeto,
-  .valores {
-    padding: 0 24px;
   }
 
   .valores-cards {

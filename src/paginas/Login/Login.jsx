@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "../../components/button/Button";
 import "./Login.css";
 import Img from "../../assets/Logoimg.jpeg";
@@ -12,7 +12,6 @@ export function Login() {
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
-    const [debugInfo, setDebugInfo] = useState(null);
     const [mostrarSenha, setMostrarSenha] = useState(false);
 
     function toggleSenha() {
@@ -20,6 +19,7 @@ export function Login() {
     }
 
     const navigate = useNavigate();
+    const location = useLocation();
 
     const handleSubmit = async (e) => {
         if (e && typeof e.preventDefault === 'function') e.preventDefault();
@@ -45,9 +45,7 @@ export function Login() {
             }
 
             if (response.user) {
-                // save user immediately
                 localStorage.setItem('user', JSON.stringify(response.user));
-                // attempt to resolve associated company now so UI loads correct empresa before navigation
                 (async () => {
                     try {
                         const u = response.user;
@@ -94,7 +92,10 @@ export function Login() {
             const tipoIsAdmin = tipo === 'adm' || role === 'adm' || isAdmin === true;
             const tipoIsEmpresa = isEmpresa === true || tipo.includes('empresa') || tipo.includes('empreendedor') || role.includes('empresa') || role.includes('empreendedor');
 
-            if (tipoIsAdmin) {
+            const from = location?.state?.from;
+            if (from) {
+                navigate(from, { replace: true });
+            } else if (tipoIsAdmin) {
                 navigate('/admin-dashboard', { replace: true });
             } else if (tipoIsEmpresa) {
                 navigate('/empresa-dashboard', { replace: true });
@@ -104,13 +105,12 @@ export function Login() {
         } catch (err) {
             console.error('Erro no login:', err);
             setError('E-mail ou senha inválidos. Tente novamente.');
-            try { setDebugInfo({ status: err?.response?.status, data: err?.response?.data, message: err?.message }); } catch(e){}
         } finally {
             setLoading(false);
         }
     };
 
-    const navigation = useNavigate();
+    
 
     return (
 
@@ -124,56 +124,53 @@ export function Login() {
                 <h1 className="text-global">Login</h1>
                 <p className="subtitle-p">Entre na sua conta</p>
 
-                <div className="form-login-container">
-                    <input
-                        className="login-input"
-                        type="email"
-                        placeholder="E-mail"
-                        required
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                    />
-                    <FaUser className="img-cadeado" />
-                </div>
-
-                <div className="container-input-person">
-                    <input
-                        className="input-person"
-                        type={mostrarSenha ? "text" : "password"}
-                        placeholder="Senha"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                    />
-
-                    {mostrarSenha ? (
-                        <IoIosUnlock
-                        className="img-cadeado"
-                        onClick={toggleSenha}
+                <form onSubmit={handleSubmit}>
+                    <div className="form-login-container">
+                        <input
+                            className="login-input"
+                            type="email"
+                            placeholder="E-mail"
+                            required
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
                         />
-                    ) : (
-                        <IoIosLock
-                        className="img-cadeado"
-                        onClick={toggleSenha}
+                        <FaUser className="img-cadeado" />
+                    </div>
+
+                    <div className="container-input-person">
+                        <input
+                            className="input-person"
+                            type={mostrarSenha ? "text" : "password"}
+                            placeholder="Senha"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
                         />
+
+                        {mostrarSenha ? (
+                            <IoIosUnlock
+                            className="img-cadeado"
+                            onClick={toggleSenha}
+                            />
+                        ) : (
+                            <IoIosLock
+                            className="img-cadeado"
+                            onClick={toggleSenha}
+                            />
+                        )}
+                    </div>
+
+                    {error && (
+                        <p className="login-error" style={{ color: 'red', marginTop: 8 }}>{error}</p>
                     )}
-                </div>
 
-                {error && (
-                    <p className="login-error" style={{ color: 'red', marginTop: 8 }}>{error}</p>
-                )}
-
-                <Button text="Entrar" onClick={handleSubmit} disabled={loading} />
+                    <Button text="Entrar" disabled={loading} type="submit" />
+                </form>
 
                 <div className="form-login-request">
-                    <p><strong className="underline-login" onClick={() => navigate('/passwordreset')}>Esqueceu sua senha ?</strong></p>
+                    <p><strong className="underline-login" onClick={() => navigate('/password-reset')}>Esqueceu sua senha ?</strong></p>
                 <p>Não tem conta ? <strong className="underline-login" onClick={() => navigate('/register')}>Cadastre-se</strong></p>
                 </div>
-                {debugInfo && (
-                    <details style={{ marginTop: 12, background: '#fff7f7', padding: 10, borderRadius: 6 }}>
-                        <summary style={{ cursor: 'pointer', color: '#b00' }}>Detalhes da falha (debug)</summary>
-                        <pre style={{ whiteSpace: 'pre-wrap', marginTop: 8 }}>{JSON.stringify(debugInfo, null, 2)}</pre>
-                    </details>
-                )}
+                
             </div>
 
         </div>

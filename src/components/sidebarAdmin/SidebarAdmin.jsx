@@ -4,12 +4,11 @@ import "./SidebarAdmin.css";
 import { LuMenu } from "react-icons/lu";
 
 export function SidebarAdmin() {
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(() => (typeof window !== 'undefined' ? window.innerWidth >= 768 : true));
   const navigate = useNavigate();
   const location = useLocation();
 
   return (
-    <div className="layout">
       <aside className={open ? "sidebar open" : "sidebar"}>
         <div className="sidebar-header">
           <h2>{open ? "Olá, Admin!" : ""}</h2>
@@ -75,7 +74,6 @@ export function SidebarAdmin() {
           </li>
         </ul>
       </aside>
-    </div>
   );
 }
 

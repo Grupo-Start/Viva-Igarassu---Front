@@ -4,23 +4,23 @@
   font-family:'Poppins', sans-serif;
 }
 
-.layout {
-  display: flex;
-  height: auto;
-}
-
 .sidebar {
-  background-color:#0A3D62;
+  background-color: #0A3D62;
   color: #fff;
   width: 80px;
-  transition: width 0.3s ease;
-  overflow: hidden;
-  min-height: 100vh;
+  flex: 0 0 80px;
+  transition: width 0.28s ease;
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
   height: auto;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .sidebar.open {
   width: 280px;
+  flex: 0 0 280px;
 }
 
 .sidebar-header {
@@ -69,7 +69,10 @@
 .content {
   flex: 1;
   padding: 30px;
+  min-height: auto;
+  overflow-y: auto;
 }
+
 
 @media (max-width: 768px) {
   .sidebar {

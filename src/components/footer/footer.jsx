@@ -1,18 +1,18 @@
 import "./footer.css";
 import { Link } from "react-router-dom";
 
-export default function Footer() {
+export default function Footer({ admin = false }) {
   return (
-    <footer className="footer">
+    <footer className={`footer ${admin ? 'footer-admin' : ''}`} id="contato">
       <div className="footer-container">
 
             <div className="footer-logo">
-            <img src="header-logo.png" alt="logo viva igarassu" />
-        </div>
+              <img src="/header-logo.png" alt="logo viva igarassu" />
+              </div>
 
         <div className="footer-links">
           <h4>Links úteis</h4>
-          <Link to="/home">Home</Link>
+          <Link to="/">Home</Link>
           <Link to="/quem-somos">Quem somos</Link>
           <Link to="/cidade">A cidade</Link>
         </div>

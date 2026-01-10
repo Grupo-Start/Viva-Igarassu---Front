@@ -1,0 +1,132 @@
+.container-tokenreset {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100vh;
+}
+
+.container-imagem-tokenreset {
+  height: 100vh;
+  width: 70%;
+  display: flex;
+  justify-content: end;
+  align-items: center;
+  padding: 50px 0;
+}
+
+.img-tokenreset {
+  width: 800px;
+  height: 550px;
+}
+
+.form-tokenreset {
+  padding: 60px;
+  display: flex;
+  flex-direction: column;
+  width: 35%;
+  min-height: 100vh;
+  font-family: "Poppins", sans-serif;
+  align-items: center;
+  color: darkcyan;
+  background-color: #DCE5F1;
+  justify-content: center;
+}
+
+.form-tokenreset h2 {
+  font-size: clamp(1.4rem, 5vw, 3.0rem);
+  margin-bottom: -5px;
+  text-align: center;
+  font-weight: 100px;
+}
+
+.subtitle-token {
+  margin: 25px;
+  font-weight: 600;
+  text-align: center;
+  font-size: clamp(0.9rem, 2.5vw, 1.2rem);
+  color: black;
+}
+
+.form-tokenreset-container {
+  display: flex;
+  width: 100%;
+  gap: 5px;
+  padding: 9px 10px;
+  margin-bottom: 32px;
+  border: 1px solid #53a5f7;
+  border-radius: 10px;
+  background-color: white;
+  align-items: center;
+}
+
+.tokenreset-input {
+  width: 100%;
+  background-color: transparent;
+  border: none;
+  outline: none;
+  height: 100%;
+  font-size: 15px;
+}
+
+.icon-lock {
+  font-size: 20px;      
+}
+
+.btn-tokenreset {
+  padding: 12px 20px;
+  background-color: #53a5f7;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: 0.3s;
+  
+}
+
+.btn-tokenreset:hover {
+  background-color: #0f7ae5;
+}
+
+@media (max-width: 320px) {
+  .container-imagem-tokenreset {
+    display: none;
+  }
+
+  .form-tokenreset {
+    width: 100%;
+  }
+
+  .form-tokenreset h2 {
+    font-size: 28px;
+  }
+}
+
+@media (max-width: 768px) {
+  .container-tokenreset {
+    flex-direction: column;
+  }
+
+  .container-imagem-tokenreset {
+    display: none;
+  }
+
+  .img-tokenreset {
+    width: 100%;
+    max-width: 0;
+  }
+
+  .form-tokenreset {
+    width: 100%;
+    padding: 20px;
+  }
+
+  .container-imagem-tokenreset {
+    padding: 0;
+  }
+
+  .form-tokenreset h2 {
+    font-size: 40px;
+  }
+}

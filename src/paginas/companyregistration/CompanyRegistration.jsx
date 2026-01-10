@@ -13,7 +13,6 @@ export function CompanyRegistration() {
     const [servico, setServico] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-    const [debugInfo, setDebugInfo] = useState(null);
     const navigate = useNavigate();
     return (
         
@@ -69,24 +68,11 @@ export function CompanyRegistration() {
                 
 
                 {error && <p style={{ color: 'crimson' }}>{error}</p>}
-                {debugInfo && (
-                    <details style={{ marginTop: 12, background: '#fff7f7', padding: 10, borderRadius: 6 }}>
-                        <summary style={{ cursor: 'pointer', color: '#b00' }}>Mostrar detalhes do erro</summary>
-                        <pre style={{ whiteSpace: 'pre-wrap', marginTop: 8 }}>{JSON.stringify(debugInfo, null, 2)}</pre>
-                    </details>
-                )}
-                <div style={{ marginTop: 8 }}>
-                    <details style={{ marginTop: 6, background: '#fff7f7', padding: 8, borderRadius: 6 }}>
-                        <summary style={{ cursor: 'pointer', color: '#b00' }}>Informações de sessão (debug)</summary>
-                        <pre style={{ whiteSpace: 'pre-wrap', marginTop: 8 }}>{JSON.stringify({ token: localStorage.getItem('token'), user: (() => { try { return JSON.parse(localStorage.getItem('user')||'null') } catch(e){ return localStorage.getItem('user') } })() }, null, 2)}</pre>
-                    </details>
-                </div>
                 <Button disabled={loading} text={loading ? 'Enviando...' : 'Enviar'} onClick={async (e) => {
                     e.preventDefault();
                     setError(null);
                     setLoading(true);
                     try {
-                        // normalize and build payload with common aliases expected by backend
                         let rawCnpj = (cnpj || '').toString();
                         const cnpjDigits = rawCnpj.replace(/\D/g, '');
                         const sessionUserRaw = localStorage.getItem('user');
@@ -108,14 +94,11 @@ export function CompanyRegistration() {
                         const token = localStorage.getItem('token');
                         if (!token) throw new Error('Token ausente. Complete cadastro da pessoa e aguarde login automático.');
                         const res = await api.post('/empresa', payload, { headers: { Authorization: `Bearer ${token}`, 'X-Skip-Auth-Redirect': '1' } });
-                        // após cadastro de empresa, atualizar localStorage.user com dados da empresa (se retornados) e ir ao dashboard da empresa
-                        // normalize response: company may be nested under `data.empresa`, `empresa` or returned directly
                         let companyObj = res?.data || res;
                         if (companyObj && companyObj.empresa) companyObj = companyObj.empresa;
                         if (companyObj && Array.isArray(companyObj) && companyObj.length) companyObj = companyObj[0];
                         if (companyObj && companyObj.data && companyObj.data.empresa) companyObj = companyObj.data.empresa;
 
-                        // If we have an identifier, fetch the canonical company object from the API
                         const resolveCompanyFromId = async (maybe) => {
                             const resolvedId = maybe?.id || maybe?._id || maybe?.id_empresa || maybe?.empresa_id || null;
                             if (!resolvedId) return null;
@@ -136,9 +119,7 @@ export function CompanyRegistration() {
                             if (full) companyObj = full;
                         }
 
-                        // fallback: if backend didn't return identifying fields, try to find created company by CNPJ or name
                         if ((!companyObj || !(companyObj?.id || companyObj?._id || companyObj?.id_empresa || companyObj?.nome_empresa))) {
-                            // try targeted query by CNPJ first (if available)
                             try {
                                 if (cnpjDigits) {
                                     try {
@@ -148,7 +129,6 @@ export function CompanyRegistration() {
                                             companyObj = arrq[0];
                                         }
                                     } catch (e) {
-                                        // ignore and fall back to listing
                                     }
                                 }
                                 if (!companyObj) {
@@ -169,11 +149,9 @@ export function CompanyRegistration() {
                                     if (found) companyObj = found;
                                 }
                             } catch (e) {
-                                // ignore
                             }
                         }
 
-                        // If we resolved an object with an id, do one more GET to obtain canonical shape
                         if (companyObj && (companyObj?.id || companyObj?._id || companyObj?.id_empresa || companyObj?.empresa_id)) {
                             const full2 = await resolveCompanyFromId(companyObj);
                             if (full2) companyObj = full2;
@@ -185,7 +163,6 @@ export function CompanyRegistration() {
                             const resolvedId = companyObj?.id || companyObj?._id || companyObj?.id_empresa || companyObj?.empresa_id || null;
                             const merged = {
                                 ...current,
-                                // multiple aliases for compatibility across the app
                                 empresa: resolvedId || current.empresa,
                                 id_empresa: resolvedId || current.id_empresa,
                                 empresa_id: resolvedId || current.empresa_id,
@@ -197,11 +174,8 @@ export function CompanyRegistration() {
                                 empresa_obj: companyObj || current.empresa_obj || companyObj,
                             };
                             localStorage.setItem('user', JSON.stringify(merged));
-                            // expose debug info in UI so developer can inspect what was saved
-                            try { setDebugInfo({ savedUser: merged, detectedCompany: companyObj }); } catch(e){}
-                            // notify same-window listeners
+                            
                             try { window.dispatchEvent(new Event('localUserChange')); } catch(e){}
-                            // fallback: force full reload to ensure all components read updated localStorage
                             try { setTimeout(() => { window.location.reload(); }, 150); } catch(e) {}
                         } catch (e) {}
                         navigate('/empresa-dashboard');
@@ -209,7 +183,6 @@ export function CompanyRegistration() {
                             const msg = err?.response?.data?.message || err?.message || 'Erro ao cadastrar empresa';
                             const info = { status: err?.response?.status, responseData: err?.response?.data };
                             setError(String(msg));
-                            setDebugInfo(info);
                             console.warn('CompanyRegistration erro', info);
                     } finally {
                         setLoading(false);

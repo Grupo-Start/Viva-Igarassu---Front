@@ -1,0 +1,265 @@
+
+.dashboard-layout-container {
+  display: flex;
+  align-items: stretch;
+  min-height: calc(100vh - 70px);
+}
+
+.dashboard-layout-container nav {
+  flex-shrink: 0;
+  transition: width 0.3s ease;
+}
+
+h1,hr{
+    color:#2C5782;
+}
+
+.usuario-dashboard-main {
+  flex: 1;
+  padding: 30px;
+  background-color: #f8f9fa; 
+  color: #333;
+  overflow-x: hidden;
+  min-width: 0;
+  transition: all 0.3s ease;
+}
+
+.usuario-dashboard-main h1 {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.usuario-dashboard-main hr {
+  border: 0;
+  border-top: 1px solid #ddd;
+  margin-bottom: 30px;
+}
+
+.conquistas-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+  width: 100%;
+  grid-auto-rows: 1fr;
+  align-items: stretch;
+}
+
+.conquistas-container {
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 38px;
+  padding-right: 20px;
+}
+
+.giftcard-usuario-dashboard {
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 12px;
+  padding-right: 12px;
+}
+
+.conquista-card, .conquista-card2 {
+  background: linear-gradient(135deg, #4BBFBF 0%, #2C5782 94%);
+  color: white;
+  padding: 8px;
+  border-radius: 10px;
+  width: 100%;
+  max-width: 320px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 100%;
+  border: none;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  box-sizing: border-box;
+  line-height: 1.05;
+}
+
+.conquista-card:hover, .conquista-card2:hover {
+  transform: scale(1.02);
+}
+
+.conquista-card h2, .conquista-card2 h2 {
+  font-size: 0.8rem;
+  margin: 0;
+  line-height: 1.05;
+}
+
+.conquista-card2 {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.conquista-card2 h2 {
+  font-size: 0.86rem;
+  font-weight: 800;
+  margin: 0;
+  line-height: 1.05;
+}
+
+.conquista-card {
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  text-align: left;
+  gap: 20px;
+}
+
+.conquista-card .moeda {
+  width: 83px;
+  height: 83px;
+  object-fit: contain;
+  margin: 0;
+}
+
+.conquista-card3 {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 16px;
+}
+
+.conquista-card3 .figurinha {
+  width: 83px;
+  height: 83px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.conquista-card3 {
+  width: 100%;
+  max-width: 320px;
+  height: 100%;
+}
+
+.conquista-card h2 {
+  font-size: 1.05rem;
+  font-weight: 800;
+  margin: 0;
+  line-height: 1.15;
+}
+
+.resgate-recompensa {
+    color:#2C5782
+ }
+
+ .giftcard-usuario-dashboard{
+   display: grid;
+   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+   grid-auto-rows: 1fr;
+   gap: 20px;
+   justify-items: center;
+   align-items: stretch;
+ }
+
+
+@media (max-width: 1024px) {
+    .usuario-dashboard-main {
+        padding: 24px;
+    }
+
+    .conquista-card, .conquista-card2 {
+      flex: 1 1 48%;
+      padding: 8px;
+      max-width: none;
+    }
+
+    .conquista-card .moeda {
+      width: 90px;
+      height: 90px;
+    }
+
+    .conquista-card h2, .conquista-card2 h2 {
+      font-size: 1rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .usuario-dashboard-main {
+        padding: 16px;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .usuario-dashboard-main h1 {
+        font-size: 20px;
+        text-align: left;
+    }
+
+    .conquistas-container {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      width: 100%;
+    }
+
+    .conquista-card, .conquista-card2 {
+      min-width: auto;
+      width: 100%;
+      flex-direction: column;
+      text-align: center;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    .conquista-card .moeda {
+      width: 53px;
+      height: 53px;
+      margin-bottom: 10px;
+    }
+
+    .conquista-card h2 {
+      font-size: 1rem;
+      text-align: center;
+    }
+
+    .conquista-card2 h2 {
+      font-size: 1.1rem;
+    }
+
+    .resgate-conrainer {
+        width: 100%;
+    }
+
+    .resgate-recompensa {
+        font-size: 16px;
+        text-align: left;
+    }
+
+    .giftcard-usuario-dashboard {
+      grid-template-columns: 1fr;
+      justify-items: center;
+      gap: 16px;
+      width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .usuario-dashboard-main {
+        padding: 12px;
+    }
+
+    .usuario-dashboard-main h1 {
+        font-size: 16px;
+    }
+
+    .conquista-card .moeda {
+      width: 45px;
+      height: 45px;
+    }
+
+    .conquista-card h2, .conquista-card2 h2 {
+      font-size: 0.95rem;
+    }
+
+    .conquista-card, .conquista-card2 {
+        padding: 16px;
+        border-radius: 10px;
+    }
+}

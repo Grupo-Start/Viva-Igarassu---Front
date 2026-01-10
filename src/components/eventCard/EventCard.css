@@ -1,0 +1,79 @@
+.event-card {
+  background: #fff;
+  border: 1px solid #e6eef0;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 6px 18px rgba(6, 37, 58, 0.06);
+  display: flex;
+  flex-direction: column;
+}
+
+.event-image-wrap {
+  position: relative;
+  width: 100%;
+  height: 160px;
+  overflow: hidden;
+}
+
+.event-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.event-badge {
+  position: absolute;
+  left: 12px;
+  top: 12px;
+  background: rgba(9, 93, 107, 0.95);
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 14px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.event-card-content {
+  padding: 14px 16px 18px 16px;
+}
+
+.event-title {
+  font-size: 16px;
+  margin: 0 0 6px;
+  color: #08303b;
+  font-weight: 700;
+}
+
+.event-month {
+  font-size: 13px;
+  color: #41a39a;
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+
+.event-date {
+  font-size: 13px;
+  color: #6b7d80;
+  margin: 2px 0;
+}
+
+.event-time {
+  font-size: 13px;
+  color: #6b7d80;
+  margin: 2px 0 6px 0;
+}
+
+.event-location {
+  font-size: 13px;
+  color: #4b5b5d;
+  margin: 6px 0 10px 0;
+  display: flex;
+  align-items: center;
+}
+.loc-icon { font-size: 16px; margin-right: 8px; color: #3b4b4d }
+
+.event-cta { text-align: center; }
+.event-cta .btn-primary { padding: 8px 14px; font-size: 13px; border-radius: 18px }
+.event-cta .btn-primary:hover { filter: brightness(0.95) }

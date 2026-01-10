@@ -32,6 +32,16 @@
   line-height: 1.4;
 }
 
+.faixa-link {
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.faixa-link:hover {
+  color: #46c7c2;
+  text-decoration: underline;
+}
+
 .hero {
   margin-top: 140px;
   text-align: center;
@@ -59,7 +69,7 @@
   margin: 32px auto 0;
   padding: 20px 32px;
   background: #ffffff;
-  border: 1px solid #4BBFBF;
+  border: 1px solid #4ec3bf;
   border-radius: 8px;
   box-shadow: 0px 4px 12px rgba(98, 95, 10, 0.2);
   font-family: "Poppins", sans-serif;
@@ -96,7 +106,6 @@
   align-items: stretch;
 }
 
-/* Ensure desktop layout shows 2 columns x 2 rows for the Como funciona cards */
 @media (min-width: 900px) {
   .cards {
     display: grid !important;
@@ -114,7 +123,6 @@
   }
 }
 
-/* Desktop card appearance: icon above title, centered (2x2 layout) */
 @media (min-width: 900px) {
   .card {
     display: flex;
@@ -126,6 +134,7 @@
     gap: 12px;
     min-height: 160px;
     border-radius: 16px;
+    border: 1px solid #4ec3bf;
   }
 
   .card-icon {
@@ -156,7 +165,7 @@
   max-width: 520px;
   min-height: 160px;
   background: #ffffff;
-  border: 1px solid rgba(9, 98, 140, 0.10);
+  border: 1px solid #4ec3bf;
   box-shadow: none;
   border-radius: 22px;
   padding: 28px 32px;
@@ -194,9 +203,6 @@
 
 .card p {
   margin: 0;
-}
-
-.card p {
   font-family: "Poppins", sans-serif;
   font-size: 16px;
   line-height: 1.4;
@@ -210,7 +216,7 @@
   padding: 48px 20px;
   text-align: center;
   background: #ffffff;
-  border: 1px solid rgba(44,93,143,0.12);
+  border: 1px solid #4ec3bf;
   border-radius: 16px;
 }
 
@@ -228,33 +234,11 @@
   margin-bottom: 24px;
 }
 
-.cta-btn {
-  background: #4ec3bf;
-  color: #ffffff;
-  border: none;
-  padding: 14px 36px;
-  font-size: 16px;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  border-radius: 999px;
-  cursor: pointer;
-  transition: opacity 0.2s ease;
-}
-
-.cta-btn:hover {
-  opacity: 0.9;
-}
-
-/* Hero CTAs */
 .hero-ctas{display:flex;gap:12px;justify-content:center;margin-top:20px}
 .btn-primary{background:#4ec3bf;color:#ffffff;border:none;padding:12px 20px;border-radius:8px;font-weight:700;cursor:pointer}
 .btn-primary:hover{opacity:0.95;transform:translateY(-2px)}
 .btn-secondary{background:transparent;color:#083b5c;border:2px solid #083b5c;padding:10px 18px;border-radius:8px;font-weight:700;cursor:pointer}
 .btn-secondary:hover{background:#083b5c;color:#fff}
-
-
-
-
 
 @media (max-width: 520px) {
   .hero h1,
@@ -279,12 +263,12 @@
     padding: 18px;
     min-height: 120px;
     border-radius: 12px;
+    border: 1px solid #4ec3bf;
   }
 
   .faixa-topo-historico h2 { font-size: 28px; }
 
   .trail-timeline { padding: 0 12px; max-width: 100%; }
-  /* Keep the vertical timeline line visible on mobile as well */
   .trail-timeline::before { display: block; }
   .timeline-row { display: grid; grid-template-columns: 1fr; gap: 12px; min-height: auto; padding: 8px 0; }
   .timeline-circle { width: 72px; height: 72px; margin: 0 auto 12px; }
@@ -296,10 +280,10 @@
   .lista-locais { width: 100%; }
 }
 
-/* .card-icon — configured above with explicit sizing for card layout */
-
 .faixa-topo-historico {
-  position: static;
+  position: relative;
+  z-index: 6;
+  overflow: visible;
   width: 100%;
   height: 62px;
   margin: 40px 0 80px;
@@ -316,13 +300,6 @@
   font-size: 40px;
   font-weight: 900;
   color: #ffffff;
-}
-
-/* ensure faixa-topo-historico stays visible and above other content */
-.faixa-topo-historico {
-  position: relative;
-  z-index: 6;
-  overflow: visible;
 }
 
 .tag-historico {
@@ -345,13 +322,10 @@
   border-radius: 8px;
 }
 
-/* Trilha: pontos em formato de cards alinhados horizontalmente com estado locked/unlocked */
-
-
 .trail-timeline {
   display: flex;
   flex-direction: column;
-  gap: 28px; /* vertical spacing between points */
+  gap: 28px;
   align-items: stretch;
   margin: 24px auto;
   max-width: 920px;
@@ -368,14 +342,14 @@
 .trail-timeline::before {
   content: '';
   position: absolute;
-  left: 60px; /* center of circle column */
+  left: 60px;
   top: 12px;
   bottom: 12px;
   width: 2px;
   background-image: linear-gradient(#cfe8ee 33%, rgba(255,255,255,0) 0%);
   background-size: 2px 12px;
   background-repeat: repeat-y;
-  z-index: 0; /* behind masking */
+  z-index: 0;
 }
 
 .timeline-row { display: grid; grid-template-columns: 120px 1fr; align-items: center; gap: 28px; padding: 12px 0; min-height: 120px; }
@@ -394,10 +368,8 @@
   color: #fff;
   box-shadow: 0 6px 14px rgba(2,6,23,0.06);
   transition: transform 140ms ease;
-  z-index: 3; /* above the vertical line */
+  z-index: 3;
 }
-
-/* removed mask so circles remain fully visible */
 
 .timeline-circle.unlocked { background: #ffd454; color: #083b5c; }
 .timeline-circle.locked { background: #2fa9a6; color: #fff; opacity: 0.98 }
@@ -412,7 +384,7 @@
   display: block;
   border: 6px solid #ffffff;
   position: relative;
-  z-index: 4; /* ensure image is above the mask */
+  z-index: 4;
 }
 
 .timeline-badge {
@@ -432,7 +404,6 @@
 .timeline-labels { display: block; }
 .timeline-label__text { font-family: 'Poppins', sans-serif; font-size:18px; color:#083b5c; padding-left: 12px; text-align: left; max-width:520px; }
 
-/* Mobile narrow: preserve layout, scale and stack to fit <= 375px */
 @media (max-width: 375px) {
   .imagem-topo img {
     height: 160px;
@@ -461,7 +432,6 @@
   .como-funciona { margin: 32px auto 24px; }
   .como-funciona h2 { font-size: 22px; margin-bottom: 24px; }
 
-  /* Stack cards vertically and center */
   .cards {
     display: flex;
     flex-direction: column;
@@ -493,7 +463,6 @@
   .hero-ctas { flex-direction: column; gap: 10px; align-items: center; }
   .btn-primary, .btn-secondary { width: 100%; max-width: 260px; padding: 12px 16px; font-size: 14px; }
 
-  /* Timeline centered */
   .trail-timeline { padding: 0 16px; max-width: 100%; align-items: center; }
   .trail-timeline::before { left: 50%; transform: translateX(-50%); }
   .timeline-row { 
@@ -511,10 +480,8 @@
 
   .imagem-trilha { width: 100%; max-width: 100%; margin-bottom: 16px; border-radius: 8px; }
 
-  /* center the list and timeline column on narrow screens */
   .lista-locais { display: flex; flex-direction: column; align-items: center; padding: 0 16px; }
 
-  /* keep spacing compact but visible */
   .faixa-topo-historico {
     margin: 24px 16px;
     padding: 14px 16px;
@@ -531,7 +498,5 @@
   }
 
   .faixa-topo-historico h2 { font-size: 18px; text-align: center; color: #fff; margin: 0; }
-  /* hide the hash/tag on very narrow screens to save vertical space */
   .tag-historico { display: none; }
 }
-

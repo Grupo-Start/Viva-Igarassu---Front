@@ -155,7 +155,6 @@ export default function EventsChart({ data = null, empresaId = null, height = 30
   }, [source]);
 
   if (import.meta.env.MODE === 'development') {
-    try { console.debug('EventsChart monthly:', monthly); } catch (e) {}
   }
 
   if (loading) return <div className="visits-chart-container">Carregando gráfico...</div>;
@@ -170,7 +169,7 @@ export default function EventsChart({ data = null, empresaId = null, height = 30
           <YAxis />
           <Tooltip formatter={(value) => value} />
           <Legend formatter={() => 'Eventos'} />
-          <Line type="monotone" dataKey="eventos" stroke="#0A84FF" strokeWidth={2} activeDot={{ r: 6 }} />
+          <Line type="monotone" dataKey="eventos" stroke="#46c7c2" strokeWidth={2} activeDot={{ r: 6 }} />
         </LineChart>
       </ResponsiveContainer>
     </div>
