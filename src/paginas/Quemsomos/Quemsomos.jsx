@@ -1,94 +1,88 @@
 import "./Quemsomos.css";
 import Footer from "../../components/footer/Footer";
-import Header from "../../components/header/header";
+import Header from "../../components/header/Header";
+import { FaLandmark, FaLightbulb, FaUniversalAccess } from 'react-icons/fa';
 
 export function Quemsomos() {
   return (
     <>
       <Header />
-
-      <main className="conteudo">
-        {/* TOPO */}
-        <div className="topo-viva">
-          <span className="viva-texto">VIVA</span>
-          <img
-            src="/Igarassu.png"
-            alt="Igarassu"
-            className="igarassu-img"
-          />
-        </div>
-
-        {/* TEXTO DO PROJETO */}
-        <section className="quem-somos">
-          <div className="texto-projeto">
-            <p>
-              O Projeto Viva Igarassu tem como objetivo promover e modernizar a
-              experiência turística na cidade, conectando visitantes aos
-              principais pontos históricos, culturais, religiosos e naturais de
-              Igarassu, Pernambuco.
-            </p>
-            <br />
-            <p>
-              Cada ponto turístico do sítio histórico contará com um QR Code
-              exclusivo, permitindo que o visitante registre sua presença e
-              acumule pontos, conquistas e recompensas dentro da plataforma.
-            </p>
-            <br />
-            <p>
-              A iniciativa transforma a visitação em uma jornada interativa,
-              divertida e educativa, incentivando o conhecimento da cultura
-              local, o aumento do fluxo turístico e o fortalecimento da economia
-              e da identidade cultural da região.
-            </p>
-            <br />
+      <div className="quemsomos-bg">
+        <main className="conteudo">
+          <div className="topo-viva">
+            <span className="viva-texto">QUEM SOMOS</span>
           </div>
 
-          {/* MISSÃO */}
-          <div className="missao">
-            <h2>NOSSA MISSÃO</h2>
-            <p>
-              Valorizar Igarassu como o destino histórico mais importante de
-              Pernambuco, promovendo o turismo através da tecnologia e
-              oferecendo aos visitantes uma experiência envolvente e acessível.
-              Buscamos estimular a descoberta dos patrimônios culturais,
-              ambientais e religiosos, aproximando cada pessoa da essência e da
-              história da cidade.
-            </p>
-          </div>
+          <section className="quem-somos">
+            <div className="texto-projeto" aria-labelledby="quem-somos-title">
+              <p>
+               O Viva Igarassu é uma plataforma digital criada para valorizar, 
+               divulgar e fortalecer o turismo, a cultura e a história da cidade de Igarassu – PE. 
+               Nosso propósito é conectar moradores, visitantes e empreendedores locais por meio de uma 
+               experiência interativa, informativa e acessível.
+              </p>
+              <br />
+              <p>
+                Por meio de recursos como QR Codes, sistema de recompensas, figurinhas e moedas virtuais, 
+                incentivamos a exploração consciente da cidade, promovendo o engajamento dos usuários e o 
+                fortalecimento do comércio e do turismo local.
+              </p>
+              <br />
+              <p>
+                O Viva Igarassu nasce com o compromisso de preservar a história, impulsionar a economia criativa e 
+                mostrar que a tecnologia pode ser uma grande aliada no desenvolvimento cultural e turístico do 
+                município..
+              </p>
+              <br />
+            </div>
 
-          {/* VALORES */}
-          <div className="valores">
-            <h2>⭐ NOSSOS VALORES</h2>
+            <div className="missao">
+              <h2>NOSSA MISSÃO</h2>
+              <p>
+                Valorizar Igarassu como o destino histórico mais importante de
+                Pernambuco, promovendo o turismo através da tecnologia e
+                oferecendo aos visitantes uma experiência envolvente e acessível.
+                Buscamos estimular a descoberta dos patrimônios culturais,
+                ambientais e religiosos, aproximando cada pessoa da essência e da
+                história da cidade.
+              </p>
+            </div>
 
-            <div className="valores-cards">
-              <div className="valor-card">
-                <strong>Preservação Histórica</strong>
-                <p>
-                  Honramos a importância de Igarassu, promovendo seu acervo
-                  cultural e religioso.
-                </p>
-              </div>
+            <div className="valores" aria-labelledby="valores-title">
+              <h2>⭐ NOSSOS VALORES</h2>
 
-              <div className="valor-card">
-                <strong>Inovação</strong>
-                <p>
-                  Unimos tradição e tecnologia para criar novas possibilidades
-                  turísticas.
-                </p>
-              </div>
+              <div className="valores-cards">
+                <div className="valor-card">
+                  <FaLandmark className="valor-icon" aria-hidden="true" />
+                  <strong>Preservação Histórica</strong>
+                  <p>
+                    Honramos a importância de Igarassu, promovendo seu acervo
+                    cultural e religioso.
+                  </p>
+                </div>
 
-              <div className="valor-card">
-                <strong>Acessibilidade</strong>
-                <p>
-                  Experiência simples, intuitiva e gratuita para todos os
-                  visitantes.
-                </p>
+                <div className="valor-card">
+                  <FaLightbulb className="valor-icon" aria-hidden="true" />
+                  <strong>Inovação</strong>
+                  <p>
+                    Unimos tradição e tecnologia para criar novas possibilidades
+                    turísticas.
+                  </p>
+                </div>
+
+                <div className="valor-card">
+                  <FaUniversalAccess className="valor-icon" aria-hidden="true" />
+                  <strong>Acessibilidade</strong>
+                  <p>
+                    Experiência simples, intuitiva e gratuita para todos os
+                    visitantes.
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
-        </section>
-      </main>
-
+          </section>
+        </main>
+      </div>
       <Footer />
     </>
   );

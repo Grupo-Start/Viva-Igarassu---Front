@@ -5,7 +5,7 @@ import {
   FaUsers,
   FaLandmark,
 } from "react-icons/fa";
-import Header from "../../components/header/header";
+import Header from "../../components/header/Header";
 import Footer from "../../components/footer/Footer";
 
 export function Acidade() {
@@ -13,7 +13,6 @@ export function Acidade() {
     <>
       <Header />
 
-      {/* BANNER */}
       <section className="banner-cidade">
         <img
           src="/igreja.jpeg"
@@ -24,14 +23,12 @@ export function Acidade() {
         <div className="banner-conteudo">
           <span className="hashtag">#vivanossahistória</span>
           <h1>Igarassu</h1>
-          <p>
-            Uma das cidades mais antigas do Brasil, onde a história colonial ganha
-            vida
+          <p className="banner-text-box">
+            Uma das cidades mais antigas do Brasil, onde a história ganha vida.
           </p>
         </div>
       </section>
 
-      {/* CARDS INFO */}
       <section className="info-cards">
         <div className="info-card">
           <FaMapMarkerAlt />
@@ -62,7 +59,6 @@ export function Acidade() {
         </div>
       </section>
 
-      {/* SOBRE - CARD GRANDE */}
       <section className="sobre-wrapper">
         <div className="sobre-card">
           <h2>Sobre a Cidade</h2>
@@ -80,18 +76,18 @@ export function Acidade() {
           </p>
 
           <p>
-            Além da rica história, Igarassu possui belas praias como a Praia de
-            Gavoa, Praia do Janga e a paradisíaca Ilha de Itamaracá nas
+            Além da rica história, Igarassu possui belas praias como a Praia do Capitão, Praia da Gavoa e a ilhota da Coroa do Avião e a paradisíaca Ilha de Itamaracá nas
             proximidades.
           </p>
         </div>
     <br />
     <br />
     
-        {/* FRASE FINAL */}
         <span className="rodape-texto">
-          <strong className="rodape-igarassu">Igarassu</strong> – Onde a história
-          do Brasil começou
+          <FaMapMarkerAlt className="rodape-icon" />
+          <strong className="rodape-igarassu">Igarassu</strong>
+          <span className="rodape-sep">-</span>
+          <span className="rodape-desc">Onde a história do Brasil começou</span>
         </span>
       </section>
 

@@ -162,7 +162,7 @@ export function Header() {
           const items = [
             { to: '/', label: 'Home' },
             { to: '/quem-somos', label: 'Quem somos' },
-            { to: '/cidade', label: 'A cidade' },
+            { to: '/a-cidade', label: 'A cidade' },
           ];
           return items.map((it, idx) => (
             <React.Fragment key={it.to}>

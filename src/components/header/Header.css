@@ -162,11 +162,22 @@
   }
 
   .header-actions .search-input,
-  .header-actions .login,
   .header-actions .user-info,
   .header-actions .admin-trigger {
     display: none !important;
   }
+
+  .header-actions .login {
+    display: flex !important;
+    align-items: center;
+    gap: 0;
+    color: #ffffff;
+    text-decoration: none;
+    padding: 6px;
+  }
+
+  .header-actions .login span { display: none !important; }
+  .header-actions .login img { width: 30px; height: 30px; filter: brightness(0) invert(1); }
 
   .mobile-user-btn { display: flex; align-items: center; justify-content: center; }
   .header-actions { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); }

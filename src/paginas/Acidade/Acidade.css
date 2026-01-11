@@ -1,7 +1,3 @@
-/* ===================== */
-/* BANNER */
-/* ===================== */
-
 .banner-cidade {
   position: relative;
   width: 100%;
@@ -45,6 +41,17 @@
   max-width: 720px;
   margin-top: 40px;
 }
+.banner-conteudo .banner-text-box {
+  display: inline-block;
+  background: #0A3D62;
+  color: #ffffff;
+  padding: 14px 18px;
+  border-radius: 12px;
+  box-shadow: 0 12px 30px rgba(10,61,98,0.12);
+  backdrop-filter: blur(4px);
+  margin-top: 24px; 
+  text-shadow: none;
+}
 
 .banner-conteudo h1,
 .banner-conteudo p,
@@ -52,15 +59,11 @@
   text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
 }
 
-/* ===================== */
-/* INFO CARDS */
-/* ===================== */
-
 .info-cards {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 28px;
-  padding: 48px 20px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+  padding: 36px 18px;
   background: #ffffff;
 }
 
@@ -68,10 +71,11 @@
   background: #EDF4FA;
   border: 2px solid #bcdce6;
   border-radius: 18px;
-  padding: 36px 24px;
+  padding: 20px 14px;
   text-align: center;
   color: #0A3D62;
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
+  min-height: 120px;
 }
 
 .info-card svg {
@@ -81,19 +85,15 @@
 }
 
 .info-card h3 {
-  font-size: 22px;
+  font-size: 18px;
   font-weight: 800;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .info-card p {
-  font-size: 16px;
-  line-height: 1.5;
+  font-size: 14px;
+  line-height: 1.4;
 }
-
-/* ===================== */
-/* SOBRE - CARD GRANDE */
-/* ===================== */
 
 .sobre-wrapper {
   padding: 40px 20px 60px;
@@ -125,12 +125,11 @@
   text-align: justify;
 }
 
-/* ===================== */
-/* FRASE FINAL */
-/* ===================== */
-
 .rodape-texto {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: center;
   font-size: 30px;
   font-weight: 600;
   color: #0A3D62;
@@ -140,13 +139,141 @@
   color: #4BBFBF;
 }
 
-/* ===================== */
-/* DESKTOP */
-/* ===================== */
+.rodape-icon {
+  font-size: 28px;
+  color: #4BBFBF;
+  display: inline-flex;
+  align-items: center;
+}
+
+.rodape-sep {
+  display: inline-block;
+  margin: 0 8px;
+  font-size: 20px;
+  color: #0A3D62;
+}
+
+.rodape-desc {
+  display: inline-block;
+  color: #0A3D62;
+}
+
 
 @media (min-width: 768px) {
   .info-cards {
     max-width: 900px;
     margin: 0 auto;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+    padding: 28px 20px;
+    grid-auto-rows: 1fr;
+    align-items: stretch;
+    justify-items: stretch;
+  }
+
+  .info-card {
+    min-height: 140px;
+    padding: 16px;
+    border-radius: 14px;
+  }
+}
+
+@media (max-width: 385px) {
+  .info-cards {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    padding: 12px;
+    grid-auto-rows: 1fr;
+    justify-items: stretch;
+    align-items: stretch;
+    background: #ffffff;
+  }
+
+  .info-card {
+    min-height: 120px;
+    padding: 10px;
+    border-radius: 12px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: stretch;
+    height: 100%;
+  }
+
+  .info-card h3 {
+    font-size: 14px;
+  }
+
+  .info-card p {
+    font-size: 12px;
+    margin: 0;
+  }
+
+  .banner-conteudo {
+    padding: 8px;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .banner-conteudo h1 {
+    font-size: 50px;
+    line-height: 1.05;
+    margin: 0 6px;
+    font-weight: 800;
+    text-wrap: balance;
+  }
+
+  .banner-conteudo p,
+  .banner-conteudo .banner-text-box {
+    font-size: 8px;
+    max-width: 100%;
+    padding: 8px 10px;
+  }
+
+  .hashtag {
+    font-size: 8px;
+    padding: 6px 10px;
+    margin-bottom: 8px;
+  }
+
+  .rodape-texto {
+    flex-direction: column;
+    gap: 6px;
+    font-size: 16px;
+    padding: 8px 12px;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .rodape-icon {
+    font-size: 20px;
+    color: #4BBFBF;
+    margin: 0;
+    display: inline-flex;
+    align-self: center;
+  }
+
+  .rodape-igarassu {
+    font-size: 16px;
+    display: block;
+    color: #4BBFBF;
+  }
+
+  .rodape-sep {
+    display: block;
+    width: 100%;
+    text-align: center;
+    font-size: 20px;
+    color: #0A3D62;
+    line-height: 1;
+    margin: 4px 0 2px;
+  }
+
+  .rodape-desc {
+    font-size: 14px;
+    text-align: center;
   }
 }

@@ -14,7 +14,7 @@ export default function Footer({ admin = false }) {
           <h4>Links úteis</h4>
           <Link to="/">Home</Link>
           <Link to="/quem-somos">Quem somos</Link>
-          <Link to="/cidade">A cidade</Link>
+          <Link to="/a-cidade">A cidade</Link>
         </div>
 
         <div className="footer-contato">

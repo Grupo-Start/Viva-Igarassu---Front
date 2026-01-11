@@ -117,10 +117,6 @@
     align-items: stretch;
   }
 
-  .card {
-    max-width: none;
-    width: 100%;
-  }
 }
 
 @media (min-width: 900px) {
@@ -247,16 +243,46 @@
     line-height: 1.12;
   }
 
+  .hero {
+    margin-top: 40px;
+    margin-bottom: 0;
+  }
+
   .descricao-box {
-    margin: 18px auto 0;
+    margin: 0 12px 0;
     padding: 12px 14px;
     font-size: 15px;
+    width: calc(100% - 24px);
+    max-width: none;
   }
 
   .cards {
-    grid-template-columns: 1fr;
-    gap: 18px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
     padding: 0 12px;
+  }
+
+  .cards { align-items: stretch; }
+  .cards > .card {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    box-sizing: border-box;
+    height: 130px;
+    padding: 12px;
+  }
+
+  .cta {
+    margin: 48px 16px;
+    padding: 24px 16px;
+    width: calc(100% - 32px);
+    max-width: none;
+  }
+
+  .como-funciona h2 {
+    font-size: 32px;
+    margin-bottom: 40px;
   }
 
   .card {
@@ -264,6 +290,33 @@
     min-height: 120px;
     border-radius: 12px;
     border: 1px solid #4ec3bf;
+    width: 100%;
+    max-width: none;
+  }
+
+  .card {
+    padding: 12px;
+    min-height: 96px;
+    gap: 12px;
+    border-radius: 10px;
+  }
+
+  .cards > .card { height: 130px; }
+
+  .card-icon {
+    flex: 0 0 48px;
+    width: 48px;
+    height: 48px;
+    font-size: 24px;
+  }
+
+  .card h3 {
+    font-size: 16px;
+  }
+
+  .card p {
+    font-size: 13px;
+    max-width: none;
   }
 
   .faixa-topo-historico h2 { font-size: 28px; }
@@ -278,6 +331,10 @@
 
   .imagem-trilha { width: 100%; max-width: 100%; margin-bottom: 12px; }
   .lista-locais { width: 100%; }
+
+  .imagem-topo img {
+    height: 200px;
+  }
 }
 
 .faixa-topo-historico {
@@ -306,7 +363,7 @@
   background: #1fa9a6;
   color: #ffffff;
   font-family: "Poppins", sans-serif;
-  font-size: 14px;
+  font-size: 18px;
   font-weight: 600;
   padding: 6px 14px;
   border-radius: 999px;
@@ -340,15 +397,15 @@
   align-items: center;
 }
 .trail-timeline::before {
-  content: '';
-  position: absolute;
-  left: 60px;
-  top: 12px;
-  bottom: 12px;
-  width: 2px;
-  background-image: linear-gradient(#cfe8ee 33%, rgba(255,255,255,0) 0%);
-  background-size: 2px 12px;
-  background-repeat: repeat-y;
+  content: ''; 
+  position: absolute; 
+  left: 60px; 
+  top: 12px; 
+  bottom: 12px; 
+  width: 2px; 
+  background-image: linear-gradient(#cfe8ee 33%, rgba(255,255,255,0) 0%); 
+  background-size: 2px 12px; 
+  background-repeat: repeat-y; 
   z-index: 0;
 }
 
@@ -404,7 +461,7 @@
 .timeline-labels { display: block; }
 .timeline-label__text { font-family: 'Poppins', sans-serif; font-size:18px; color:#083b5c; padding-left: 12px; text-align: left; max-width:520px; }
 
-@media (max-width: 375px) {
+@media (max-width: 385px) {
   .imagem-topo img {
     height: 160px;
   }
@@ -424,23 +481,23 @@
 
   .faixa-texto { font-size: 13px; line-height: 1.3; }
 
-  .hero { margin-top: 16px; margin-bottom: 24px; padding: 0 16px; text-align: center; }
+  .hero { margin-top: 60px; margin-bottom: -20px; padding: 0 16px; text-align: center; }
   .hero h1, .hero h1 span { font-size: 22px; line-height: 1.15; }
 
-  .descricao-box { max-width: 100%; padding: 12px 14px; font-size: 14px; margin: 16px auto 0; text-align: center; }
+  .descricao-box { max-width: 100%; padding: 12px 14px; font-size: 14px; margin: -8px auto 0; text-align: center; }
 
-  .como-funciona { margin: 32px auto 24px; }
+  .como-funciona { margin: 30px auto 24px; }
   .como-funciona h2 { font-size: 22px; margin-bottom: 24px; }
 
   .cards {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
-    padding: 0 16px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    padding: 0 12px;
+    align-items: stretch;
   }
   .card {
-    padding: 14px 16px;
+    padding: 14px 12px;
     gap: 10px;
     border-radius: 12px;
     min-height: auto;
@@ -449,7 +506,7 @@
     align-items: center;
     text-align: center;
     width: 100%;
-    max-width: 300px;
+    max-width: none;
   }
   .card-icon { width: 56px; height: 56px; font-size: 32px; flex: 0 0 56px; margin-bottom: 6px; }
   .card h3 { text-align: center; font-size: 16px; }
@@ -484,7 +541,7 @@
 
   .faixa-topo-historico {
     margin: 24px 16px;
-    padding: 14px 16px;
+    padding: 12px 14px;
     height: auto;
     flex-direction: column;
     align-items: center;
@@ -497,6 +554,11 @@
     width: calc(100% - 32px);
   }
 
-  .faixa-topo-historico h2 { font-size: 18px; text-align: center; color: #fff; margin: 0; }
+  .faixa-topo-historico h2 { 
+    font-size: 12px; 
+    text-align: center; 
+    color: #fff; 
+    margin: 0; 
+  }
   .tag-historico { display: none; }
 }

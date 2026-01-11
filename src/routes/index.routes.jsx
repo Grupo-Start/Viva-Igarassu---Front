@@ -11,6 +11,7 @@ import { NewPassword } from "../paginas/Passwords/newpassword/NewPassword";
 import { AlterarSenha } from "../paginas/Passwords/passwordlogged/passwordlogged";
 
 import { Quemsomos } from "../paginas/Quemsomos/Quemsomos";
+import { Acidade } from "../paginas/Acidade/Acidade";
 import { Pontoturistico } from "../paginas/Trilha/pontoturistico/Pontoturistico";
 import { Pontos } from "../paginas/Trilha/pontos/pontos";
 import { Telafigurinha } from "../paginas/Trilha/telafigurinha/telafigurinha";
@@ -42,6 +43,7 @@ import { RewardsPage } from "../paginas/rewardspage/RewardsPage";
 export const paginas = createBrowserRouter([
   { path: "/", element: <Home /> },
   { path: "/quem-somos", element: <Quemsomos /> },
+  { path: "/a-cidade", element: <Acidade /> },
   { path: "/login", element: <Login /> },
   { path: "/register", element: <Register /> },
   { path: "/register-person", element: <RegisterPerson /> },
