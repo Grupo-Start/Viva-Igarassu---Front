@@ -426,6 +426,7 @@
   box-shadow: 0 6px 14px rgba(2,6,23,0.06);
   transition: transform 140ms ease;
   z-index: 3;
+  cursor: pointer;
 }
 
 .timeline-circle.unlocked { background: #ffd454; color: #083b5c; }
