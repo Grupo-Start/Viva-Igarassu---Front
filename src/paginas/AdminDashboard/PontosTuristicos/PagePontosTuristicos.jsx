@@ -27,7 +27,8 @@ export function PagePontosTuristicos() {
   const tipos = [
     { value: 'historico', label: 'Histórico' },
     { value: 'natural', label: 'Natural' },
-    { value: 'outros', label: 'Outros' }
+    { value: 'cultural', label: 'Cultural' },
+    { value: 'outro', label: 'Outro' }
   ];
 
   useEffect(() => {
@@ -39,7 +40,12 @@ export function PagePontosTuristicos() {
       setLoading(true);
       setError(null);
       const data = await dashboardService.getPontosTuristicos();
+      try { console.log('[debug loadPontosTuristicos] data:', data); } catch (e) {}
       const arr = Array.isArray(data) ? data : (Array.isArray(data?.data) ? data.data : []);
+      try {
+        const tiposExistentes = Array.from(new Set(arr.map(p => (p.tipo || p.type || p.tipo_ponto || p.tipoTuristico || p.t || '').toString()))).filter(Boolean);
+        console.log('[debug loadPontosTuristicos] tipos existentes:', tiposExistentes);
+      } catch (e) {}
       const formatted = arr.map(p => ({
         id: p.id_ponto ?? p.id ?? p._id ?? p.uuid ?? p.codigo ?? null,
         nome: p.nome || p.nome_ponto || p.name || '',
@@ -84,13 +90,27 @@ export function PagePontosTuristicos() {
   const handleSubmitPonto = async (e) => {
     e.preventDefault();
     try {
+      const tipoMapPrisma = {
+        historico: 'Hist_rico',
+        natural: 'Natural',
+        cultural: 'cultural',
+        outro: 'outro'
+      };
+      const mappedTipo = formData.tipo ? (tipoMapPrisma[String(formData.tipo).toLowerCase()] || String(formData.tipo)) : '';
+
       const payload = {
         nome: formData.nome,
         descricao: formData.descricao,
         horario_funcionamento: formData.horario_funcionamento,
-        tipo: formData.tipo,
+        tipo: mappedTipo,
         endereco_completo: formData.endereco
       };
+
+      if (!payload.tipo) delete payload.tipo;
+
+      try {
+        console.log('[debug PagePontosTuristicos] Enviando payload ponto turístico:', payload);
+      } catch (e) {}
       if (isEditing && editingId) {
         await dashboardService.updatePontoTuristico(editingId, payload);
       } else {

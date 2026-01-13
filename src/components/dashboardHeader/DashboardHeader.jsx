@@ -84,7 +84,6 @@ export function DashboardHeader() {
               } catch (err) {}
             }}
           >
-            <img src="/icone-login.png" alt="Admin" />
             <span className="admin-label">Admin</span>
           </Link>
         )}

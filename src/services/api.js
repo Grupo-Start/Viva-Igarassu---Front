@@ -1003,11 +1003,19 @@ export const dashboardService = {
         if (allowed.has(k)) finalPayload[k] = jsonPayload[k];
       }
 
+      try {
+        if (finalPayload.empresa && typeof finalPayload.empresa === 'string') {
+          finalPayload.id_empresa = finalPayload.id_empresa || finalPayload.empresa;
+          delete finalPayload.empresa;
+        }
+      } catch (e) {}
+
       const endpoints = ['/pontos-turisticos'];
       const config = { headers: { 'Content-Type': 'application/json' } };
       let lastErr = null;
       for (const ep of endpoints) {
         try {
+          try { console.log('[debug createPontoTuristico] finalPayload:', finalPayload, 'endpoint:', ep); } catch (e) {}
           const res = await api.post(ep, finalPayload, config);
           return res.data;
         } catch (err) {
