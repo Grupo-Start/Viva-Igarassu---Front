@@ -511,10 +511,10 @@ export function PageEventos() {
                   <h2>{isEditing ? 'Editar Evento' : 'Adicionar Evento'}</h2>
                   <form onSubmit={handleSubmit}>
                     <label>Nome:
-                      <input type="text" value={formData.nome} onChange={e => setFormData({ ...formData, nome: e.target.value })} required />
+                      <input type="text" placeholder="Ex: Festival Cultural de Igarassu" value={formData.nome} onChange={e => setFormData({ ...formData, nome: e.target.value })} required />
                     </label>
                     <label>Descrição:
-                      <input type="text" value={formData.descricao} onChange={e => setFormData({ ...formData, descricao: e.target.value })} required />
+                      <input type="text" placeholder="Ex: Apresentação de dança, música e artesanato local" value={formData.descricao} onChange={e => setFormData({ ...formData, descricao: e.target.value })} required />
                     </label>
                     <label>Imagem:
                       <input type="file" accept="image/*" onChange={e => setFormData({ ...formData, imagem: e.target.files[0] || null, imagemPreview: e.target.files[0] ? URL.createObjectURL(e.target.files[0]) : formData.imagemPreview })} />
@@ -532,10 +532,10 @@ export function PageEventos() {
                       <input type="date" value={formData.data} onChange={e => setFormData({ ...formData, data: e.target.value })} required />
                     </label>
                     <label>Horário:
-                      <input type="time" value={formData.horario} onChange={e => setFormData({ ...formData, horario: e.target.value })} required />
+                      <input type="time" placeholder="Ex: 19:30" value={formData.horario} onChange={e => setFormData({ ...formData, horario: e.target.value })} required />
                     </label>
                     <label>Endereço:
-                      <input type="text" value={formData.endereco} onChange={e => setFormData({ ...formData, endereco: e.target.value })} required />
+                      <input type="text" placeholder="Ex: R. Barbosa Lima, S/N, Centro, Igarassu, PE, 53615-000" value={formData.endereco} onChange={e => setFormData({ ...formData, endereco: e.target.value })} required />
                     </label>
                     
                     <div className="modal-actions">
