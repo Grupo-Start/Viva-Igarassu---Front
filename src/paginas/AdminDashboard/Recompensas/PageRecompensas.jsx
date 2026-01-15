@@ -16,6 +16,16 @@ export function PageRecompensas() {
   const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState({ nome: '', descricao: '', valor: '', quantidade: '', imagem: null, imagemPreview: null, empresa: '' });
 
+  const getUserEmpresaId = () => {
+    try {
+      const raw = localStorage.getItem('user');
+      const u = raw ? JSON.parse(raw) : {};
+      return u.empresa || u.empresa_id || u.id_empresa || u.empresaId || (u.empresa && (u.empresa.id || u.empresa_id)) || u.id || u._id || null;
+    } catch (e) { return null; }
+  };
+
+  const adminEmpresaId = getUserEmpresaId();
+
   useEffect(() => { loadData(); }, []);
 
   const loadData = async () => {
@@ -27,7 +37,17 @@ export function PageRecompensas() {
         dashboardService.getEmpresas().catch(() => [])
       ]);
       setRecompensas(Array.isArray(recompensasData) ? recompensasData : []);
-      setEmpresas(Array.isArray(empresasData) ? empresasData : []);
+      try {
+        let empresasList = Array.isArray(empresasData) ? empresasData : [];
+        const userEmpresaId = getUserEmpresaId();
+        if (userEmpresaId) {
+          const found = empresasList.find(emp => String(emp.id ?? emp._id ?? emp.id_empresa) === String(userEmpresaId));
+          if (found) empresasList = [found];
+        }
+        setEmpresas(empresasList);
+      } catch (e) {
+        setEmpresas(Array.isArray(empresasData) ? empresasData : []);
+      }
     } catch (err) {
       setError('Erro ao carregar recompensas: ' + (err.response?.data?.message || err.message));
     } finally {
@@ -65,7 +85,8 @@ export function PageRecompensas() {
     } else {
       setIsEditing(false);
       setEditingId(null);
-      setFormData({ nome: '', descricao: '', valor: '', quantidade: '', imagem: null, imagemPreview: null, empresa: '' });
+      const userEmpresaId = getUserEmpresaId();
+      setFormData({ nome: '', descricao: '', valor: '', quantidade: '', imagem: null, imagemPreview: null, empresa: userEmpresaId || '' });
     }
     setShowModal(true);
   };
@@ -226,7 +247,7 @@ export function PageRecompensas() {
                       <input type="number" value={formData.valor} onChange={e => setFormData({ ...formData, valor: e.target.value })} />
                     </label>
                     <label>Empresa:
-                      <select value={formData.empresa} onChange={e => setFormData({ ...formData, empresa: e.target.value })}>
+                      <select value={formData.empresa} onChange={e => setFormData({ ...formData, empresa: e.target.value })} disabled={!!adminEmpresaId}>
                         <option value="">(nenhuma)</option>
                         {empresas.map(emp => (
                           <option key={emp.id ?? emp._id ?? emp.id_empresa} value={emp.id ?? emp._id ?? emp.id_empresa}>{emp.nome_empresa || emp.nome || emp.name || emp.razao_social || String(emp.id || '')}</option>
