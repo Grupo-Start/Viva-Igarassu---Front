@@ -1,0 +1,18 @@
+[
+  {
+    "id": "fallback-1",
+    "nome_empresa": "Café da Praça",
+    "tipo_servico": "alimentação",
+    "email": "contato@cafedapraca.com",
+    "telefone": "(81) 9 9999-0001",
+    "imagem": "/placeholder-company.jpg"
+  },
+  {
+    "id": "fallback-2",
+    "nome_empresa": "Artesanato Igarassu",
+    "tipo_servico": "artesanato",
+    "email": "contato@artesanato-igarassu.com",
+    "telefone": "(81) 9 9999-0002",
+    "imagem": "/placeholder-company.jpg"
+  }
+]

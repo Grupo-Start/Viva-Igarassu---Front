@@ -17,6 +17,12 @@ export default function Footer({ admin = false }) {
           <Link to="/a-cidade">A cidade</Link>
         </div>
 
+        <div className="footer-parceiros">
+          <h4>Parceiros</h4>
+          <Link to="/parceiros">Ver parceiros</Link>
+          <Link to="/register-person" state={{ next: '/company-registration', role: 'empreendedor' }}>Seja parceiro</Link>
+        </div>
+
         <div className="footer-contato">
           <h4>Contatos</h4>
           <p> <strong> Email: </strong> turismo@igarassu.pe.gov.br</p>

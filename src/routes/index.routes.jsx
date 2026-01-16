@@ -39,6 +39,7 @@ import { UsuarioFigurinhas } from "../paginas/DashboardUsuario/UsuarioFigurinhas
 import { EventsPage } from "../paginas/eventspage/EventsPage";
 import { CarnivalPage } from "../paginas/EspecificEventspage/EspecificEventPage";
 import { RewardsPage } from "../paginas/rewardspage/RewardsPage";
+import { ParceirosPage } from "../paginas/parceiros/Parceiros";
 
 export const paginas = createBrowserRouter([
   { path: "/", element: <Home /> },
@@ -65,6 +66,7 @@ export const paginas = createBrowserRouter([
   { path: "/eventspage", element: <EventsPage /> },
   { path: "/carnivalpage", element: <CarnivalPage /> },
   { path: "/rewardspage", element: <RewardsPage /> },
+  { path: "/parceiros", element: <ParceirosPage /> },
 
   { path: "/admin-dashboard", element: <AdminRoute><AdminDashboard /></AdminRoute> },
   { path: "/admin-dashboard/users", element: <AdminRoute><PageUsers /></AdminRoute> },

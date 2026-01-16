@@ -1,0 +1,72 @@
+.parceiros-page main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px;
+}
+.parceiros-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+.parceiro-card {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.parceiro-image img {
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+  display: block;
+}
+.parceiro-body {
+  padding: 12px;
+}
+.parceiro-body h3 {
+  margin: 0 0 6px 0;
+  font-size: 16px;
+}
+.parceiro-tipo {
+  color: #666;
+  font-size: 13px;
+  margin: 0 0 8px 0;
+}
+.parceiro-contato {
+  font-size: 13px;
+  margin: 0;
+  color: #333;
+}
+.parceiros-page .error {
+  color: #c0392b;
+  margin-top: 8px;
+}
+
+.parceiros-page main h2 {
+  text-align: center;
+  color: #0A3D62;
+  font-weight: 800;
+  margin-bottom: 12px;
+}
+
+.parceiros-filtro {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin: 12px 0 8px;
+}
+.parceiros-filtro label { color: #0A3D62; font-weight: 600; }
+.parceiros-filtro select {
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #d0eae8;
+  background: #fff;
+  color: #0A3D62;
+}
+
+@media (max-width: 520px) {
+  .parceiros-filtro { flex-direction: column; align-items: flex-start; }
+}

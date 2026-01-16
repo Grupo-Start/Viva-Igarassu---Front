@@ -10,6 +10,12 @@
   width: 100%;
   box-sizing: border-box;
 }
+.footer-parceiros {
+  
+}
+
+.footer-parceiros a { display: block; color: #ccc; text-decoration: none; margin-bottom: 8px; }
+.footer-parceiros a:hover { color: #fff; }
 
 html, body {
   overflow-x: hidden;
@@ -18,7 +24,7 @@ html, body {
 .footer-container {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   max-width: 1400px;
   margin: 0 auto;
   gap: 40px;

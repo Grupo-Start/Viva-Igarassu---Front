@@ -15,6 +15,8 @@ export function EmpresaMeusDados() {
     email: '',
     tipo_servico: '',
   });
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
 
   useEffect(() => {
     const raw = localStorage.getItem('user');
@@ -206,6 +208,29 @@ export function EmpresaMeusDados() {
                   <span>{formData.tipo_servico || '-'}</span>
                 )}
               </div>
+              <div className="field">
+                <strong>Imagem da empresa:</strong>
+                {!isEditing ? (
+                  <div>
+                    {(empresa?.imagem || empresa?.image || empresa?.logo || imagePreview) ? (
+                      <img src={imagePreview || empresa?.imagem || empresa?.image || empresa?.logo} alt="logo" style={{ maxWidth: 160, display: 'block' }} />
+                    ) : (
+                      <span>-</span>
+                    )}
+                  </div>
+                ) : (
+                  <div>
+                    <input type="file" accept="image/*" onChange={e => {
+                      const f = e.target.files && e.target.files[0];
+                      setImageFile(f || null);
+                      if (f) {
+                        try { setImagePreview(URL.createObjectURL(f)); } catch(e) { setImagePreview(null); }
+                      } else setImagePreview(null);
+                    }} />
+                    {imagePreview && <div style={{ marginTop: 8 }}><img src={imagePreview} alt="preview" style={{ maxWidth: 160 }} /></div>}
+                  </div>
+                )}
+              </div>
               <div style={{ marginTop: 12 }}>
                 {!isEditing ? (
                   <button className="btn-acao editar" onClick={() => setIsEditing(true)}>Editar</button>
@@ -217,7 +242,20 @@ export function EmpresaMeusDados() {
                         setError(null);
                         const id = empresa?.id || empresa?._id || empresa?.id_empresa;
                         if (!id) throw new Error('ID da empresa não encontrado');
-                        await dashboardService.updateEmpresa(id, formData);
+                        // se houver imagem selecionada, enviar como FormData
+                        if (imageFile) {
+                          const fd = new FormData();
+                          try {
+                            fd.append('imagem', imageFile);
+                          } catch(e) {}
+                          // anexar os campos do form
+                          Object.keys(formData).forEach(k => {
+                            try { fd.append(k, formData[k] == null ? '' : formData[k]); } catch(e){}
+                          });
+                          await dashboardService.updateEmpresa(id, fd);
+                        } else {
+                          await dashboardService.updateEmpresa(id, formData);
+                        }
                         const refreshed = await dashboardService.getEmpresaById(id);
                         const refreshedObj = Array.isArray(refreshed) ? refreshed[0] : (refreshed?.empresa || refreshed || null);
                         setEmpresa(refreshedObj || empresa);

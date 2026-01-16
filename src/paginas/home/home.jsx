@@ -67,6 +67,8 @@ export function Home() {
         <FaixaInfo />
       </section>
 
+      
+
       <section className="hero">
         <h1>
           Viva Igarassu. <span>Viva nossa história.</span>
@@ -82,6 +84,7 @@ export function Home() {
             <strong>figurinhas e recompensas</strong> enquanto explora a cidade.
           </p>
         </div>
+        
 
         <div className="hero-ctas">
           {!isLogged && (
@@ -89,6 +92,22 @@ export function Home() {
           )}
           <button className="btn-secondary" onClick={() => navigate('/pontos-turisticos')}>Explorar pontos</button>
         </div>
+
+        <section className="partner-cta">
+          <div className="partner-card">
+            <div className="partner-card__content">
+              <h3>Seja parceiro do Viva Igarassu</h3>
+              <p>
+                Cadastre sua empresa, crie eventos e 
+                recompensas para visitantes e aumente a visibilidade do seu negócio na cidade.
+              </p>
+
+              <div className="partner-card__actions">
+                <button className="btn-primary" onClick={() => navigate('/register-person', { state: { next: '/company-registration', role: 'empreendedor' } })}>Quero ser parceiro</button>
+              </div>
+            </div>
+          </div>
+        </section>
       </section>
 
       <section className="como-funciona">

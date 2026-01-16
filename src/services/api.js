@@ -23,7 +23,21 @@ const api = axios.create({
 
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
-  if (token) config.headers = { ...(config.headers || {}), Authorization: `Bearer ${token}` };
+  try {
+    const hdrs = config.headers || {};
+    let skipAuth = false;
+    for (const key of Object.keys(hdrs || {})) {
+      try {
+        if (String(key).toLowerCase() === 'x-skip-auth-redirect') { skipAuth = true; break; }
+        const val = hdrs[key];
+        if (typeof val === 'string' && val === '1') { skipAuth = true; break; }
+        if (typeof val === 'number' && Number(val) === 1) { skipAuth = true; break; }
+      } catch (e) {}
+    }
+    if (!skipAuth && token) config.headers = { ...(config.headers || {}), Authorization: `Bearer ${token}` };
+  } catch (e) {
+    if (token) config.headers = { ...(config.headers || {}), Authorization: `Bearer ${token}` };
+  }
   try {
     if (config && config.data && (typeof FormData !== 'undefined') && config.data instanceof FormData) {
       config.headers = config.headers || {};
@@ -672,6 +686,27 @@ export const dashboardService = {
     }
   },
 
+  getUsuarioById: async (id) => {
+    try {
+      if (!id) throw new Error('getUsuarioById: id ausente');
+      const candidates = [`/usuarios/${encodeURIComponent(id)}`, `/usuario/${encodeURIComponent(id)}`, `/usuarios?id=${encodeURIComponent(id)}`];
+      let lastErr = null;
+      for (const ep of candidates) {
+        try {
+          const res = await api.get(ep, { headers: { 'X-Skip-Auth-Redirect': '1' } });
+          if (res && res.data !== undefined) return res.data;
+        } catch (err) {
+          lastErr = err;
+          continue;
+        }
+      }
+      if (lastErr) throw lastErr;
+      throw new Error('getUsuarioById: nenhum endpoint retornou dados');
+    } catch (error) {
+      throw error;
+    }
+  },
+
   updateUserStatus: async (userId, status) => {
     try {
       const res = await api.patch(`/usuarios/${userId}/status`, { status });
@@ -683,8 +718,44 @@ export const dashboardService = {
 
   getEmpresas: async () => {
     try {
-      const res = await api.get('/empresa');
-      return res.data;
+      const candidates = [
+        '/empresa', '/empresas', '/empresa/list', '/empresa?public=1', '/empresa/all',
+        '/empresa/public', '/empresa/publico', '/empresa/publicos', '/empresa/público'
+      ];
+      let lastErr = null;
+      for (const ep of candidates) {
+        try {
+            const res = await api.get(ep, { headers: { 'X-Skip-Auth-Redirect': '1' } });
+          if (res && (res.data !== undefined)) return res.data;
+        } catch (err) {
+          lastErr = err;
+          try { console.warn('[dashboardService.getEmpresas] tentativa falhou', ep, err?.response?.status); } catch(e){}
+          continue;
+        }
+      }
+
+      // Se chegamos aqui e houve um erro 401, tentar retornar fallback local público
+      try {
+        if (lastErr && lastErr.response && lastErr.response.status === 401) {
+          try { console.warn('[dashboardService.getEmpresas] recebida 401, tentando fallback público /empresas-fallback.json'); } catch(e){}
+          if (typeof fetch !== 'undefined') {
+            try {
+              const origin = (typeof window !== 'undefined' && window.location && window.location.origin) ? window.location.origin : '';
+              const url = `${origin}/empresas-fallback.json`;
+              const r = await fetch(url);
+              if (r && r.ok) {
+                const j = await r.json();
+                return Array.isArray(j) ? j : (j?.data || j?.empresas || []);
+              }
+            } catch (e) {
+              try { console.warn('[dashboardService.getEmpresas] fallback fetch falhou', e); } catch(e){}
+            }
+          }
+        }
+      } catch (e) {}
+
+      if (lastErr) throw lastErr;
+      throw new Error('getEmpresas: nenhum endpoint retornou dados');
     } catch (error) {
       throw error;
     }
@@ -777,8 +848,42 @@ export const dashboardService = {
 
   updateEmpresa: async (empresaId, dados) => {
     try {
-      const res = await api.put(`/empresa/${empresaId}`, dados);
-      return res.data;
+      if (!empresaId) throw new Error('updateEmpresa: empresaId ausente');
+      const isFormData = (typeof FormData !== 'undefined') && (dados instanceof FormData);
+      const config = {};
+      if (isFormData) {
+        config.headers = config.headers || {};
+        if (Object.prototype.hasOwnProperty.call(config.headers, 'Content-Type')) delete config.headers['Content-Type'];
+      }
+
+      try {
+        const res = await api.put(`/empresa/${encodeURIComponent(empresaId)}`, dados, config);
+        return res.data;
+      } catch (err) {
+        // tentar alternativas: POST com _method=PUT ou override header
+      }
+
+      if (isFormData) {
+        try { if (!dados.get('_method')) dados.append('_method', 'PUT'); } catch(e){}
+        try {
+          const respPost = await api.post(`/empresa/${encodeURIComponent(empresaId)}`, dados, config);
+          return respPost.data;
+        } catch (postErr) {
+          try {
+            const cfg2 = { ...(config || {}) };
+            cfg2.headers = { ...(cfg2.headers || {}), 'X-HTTP-Method-Override': 'PUT' };
+            const respPost2 = await api.post(`/empresa/${encodeURIComponent(empresaId)}`, dados, cfg2);
+            return respPost2.data;
+          } catch (postErr2) {}
+        }
+      }
+
+      try {
+        const respPatch = await api.patch(`/empresa/${encodeURIComponent(empresaId)}`, dados, config);
+        return respPatch.data;
+      } catch (patchErr) {
+        throw patchErr || new Error('updateEmpresa: falha ao atualizar');
+      }
     } catch (error) {
       throw error;
     }

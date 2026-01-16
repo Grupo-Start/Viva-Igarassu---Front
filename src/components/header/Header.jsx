@@ -1,6 +1,7 @@
 import './Header.css';
 import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import React, { useEffect, useState, useRef } from 'react';
+import { Icon } from '@iconify/react';
 import { dashboardService } from '../../services/api';
 
 export function Header() {
@@ -70,6 +71,7 @@ export function Header() {
   }, []);
 
   const [open, setOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const ref = useRef();
   const location = useLocation();
   const isHome = (location && location.pathname === '/');
@@ -87,7 +89,13 @@ export function Header() {
       if (!ref.current.contains(e.target)) setOpen(false);
     };
     document.addEventListener('click', onDoc);
-    return () => document.removeEventListener('click', onDoc);
+    const onKey = (e) => { if (e.key === 'Escape') { setOpen(false); setMobileOpen(false); } };
+    document.addEventListener('keydown', onKey);
+    return () => { document.removeEventListener('click', onDoc); document.removeEventListener('keydown', onKey); };
+  }, []);
+
+  useEffect(() => {
+    return () => { /* ensure mobile menu closed on unmount */ setMobileOpen(false); };
   }, []);
 
   const getStoredUser = () => {
@@ -151,6 +159,10 @@ export function Header() {
   const displayName = (user && (user.nome_empresa || (user.empresa_obj && (user.empresa_obj.nome_empresa || user.empresa_obj.nome)) || (user.empresa && (user.empresa.nome_empresa || user.empresa.nome)))) || computeDisplayName(user);
   return (
     <header className="header">
+      <button aria-label="Abrir menu" className="mobile-hamburger" onClick={() => setMobileOpen(true)}>
+        <Icon icon="mdi:menu" className="mobile-hamburger-icon" aria-hidden="true" />
+      </button>
+
       <div className="header-logo">
         <Link to="/">
           <img src="/header-logo.png" alt="logo viva igarassu" />
@@ -163,6 +175,7 @@ export function Header() {
             { to: '/', label: 'Home' },
             { to: '/quem-somos', label: 'Quem somos' },
             { to: '/a-cidade', label: 'A cidade' },
+            { to: '/parceiros', label: 'Parceiros' },
           ];
           return items.map((it, idx) => (
             <React.Fragment key={it.to}>
@@ -209,7 +222,25 @@ export function Header() {
             )}
           </>
         )}
+
+        {/* mobile hamburger moved to top-level header for reliable positioning */}
       </div>
+
+      {mobileOpen && (
+        <div className="mobile-menu-overlay" role="dialog" aria-modal="true" onClick={() => setMobileOpen(false)}>
+          <div className="mobile-menu" onClick={(e) => e.stopPropagation()}>
+            <button className="mobile-menu-close" aria-label="Fechar menu" onClick={() => setMobileOpen(false)}>×</button>
+            <nav className="mobile-menu-nav">
+              <ul>
+                <li><NavLink to="/" onClick={() => setMobileOpen(false)}>Home</NavLink></li>
+                <li><NavLink to="/quem-somos" onClick={() => setMobileOpen(false)}>Quem somos</NavLink></li>
+                <li><NavLink to="/a-cidade" onClick={() => setMobileOpen(false)}>A cidade</NavLink></li>
+                <li><NavLink to="/parceiros" onClick={() => setMobileOpen(false)}>Parceiros</NavLink></li>
+              </ul>
+            </nav>
+          </div>
+        </div>
+      )}
     </header>
   );
 }

@@ -58,6 +58,7 @@ export default function FaixaInfo() {
         >
           Recompensas
         </span>
+        
       </span>
     </div>
   );
